@@ -1,13 +1,8 @@
 {
-  "build": {
-    "env": {
-      "PYTHON_VERSION": "3.11"
-    }
-  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
+      "source": "/(.*)",
+      "destination": "/index"
     }
   ],
   "headers": [
@@ -21,6 +16,10 @@
         {
           "key": "Access-Control-Allow-Methods",
           "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type, Accept, Authorization"
         }
       ]
     }
