@@ -23,7 +23,7 @@ app = FastAPI(
 )
 
 # CORS Configuration
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://dronewatch.cc,http://localhost:3000").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://dronewatch.cc,https://dronewatch.vercel.app,https://www.dronemap.cc,https://dronewatchv2.vercel.app,http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
