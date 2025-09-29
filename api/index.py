@@ -101,8 +101,13 @@ async def get_db_connection():
         SUPABASE_URL = os.getenv("SUPABASE_URL", "")
         SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
         if "supabase.co" in SUPABASE_URL:
+            # Extract project ref from URL like https://xyz.supabase.co
             project_ref = SUPABASE_URL.split("//")[1].split(".")[0]
-            DATABASE_URL = f"postgresql://postgres.{project_ref}:{SUPABASE_SERVICE_KEY}@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+            # Use the direct connection string format for Supabase
+            DATABASE_URL = f"postgresql://postgres.{project_ref}:{SUPABASE_SERVICE_KEY}@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+
+    if not DATABASE_URL:
+        raise ValueError("Database connection not configured. Set DATABASE_URL or SUPABASE_URL + SUPABASE_SERVICE_KEY")
 
     return await asyncpg.connect(DATABASE_URL)
 
@@ -117,7 +122,13 @@ async def root():
         "name": "DroneWatch API",
         "version": "0.1.0",
         "docs": "/api/docs",
-        "status": "operational"
+        "status": "operational",
+        "env_check": {
+            "has_supabase_url": bool(os.getenv("SUPABASE_URL")),
+            "has_supabase_key": bool(os.getenv("SUPABASE_SERVICE_KEY")),
+            "has_database_url": bool(os.getenv("DATABASE_URL")),
+            "has_ingest_token": bool(os.getenv("INGEST_TOKEN"))
+        }
     }
 
 @app.get("/api/healthz")
@@ -127,9 +138,16 @@ async def health():
         conn = await get_db_connection()
         await conn.fetchval("SELECT 1")
         await conn.close()
-        return {"ok": True, "service": "dronewatch-api"}
+        return {"ok": True, "service": "dronewatch-api", "database": "connected"}
     except Exception as e:
-        return {"ok": False, "error": str(e)}
+        import traceback
+        return {
+            "ok": False,
+            "service": "dronewatch-api",
+            "error": str(e),
+            "type": type(e).__name__,
+            "trace": traceback.format_exc().split('\n')[-3:-1] if os.getenv("DEBUG") else None
+        }
 
 @app.get("/api/incidents", response_model=List[IncidentOut])
 async def list_incidents(
