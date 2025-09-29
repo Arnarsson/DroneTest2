@@ -58,7 +58,7 @@ async def insert_incident(incident_data):
             occurred_at,
             first_seen_at,
             last_seen_at,
-            incident_data.get('asset_type', 'unknown'),
+            incident_data.get('asset_type', 'other'),  # Use 'other' as default instead of 'unknown'
             incident_data.get('status', 'active'),
             incident_data.get('evidence_score', 1),
             incident_data.get('country', 'DK'),
