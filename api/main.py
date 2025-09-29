@@ -94,6 +94,7 @@ class IncidentIn(BaseModel):
 async def get_db_connection():
     """Get async database connection"""
     import asyncpg
+    from urllib.parse import urlparse
 
     DATABASE_URL = os.getenv("DATABASE_URL")
     if not DATABASE_URL:
@@ -104,12 +105,28 @@ async def get_db_connection():
             # Extract project ref from URL like https://xyz.supabase.co
             project_ref = SUPABASE_URL.split("//")[1].split(".")[0]
             # Use the direct connection string format for Supabase
-            DATABASE_URL = f"postgresql://postgres.{project_ref}:{SUPABASE_SERVICE_KEY}@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+            DATABASE_URL = f"postgresql://postgres.{project_ref}:{SUPABASE_SERVICE_KEY}@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
     if not DATABASE_URL:
         raise ValueError("Database connection not configured. Set DATABASE_URL or SUPABASE_URL + SUPABASE_SERVICE_KEY")
 
-    return await asyncpg.connect(DATABASE_URL)
+    # Parse the DATABASE_URL to handle Supabase pooler format
+    parsed = urlparse(DATABASE_URL)
+
+    # Extract connection parameters
+    conn_params = {
+        'host': parsed.hostname,
+        'port': parsed.port or 5432,
+        'user': parsed.username,
+        'password': parsed.password,
+        'database': parsed.path.lstrip('/').split('?')[0]
+    }
+
+    # For Supabase pooler, we need to use SSL
+    if 'supabase.com' in parsed.hostname:
+        conn_params['ssl'] = 'require'
+
+    return await asyncpg.connect(**conn_params)
 
 # ======================
 # ENDPOINTS
