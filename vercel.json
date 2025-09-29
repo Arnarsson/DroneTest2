@@ -1,5 +1,5 @@
 {
-  "buildCommand": "ls -la && cd frontend && npm install && npm run build",
+  "buildCommand": "pwd && ls -la && cd frontend && pwd && npm install && npm run build",
   "outputDirectory": "frontend/.next",
   "framework": "nextjs",
   "functions": {
