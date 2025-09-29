@@ -1,26 +1,8 @@
 {
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 30
-    },
-    "api/test.py": {
-      "maxDuration": 10
-    }
-  },
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/test.py",
-      "use": "@vercel/python"
-    }
-  ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index"
+      "source": "/(.*)",
+      "destination": "/index"
     }
   ],
   "headers": [
