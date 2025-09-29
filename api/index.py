@@ -1,10 +1,17 @@
-# api/index.py
-# Re-export the FastAPI app for Vercel
-from .main import app  # Import from api/main.py using relative import
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
-# Add a quick ping endpoint for testing
-@app.get("/__whoami", include_in_schema=False)
-def whoami():
+# Create a simple FastAPI app directly here for testing
+app = FastAPI(title="DroneWatch API", version="0.1.0")
+
+@app.get("/")
+async def root():
+    return {"message": "DroneWatch API", "status": "working"}
+
+@app.get("/api")
+async def api_root():
+    return {"message": "API endpoint", "status": "working"}
+
+@app.get("/__whoami")
+async def whoami():
     return {"ok": True, "runtime": "vercel-python", "app": "dronewatch"}
-
-# IMPORTANT: Export 'app' not 'handler' for FastAPI on Vercel
