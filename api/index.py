@@ -1,17 +1,10 @@
-def handler(request, context):
-    """
-    Minimal Vercel Python function handler
-    """
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        },
-        'body': {
-            'message': 'DroneWatch API is working!',
-            'status': 'operational',
-            'path': request.get('path', '/'),
-            'method': request.get('method', 'GET')
-        }
-    }
+# api/index.py
+# Re-export the FastAPI app for Vercel
+from main import app  # Import from api/main.py
+
+# Add a quick ping endpoint for testing
+@app.get("/__whoami", include_in_schema=False)
+def whoami():
+    return {"ok": True, "runtime": "vercel-python", "app": "dronewatch"}
+
+# IMPORTANT: Export 'app' not 'handler' for FastAPI on Vercel
