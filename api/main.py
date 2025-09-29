@@ -4,7 +4,7 @@ Main entry point for all API routes
 """
 from fastapi import FastAPI, Response, Query, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response as StarletteResponse
 from pydantic import BaseModel, Field, HttpUrl, ConfigDict
 from typing import Optional, List, Literal
 from datetime import datetime
@@ -22,15 +22,42 @@ app = FastAPI(
     openapi_url="/api/openapi.json"
 )
 
-# CORS Configuration - Allow all Vercel deployments during development
-# In production, you should restrict this to specific domains
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins temporarily to fix deployment issues
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS Configuration - Dynamic handling for Vercel previews
+from starlette.middleware.base import BaseHTTPMiddleware
+
+# Production domains
+production_origins = [
+    "https://dronewatch.cc",
+    "https://www.dronewatch.cc",
+    "https://dronewatchv2.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001"
+]
+
+class DynamicCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        origin = request.headers.get("origin")
+
+        # Handle preflight OPTIONS
+        if request.method == "OPTIONS":
+            response = StarletteResponse(content="", status_code=200)
+        else:
+            response = await call_next(request)
+
+        # Allow production domains or any Vercel preview domain
+        if origin and (
+            origin in production_origins or
+            ".vercel.app" in origin or
+            "-vercel.app" in origin
+        ):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+            response.headers["Access-Control-Allow-Credentials"] = "false"
+
+        return response
+
+app.add_middleware(DynamicCORSMiddleware)
 
 # ======================
 # SCHEMAS
