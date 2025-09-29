@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Incident, FilterState } from '@/types'
 
-// Use the deployed API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://dronewatchv2-q4a13cy9t-arnarssons-projects.vercel.app/api'
+// Use relative API URL - the API is now in the same deployment
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api'
 
 async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   const params = new URLSearchParams({
