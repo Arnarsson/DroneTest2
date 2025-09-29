@@ -1,10 +1,16 @@
+from http.server import BaseHTTPRequestHandler
 from datetime import datetime
+import json
 
-def handler(request, response):
-    """Simple test endpoint for Vercel"""
-    response.status_code = 200
-    return {
-        "message": "Python API is working!",
-        "timestamp": datetime.now().isoformat(),
-        "path": request.url
-    }
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response = {
+            "message": "Python API is working!",
+            "timestamp": datetime.now().isoformat(),
+            "path": self.path
+        }
+        self.wfile.write(json.dumps(response).encode())
+        return
