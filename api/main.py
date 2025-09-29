@@ -110,23 +110,16 @@ async def get_db_connection():
     if not DATABASE_URL:
         raise ValueError("Database connection not configured. Set DATABASE_URL or SUPABASE_URL + SUPABASE_SERVICE_KEY")
 
-    # Parse the DATABASE_URL to handle Supabase pooler format
-    parsed = urlparse(DATABASE_URL)
-
-    # Extract connection parameters
-    conn_params = {
-        'host': parsed.hostname,
-        'port': parsed.port or 5432,
-        'user': parsed.username,
-        'password': parsed.password,
-        'database': parsed.path.lstrip('/').split('?')[0]
-    }
-
-    # For Supabase pooler, we need to use SSL
-    if 'supabase.com' in parsed.hostname:
-        conn_params['ssl'] = 'require'
-
-    return await asyncpg.connect(**conn_params)
+    # For Supabase connections (both direct and pooler), use the connection string directly
+    # asyncpg handles PostgreSQL connection strings well with SSL
+    if 'supabase.co' in DATABASE_URL or 'supabase.com' in DATABASE_URL:
+        # Supabase requires SSL
+        # Remove any query parameters like ?pgbouncer=true if present
+        clean_url = DATABASE_URL.split('?')[0] if '?' in DATABASE_URL else DATABASE_URL
+        return await asyncpg.connect(clean_url, ssl='require')
+    else:
+        # For non-Supabase connections, use standard connection
+        return await asyncpg.connect(DATABASE_URL)
 
 # ======================
 # ENDPOINTS
