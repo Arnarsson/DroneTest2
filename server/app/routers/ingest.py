@@ -12,7 +12,9 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 INGEST_TOKEN = os.getenv("INGEST_TOKEN")
 
 def require_token(authorization: Optional[str] = Header(None)):
-    if not INGEST_TOKEN or authorization != f"Bearer {INGEST_TOKEN}":
+    if not INGEST_TOKEN:
+        raise HTTPException(500, "Ingest token not configured")
+    if not authorization or authorization != f"Bearer {INGEST_TOKEN}":
         raise HTTPException(401, "Unauthorized")
 
 @router.post("", status_code=201)

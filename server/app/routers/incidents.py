@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from typing import List, Optional
@@ -9,6 +9,7 @@ router = APIRouter(prefix="/incidents", tags=["incidents"])
 
 @router.get("", response_model=List[IncidentOut])
 async def list_incidents(
+    response: Response,
     since: Optional[str] = Query(None, description="ISO datetime"),
     until: Optional[str] = Query(None, description="ISO datetime"),
     min_evidence: int = Query(1, ge=1, le=4),
@@ -17,6 +18,7 @@ async def list_incidents(
     country: Optional[str] = Query(None),
     bbox: Optional[str] = Query(None, description="minLon,minLat,maxLon,maxLat"),
     limit: int = Query(200, ge=1, le=1000),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
     session: AsyncSession = Depends(get_session)
 ):
     base = """
@@ -47,13 +49,22 @@ async def list_incidents(
     if bbox:
         try:
             minLon, minLat, maxLon, maxLat = [float(x) for x in bbox.split(",")]
+            # Validate bbox ranges
+            if not (-180 <= minLon <= 180 and -180 <= maxLon <= 180 and
+                    -90 <= minLat <= 90 and -90 <= maxLat <= 90):
+                raise HTTPException(400, "BBox coordinates out of range")
+            if minLon >= maxLon or minLat >= maxLat:
+                raise HTTPException(400, "Invalid bbox: min values must be less than max values")
             base += " and ST_Within(i.location::geometry, ST_MakeEnvelope(:minLon,:minLat,:maxLon,:maxLat,4326))"
             params.update({"minLon": minLon, "minLat": minLat, "maxLon": maxLon, "maxLat": maxLat})
-        except Exception:
-            raise HTTPException(400, "Invalid bbox format")
+        except ValueError:
+            raise HTTPException(400, "Invalid bbox format. Use: minLon,minLat,maxLon,maxLat")
+        except HTTPException:
+            raise
 
-    base += " order by i.occurred_at desc limit :limit"
+    base += " order by i.occurred_at desc limit :limit offset :offset"
     params["limit"] = limit
+    params["offset"] = offset
 
     rows = (await session.execute(text(base), params)).mappings().all()
 
@@ -62,6 +73,9 @@ async def list_incidents(
         r = dict(r)
         r["sources"] = []
         out.append(r)
+
+    # Add cache header for public endpoints
+    response.headers["Cache-Control"] = "public, max-age=15"
     return out
 
 @router.get("/{incident_id}", response_model=IncidentOut)
