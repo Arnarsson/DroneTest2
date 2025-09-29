@@ -1,0 +1,49 @@
+name: DroneWatch Data Ingestion
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('ingestion/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        cd ingestion
+        pip install -r requirements.txt
+
+    - name: Run ingestion
+      env:
+        API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+      run: |
+        cd ingestion
+        python ingest.py
+
+    - name: Commit processed hashes (optional)
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add ingestion/processed_incidents.json || true
+        git diff --staged --quiet || git commit -m "Update processed incidents cache"
+        git push || true

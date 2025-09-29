@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY worker/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY worker/ /app/
+
+# Create non-root user
+RUN useradd -r -s /bin/false dronewatch && \
+    chown -R dronewatch:dronewatch /app
+
+USER dronewatch
+
+# Environment
+ENV ENV=prod
+ENV PYTHONUNBUFFERED=1
+
+# Run worker
+CMD ["python", "ingest_worker.py"]
