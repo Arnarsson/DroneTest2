@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useIncidents } from '@/hooks/useIncidents'
@@ -9,7 +10,7 @@ const Map = dynamic(() => import('@/components/Map'), {
   loading: () => <div className="w-full h-full bg-gray-100 animate-pulse" />
 })
 
-export default function EmbedPage() {
+function EmbedContent() {
   const searchParams = useSearchParams()
 
   // Parse embed parameters
@@ -51,5 +52,17 @@ export default function EmbedPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function EmbedPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full h-screen bg-gray-100 animate-pulse flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    }>
+      <EmbedContent />
+    </Suspense>
   )
 }
