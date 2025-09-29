@@ -22,7 +22,7 @@ class handler(BaseHTTPRequestHandler):
 
         response = {
             "name": "DroneWatch API",
-            "version": "0.1.0",
+            "version": "0.1.1",
             "docs": "/api/docs",
             "status": "operational"
         }
