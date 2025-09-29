@@ -49,7 +49,9 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       maxClusterRadius: 50,
     })
 
-    mapInstanceRef.current.addLayer(clusterRef.current)
+    if (clusterRef.current) {
+      mapInstanceRef.current.addLayer(clusterRef.current)
+    }
 
     return () => {
       if (mapInstanceRef.current) {
