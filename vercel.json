@@ -3,6 +3,10 @@
     "api/index.py": {
       "runtime": "python3.11",
       "maxDuration": 30
+    },
+    "api/test.py": {
+      "runtime": "python3.11",
+      "maxDuration": 10
     }
   },
   "rewrites": [
