@@ -5,6 +5,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://dronewatchv2.vercel.app/api"
+    "NEXT_PUBLIC_API_URL": "https://dronewatchv2-q4a13cy9t-arnarssons-projects.vercel.app/api"
   }
 }

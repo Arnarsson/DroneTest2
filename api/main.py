@@ -115,6 +115,17 @@ async def get_db_connection():
 @app.get("/api")
 async def root():
     """Root endpoint"""
+    # Debug: Check what DATABASE_URL we're actually seeing
+    db_url = os.getenv("DATABASE_URL", "")
+    if db_url and "@" in db_url:
+        # Extract just the host part for debugging
+        try:
+            host_part = db_url.split("@")[1].split("/")[0].split(":")[0]
+        except:
+            host_part = "parse_error"
+    else:
+        host_part = "not_set"
+
     return {
         "name": "DroneWatch API",
         "version": "0.1.0",
@@ -124,7 +135,8 @@ async def root():
             "has_supabase_url": bool(os.getenv("SUPABASE_URL")),
             "has_supabase_key": bool(os.getenv("SUPABASE_SERVICE_KEY")),
             "has_database_url": bool(os.getenv("DATABASE_URL")),
-            "has_ingest_token": bool(os.getenv("INGEST_TOKEN"))
+            "has_ingest_token": bool(os.getenv("INGEST_TOKEN")),
+            "db_host": host_part  # This will show which database host is configured
         }
     }
 
