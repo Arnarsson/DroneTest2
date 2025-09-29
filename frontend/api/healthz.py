@@ -23,6 +23,10 @@ class handler(BaseHTTPRequestHandler):
                         "error": "DATABASE_URL environment variable not set"
                     }
 
+                # Debug: Check if URL is correct format
+                is_pooler = 'pooler.supabase.com' in DATABASE_URL and ':6543' in DATABASE_URL
+                url_masked = DATABASE_URL[:30] + '...' if DATABASE_URL else 'None'
+
                 # Test actual connection
                 conn = await get_connection()
                 await conn.fetchval("SELECT 1")
@@ -36,7 +40,9 @@ class handler(BaseHTTPRequestHandler):
                     "ok": True,
                     "service": "dronewatch-api",
                     "database": "connected",
-                    "incident_count": count
+                    "incident_count": count,
+                    "using_pooler": is_pooler,
+                    "debug_url": url_masked
                 }
             except Exception as e:
                 return {
@@ -44,7 +50,9 @@ class handler(BaseHTTPRequestHandler):
                     "service": "dronewatch-api",
                     "database": "error",
                     "error": str(e),
-                    "type": type(e).__name__
+                    "type": type(e).__name__,
+                    "has_env": bool(DATABASE_URL),
+                    "using_pooler": 'pooler.supabase.com' in (DATABASE_URL or '') and ':6543' in (DATABASE_URL or '')
                 }
 
         result = run_async(check_db())
