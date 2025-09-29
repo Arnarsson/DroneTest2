@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": ".next",
+  "functions": {
+    "api/index.py": {
+      "runtime": "python@3.11"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" }
+  ]
+}
