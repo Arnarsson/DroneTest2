@@ -1,7 +1,8 @@
 {
-  "buildCommand": "pwd && ls -la && cd frontend && pwd && npm install && npm run build",
+  "buildCommand": "./debug-build.sh",
   "outputDirectory": "frontend/.next",
-  "framework": "nextjs",
+  "installCommand": "echo 'Using custom build script'",
+  "framework": null,
   "functions": {
     "api/index.py": {
       "runtime": "python@3.11",
