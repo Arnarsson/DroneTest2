@@ -3,12 +3,24 @@ import json
 import os
 import sys
 from urllib.parse import parse_qs, urlparse
+from datetime import datetime
 
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from db import run_async
 import asyncpg
+
+def parse_datetime(dt_string):
+    """Parse ISO datetime string to datetime object"""
+    if not dt_string:
+        return None
+    if isinstance(dt_string, datetime):
+        return dt_string
+    # Handle ISO format with 'Z' or timezone
+    if dt_string.endswith('Z'):
+        dt_string = dt_string[:-1] + '+00:00'
+    return datetime.fromisoformat(dt_string)
 
 async def insert_incident(incident_data):
     """Insert incident into database"""
@@ -24,6 +36,11 @@ async def insert_incident(incident_data):
         else:
             conn = await asyncpg.connect(DATABASE_URL)
 
+        # Parse datetime strings
+        occurred_at = parse_datetime(incident_data.get('occurred_at'))
+        first_seen_at = parse_datetime(incident_data.get('first_seen_at', incident_data.get('occurred_at')))
+        last_seen_at = parse_datetime(incident_data.get('last_seen_at', incident_data.get('occurred_at')))
+
         # Insert incident
         query = """
         INSERT INTO public.incidents
@@ -38,9 +55,9 @@ async def insert_incident(incident_data):
             query,
             incident_data['title'],
             incident_data.get('narrative', ''),
-            incident_data.get('occurred_at'),
-            incident_data.get('first_seen_at', incident_data.get('occurred_at')),
-            incident_data.get('last_seen_at', incident_data.get('occurred_at')),
+            occurred_at,
+            first_seen_at,
+            last_seen_at,
             incident_data.get('asset_type', 'unknown'),
             incident_data.get('status', 'active'),
             incident_data.get('evidence_score', 1),
