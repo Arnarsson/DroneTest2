@@ -138,11 +138,25 @@ async def health():
         return {"ok": True, "service": "dronewatch-api", "database": "connected"}
     except Exception as e:
         import traceback
+        DATABASE_URL = os.getenv("DATABASE_URL", "")
+        # Mask the password for security
+        if DATABASE_URL and "@" in DATABASE_URL:
+            parts = DATABASE_URL.split("@")
+            if ":" in parts[0]:
+                user_pass = parts[0].split("//")[-1]
+                user = user_pass.split(":")[0]
+                masked_url = f"postgresql://{user}:****@{parts[1]}"
+            else:
+                masked_url = "Invalid URL format"
+        else:
+            masked_url = "Not set" if not DATABASE_URL else "Invalid format"
+
         return {
             "ok": False,
             "service": "dronewatch-api",
             "error": str(e),
             "type": type(e).__name__,
+            "database_url_format": masked_url,
             "trace": traceback.format_exc().split('\n')[-3:-1] if os.getenv("DEBUG") else None
         }
 
