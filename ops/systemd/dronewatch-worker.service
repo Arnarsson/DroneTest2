@@ -1,0 +1,27 @@
+[Unit]
+Description=DroneWatch Ingestion Worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/dronewatch/worker
+Environment=ENV=prod
+EnvironmentFile=/opt/dronewatch/worker/.env
+ExecStart=/usr/bin/python3 /opt/dronewatch/worker/ingest_worker.py
+Restart=always
+RestartSec=5
+User=dronewatch
+Group=dronewatch
+StandardOutput=append:/var/log/dronewatch-worker.log
+StandardError=append:/var/log/dronewatch-worker.log
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/dronewatch/worker
+
+[Install]
+WantedBy=multi-user.target
