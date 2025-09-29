@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": ".next",
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/.next",
   "framework": "nextjs",
   "functions": {
     "api/index.py": {
@@ -13,8 +13,5 @@
       "source": "/api/:path*",
       "destination": "/api/index.py"
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "/api"
-  }
+  ]
 }
