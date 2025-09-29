@@ -24,11 +24,13 @@ app = FastAPI(
 
 # CORS Configuration - Dynamic handling for Vercel previews
 from starlette.middleware.base import BaseHTTPMiddleware
+from urllib.parse import urlparse
 
 # Production domains
 production_origins = [
     "https://dronewatch.cc",
     "https://www.dronewatch.cc",
+    "https://www.dronemap.cc",
     "https://dronewatchv2.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001"
@@ -45,15 +47,18 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
 
         # Allow production domains or any Vercel preview domain
-        if origin and (
-            origin in production_origins or
-            ".vercel.app" in origin or
-            "-vercel.app" in origin
-        ):
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "*"
-            response.headers["Access-Control-Allow-Credentials"] = "false"
+        if origin:
+            try:
+                parsed = urlparse(origin)
+                hostname = parsed.hostname or ""
+                # Check if it's a production origin or a Vercel preview
+                if origin in production_origins or hostname.endswith(".vercel.app"):
+                    response.headers["Access-Control-Allow-Origin"] = origin
+                    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+                    response.headers["Access-Control-Allow-Headers"] = "*"
+                    response.headers["Access-Control-Allow-Credentials"] = "false"
+            except:
+                pass  # Invalid origin, don't set CORS headers
 
         return response
 
@@ -142,29 +147,11 @@ async def get_db_connection():
 @app.get("/api")
 async def root():
     """Root endpoint"""
-    # Debug: Check what DATABASE_URL we're actually seeing
-    db_url = os.getenv("DATABASE_URL", "")
-    if db_url and "@" in db_url:
-        # Extract just the host part for debugging
-        try:
-            host_part = db_url.split("@")[1].split("/")[0].split(":")[0]
-        except:
-            host_part = "parse_error"
-    else:
-        host_part = "not_set"
-
     return {
         "name": "DroneWatch API",
         "version": "0.1.0",
         "docs": "/api/docs",
-        "status": "operational",
-        "env_check": {
-            "has_supabase_url": bool(os.getenv("SUPABASE_URL")),
-            "has_supabase_key": bool(os.getenv("SUPABASE_SERVICE_KEY")),
-            "has_database_url": bool(os.getenv("DATABASE_URL")),
-            "has_ingest_token": bool(os.getenv("INGEST_TOKEN")),
-            "db_host": host_part  # This will show which database host is configured
-        }
+        "status": "operational"
     }
 
 @app.get("/api/healthz")
@@ -176,27 +163,11 @@ async def health():
         await conn.close()
         return {"ok": True, "service": "dronewatch-api", "database": "connected"}
     except Exception as e:
-        import traceback
-        DATABASE_URL = os.getenv("DATABASE_URL", "")
-        # Mask the password for security
-        if DATABASE_URL and "@" in DATABASE_URL:
-            parts = DATABASE_URL.split("@")
-            if ":" in parts[0]:
-                user_pass = parts[0].split("//")[-1]
-                user = user_pass.split(":")[0]
-                masked_url = f"postgresql://{user}:****@{parts[1]}"
-            else:
-                masked_url = "Invalid URL format"
-        else:
-            masked_url = "Not set" if not DATABASE_URL else "Invalid format"
-
         return {
             "ok": False,
             "service": "dronewatch-api",
             "error": str(e),
-            "type": type(e).__name__,
-            "database_url_format": masked_url,
-            "trace": traceback.format_exc().split('\n')[-3:-1] if os.getenv("DEBUG") else None
+            "type": type(e).__name__
         }
 
 @app.get("/api/incidents", response_model=List[IncidentOut])

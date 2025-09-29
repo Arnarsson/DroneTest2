@@ -192,4 +192,4 @@ The app auto-refreshes every 60 seconds. Adjust in `providers.tsx`:
 
 ```typescript
 refetchInterval: 60 * 1000 // milliseconds
-```
+```# Force redeployment Mon Sep 29 19:46:30 UTC 2025
