@@ -1,17 +1,14 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+# Import the full FastAPI app from main.py
+import sys
+import os
 
-# Create a simple FastAPI app directly here for testing
-app = FastAPI(title="DroneWatch API", version="0.1.0")
+# Add the api directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-@app.get("/")
-async def root():
-    return {"message": "DroneWatch API", "status": "working"}
+# Import the main app
+from main import app
 
-@app.get("/api")
-async def api_root():
-    return {"message": "API endpoint", "status": "working"}
-
+# Add a simple health check
 @app.get("/__whoami")
 async def whoami():
     return {"ok": True, "runtime": "vercel-python", "app": "dronewatch"}
