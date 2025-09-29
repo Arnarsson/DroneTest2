@@ -22,11 +22,11 @@ app = FastAPI(
     openapi_url="/api/openapi.json"
 )
 
-# CORS Configuration
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://dronewatch.cc,https://dronewatch.vercel.app,https://www.dronemap.cc,https://dronewatchv2.vercel.app,http://localhost:3000").split(",")
+# CORS Configuration - Allow all Vercel deployments during development
+# In production, you should restrict this to specific domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],  # Allow all origins temporarily to fix deployment issues
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
