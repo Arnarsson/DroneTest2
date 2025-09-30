@@ -22,12 +22,8 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
   // Calculate date range from incidents
   const { minDate, maxDate, dateRange } = useIncidentDateRange(incidents)
 
-  // Initialize current date to earliest incident
-  useEffect(() => {
-    if (minDate && !currentDate) {
-      setCurrentDate(minDate)
-    }
-  }, [minDate, currentDate])
+  // Don't initialize current date automatically - let user activate timeline
+  // This prevents the timeline from filtering incidents on page load
 
   // Handle animation playback
   useEffect(() => {
@@ -77,8 +73,13 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
 
   const handleReset = useCallback(() => {
     setIsPlaying(false)
-    setCurrentDate(minDate)
-  }, [minDate])
+    setCurrentDate(null)
+  }, [])
+
+  const handleShowAll = useCallback(() => {
+    setIsPlaying(false)
+    setCurrentDate(null)
+  }, [])
 
   const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setIsPlaying(false)
@@ -89,8 +90,12 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
   }, [dateRange])
 
   const togglePlay = useCallback(() => {
+    // Initialize current date on first play
+    if (!currentDate && minDate) {
+      setCurrentDate(minDate)
+    }
     setIsPlaying((prev) => !prev)
-  }, [])
+  }, [currentDate, minDate])
 
   const cycleSpeed = useCallback(() => {
     setPlaySpeed((prev) => {
@@ -178,12 +183,12 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                 {isPlaying ? '⏸ Pause' : '▶ Play'}
               </button>
 
-              {/* Reset */}
+              {/* Show All / Reset */}
               <button
-                onClick={handleReset}
+                onClick={handleShowAll}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
-                ↺ Reset
+                {currentDate ? '✕ Show All' : '↺ Reset'}
               </button>
 
               {/* Speed */}
