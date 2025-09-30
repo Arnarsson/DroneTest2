@@ -10,6 +10,7 @@ import { EvidenceLegend } from '@/components/EvidenceLegend'
 import { IncidentList } from '@/components/IncidentList'
 import { Timeline } from '@/components/Timeline'
 import { Analytics } from '@/components/Analytics'
+import { AtlasAIBadge } from '@/components/AtlasAIBadge'
 import { useIncidents } from '@/hooks/useIncidents'
 import { isWithinInterval } from 'date-fns'
 import type { FilterState, Incident } from '@/types'
@@ -62,7 +63,7 @@ export default function Home() {
   return (
     <>
       <Toaster position="top-right" richColors />
-      <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
+      <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors">
         <Header
           incidentCount={incidents?.length || 0}
           isLoading={isLoading}
@@ -135,6 +136,9 @@ export default function Home() {
             />
           )}
         </AnimatePresence>
+
+        {/* Atlas AI Badge */}
+        <AtlasAIBadge />
       </div>
     </>
   )

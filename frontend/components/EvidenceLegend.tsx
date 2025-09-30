@@ -13,7 +13,7 @@ export function EvidenceLegend() {
           <motion.button
             key="collapsed"
             onClick={() => setIsOpen(true)}
-            className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-lg shadow-xl px-3 py-2 hover:shadow-2xl transition-all border border-gray-200 dark:border-gray-800"
+            className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl rounded-xl shadow-elevated px-4 py-2.5 hover:shadow-lifted transition-all border border-gray-200/70 dark:border-gray-800/70"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
@@ -31,7 +31,7 @@ export function EvidenceLegend() {
         ) : (
           <motion.div
             key="expanded"
-            className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl shadow-2xl p-5 border border-gray-200 dark:border-gray-800 w-72"
+            className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl rounded-2xl shadow-elevated p-6 border border-gray-200/70 dark:border-gray-800/70 w-72"
             initial={{ scale: 0, opacity: 0, x: -20 }}
             animate={{ scale: 1, opacity: 1, x: 0 }}
             exit={{ scale: 0, opacity: 0, x: -20 }}

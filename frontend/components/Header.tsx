@@ -12,9 +12,9 @@ interface HeaderProps {
 
 export function Header({ incidentCount, isLoading, currentView, onViewChange }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 shadow-sm transition-all">
+    <header className="sticky top-0 z-50 bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-2xl border-b border-gray-200/70 dark:border-gray-800/70 shadow-soft transition-all">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14">
           {/* Logo and Title */}
           <motion.div
             className="flex items-center gap-4"
@@ -22,18 +22,20 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="text-3xl">🚁</span>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5 tracking-tight">
+              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23,11.5C23,11.5 22.9,11.7 22.9,11.8C22.9,11.9 22.9,12 22.8,12.1C22.7,12.2 22.6,12.3 22.5,12.4L19.8,14.4L19.1,17.8C19.1,17.9 19,18 18.9,18.1C18.8,18.2 18.7,18.2 18.6,18.2H18.5L15.5,17L12.5,18.2C12.4,18.2 12.3,18.2 12.2,18.2H12C11.9,18.2 11.8,18.1 11.7,18.1C11.6,18 11.6,17.9 11.5,17.8L10.8,14.4L8.1,12.4C8,12.3 7.9,12.2 7.8,12.1C7.7,12 7.7,11.9 7.7,11.8C7.7,11.7 7.7,11.5 7.7,11.5L10.4,9.5L10.4,6C10.4,5.8 10.5,5.7 10.6,5.6C10.7,5.5 10.9,5.4 11,5.4H13C13.2,5.4 13.3,5.5 13.4,5.6C13.5,5.7 13.6,5.8 13.6,6L13.6,9.5L16.3,11.5L23,11.5Z" />
+              </svg>
               <span className="hidden sm:inline">DroneWatch</span>
             </h1>
-            <span className="hidden md:inline text-sm text-gray-500 dark:text-gray-400 font-medium">
-              Real-time drone incident tracking
+            <span className="hidden md:inline text-[10px] text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-[0.1em] border-l border-gray-300 dark:border-gray-700 pl-4">
+              Incident Tracking
             </span>
           </motion.div>
 
           {/* View Toggle - Center on Desktop */}
           <motion.div
-            className="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1"
+            className="hidden md:flex items-center gap-0.5 bg-gray-100/80 dark:bg-gray-800/80 rounded-lg p-0.5"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -41,35 +43,32 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             <ViewTab
               active={currentView === 'map'}
               onClick={() => onViewChange('map')}
-              icon="🗺️"
-              label="Map"
+              label="MAP"
             />
             <ViewTab
               active={currentView === 'list'}
               onClick={() => onViewChange('list')}
-              icon="📋"
-              label="List"
+              label="LIST"
             />
             <ViewTab
               active={currentView === 'analytics'}
               onClick={() => onViewChange('analytics')}
-              icon="📊"
-              label="Analytics"
+              label="ANALYTICS"
             />
           </motion.div>
 
           {/* Right Section */}
           <motion.div
-            className="flex items-center gap-3 sm:gap-4"
+            className="flex items-center gap-2 sm:gap-3"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
             {/* Live indicator */}
-            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
-              <div className={`h-2.5 w-2.5 rounded-full ${isLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-500'} shadow-lg ${isLoading ? 'shadow-yellow-400/50' : 'shadow-green-500/50'}`} />
-              <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {isLoading ? 'Updating' : `${incidentCount}`}
+            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-gray-700">
+              <div className={`h-1.5 w-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'} shadow-sm ${isLoading ? 'shadow-amber-500/50' : 'shadow-emerald-500/50'}`} />
+              <span className="text-[11px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 tracking-wide">
+                {isLoading ? 'UPDATING' : incidentCount}
               </span>
             </div>
 
@@ -79,37 +78,34 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             {/* Info button */}
             <button
               onClick={() => window.open('/about', '_blank')}
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all"
               title="About DroneWatch"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
           </motion.div>
         </div>
 
         {/* Mobile View Toggle */}
-        <div className="md:hidden pb-3 flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="md:hidden pb-2.5 flex items-center gap-0.5 bg-gray-100/80 dark:bg-gray-800/80 rounded-lg p-0.5">
           <ViewTab
             active={currentView === 'map'}
             onClick={() => onViewChange('map')}
-            icon="🗺️"
-            label="Map"
+            label="MAP"
             compact
           />
           <ViewTab
             active={currentView === 'list'}
             onClick={() => onViewChange('list')}
-            icon="📋"
-            label="List"
+            label="LIST"
             compact
           />
           <ViewTab
             active={currentView === 'analytics'}
             onClick={() => onViewChange('analytics')}
-            icon="📊"
-            label="Analytics"
+            label="ANALYTICS"
             compact
           />
         </div>
@@ -121,32 +117,28 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
 interface ViewTabProps {
   active: boolean
   onClick: () => void
-  icon: string
   label: string
   compact?: boolean
 }
 
-function ViewTab({ active, onClick, icon, label, compact }: ViewTabProps) {
+function ViewTab({ active, onClick, label, compact }: ViewTabProps) {
   return (
     <button
       onClick={onClick}
-      className={`relative px-4 py-2 text-sm font-medium rounded-md transition-all ${
+      className={`relative px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
         active
-          ? 'text-white shadow-md'
+          ? 'text-white'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
       } ${compact ? 'flex-1' : ''}`}
     >
       {active && (
         <motion.div
           layoutId="activeTab"
-          className="absolute inset-0 bg-blue-600 rounded-md"
+          className="absolute inset-0 bg-gradient-to-b from-blue-600 to-blue-700 rounded-md shadow-sm"
           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}
-      <span className="relative z-10 flex items-center justify-center gap-1.5">
-        <span>{icon}</span>
-        <span className={compact ? 'text-xs' : ''}>{label}</span>
-      </span>
+      <span className="relative z-10">{label}</span>
     </button>
   )
 }
