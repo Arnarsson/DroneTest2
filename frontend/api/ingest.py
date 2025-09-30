@@ -79,7 +79,14 @@ async def insert_incident(incident_data):
         return {"id": str(incident_id), "status": "created"}
 
     except Exception as e:
-        return {"error": str(e), "type": type(e).__name__}
+        import traceback
+        error_details = {
+            "error": str(e),
+            "type": type(e).__name__,
+            "traceback": traceback.format_exc()
+        }
+        print(f"Database error: {error_details}", file=sys.stderr)
+        return error_details
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
