@@ -133,7 +133,7 @@ SELECT
   (SELECT COUNT(*) FROM public.incident_sources WHERE incident_id = i.id) as source_count,
   (SELECT json_agg(json_build_object(
     'source_url', source_url,
-    'source_type', source_type,
+    'source_title', source_title,
     'source_quote', source_quote
   )) FROM public.incident_sources WHERE incident_id = i.id) as sources
 FROM public.incident_review_queue rq
