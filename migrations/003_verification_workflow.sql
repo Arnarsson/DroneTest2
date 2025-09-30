@@ -128,7 +128,7 @@ SELECT
   i.country,
   ST_Y(i.location::geometry) AS lat,
   ST_X(i.location::geometry) AS lon,
-  i.created_at AS incident_created_at,
+  i.first_seen_at AS incident_created_at,
   -- Source information
   (SELECT COUNT(*) FROM public.incident_sources WHERE incident_id = i.id) as source_count,
   (SELECT json_agg(json_build_object(
