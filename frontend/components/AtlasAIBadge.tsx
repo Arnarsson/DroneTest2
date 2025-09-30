@@ -14,50 +14,56 @@ export function AtlasAIBadge() {
         href="https://atlas-ai.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center gap-2 bg-gradient-to-r from-slate-900/95 to-slate-800/95 dark:from-slate-950/95 dark:to-slate-900/95 backdrop-blur-xl rounded-full shadow-xl border border-slate-700/50 dark:border-slate-600/50 px-4 py-2.5 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
-        whileHover={{ scale: 1.02, x: -2 }}
+        className="group flex items-center gap-3 bg-black/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/30 px-5 py-3 hover:border-gray-600/50 transition-all duration-300"
+        whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-sm opacity-75 group-hover:opacity-100 transition-opacity" />
-            <svg
-              className="w-5 h-5 relative text-blue-400 group-hover:text-blue-300 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">
-              POWERED BY
-            </span>
-            <span className="text-sm font-bold text-white leading-tight tracking-tight">
-              Atlas AI
-            </span>
-          </div>
-        </div>
-        <div className="ml-1 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+        {/* Drone Icon */}
+        <div className="relative">
+          {/* Animated glow effect */}
+          <motion.div
+            className="absolute inset-0 bg-white/30 rounded-full blur-lg"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+
+          {/* Static outer glow */}
+          <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:bg-white/40 transition-all" />
+
+          {/* Drone SVG */}
           <svg
-            className="w-3.5 h-3.5 text-slate-400"
-            fill="none"
-            stroke="currentColor"
+            className="w-7 h-7 relative text-white"
             viewBox="0 0 24 24"
+            fill="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+            {/* Top propellers */}
+            <circle cx="7" cy="5" r="1.5" />
+            <circle cx="17" cy="5" r="1.5" />
+            {/* Body - rounded capsule shape */}
+            <rect x="10" y="8" width="4" height="8" rx="2" />
+            {/* Camera/sensor circle */}
+            <circle cx="12" cy="16" r="2.5" />
+            {/* Propeller connectors */}
+            <rect x="6" y="6" width="2" height="3" rx="0.5" />
+            <rect x="16" y="6" width="2" height="3" rx="0.5" />
           </svg>
+        </div>
+
+        {/* Text */}
+        <div className="flex flex-col">
+          <span className="text-[11px] uppercase tracking-widest text-gray-400 font-bold leading-none mb-0.5">
+            Powered by
+          </span>
+          <span className="text-base font-bold text-white leading-tight tracking-tight">
+            Atlas AI
+          </span>
         </div>
       </motion.a>
     </motion.div>
