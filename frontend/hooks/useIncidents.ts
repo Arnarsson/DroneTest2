@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Incident, FilterState } from '@/types'
 
-// Use relative API URL - the API is now in the same deployment
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api'
+// Use relative API URL - the API is in the same deployment
+// Force relative URL to avoid CORS issues with Vercel preview URLs
+const API_URL = '/api'
 
 async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   const params = new URLSearchParams({
