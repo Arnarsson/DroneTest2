@@ -37,34 +37,34 @@ export function AtlasAIBadge() {
           {/* Static outer glow */}
           <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:bg-white/40 transition-all" />
 
-          {/* Drone SVG - accurately matches reference design */}
+          {/* Drone SVG - matches reference EXACTLY */}
           <svg
-            className="w-7 h-7 md:w-9 md:h-9 relative text-white"
-            viewBox="0 0 64 64"
+            className="w-8 h-8 md:w-10 md:h-10 relative text-white"
+            viewBox="0 0 100 100"
             fill="currentColor"
           >
-            {/* Left propeller arm */}
-            <rect x="2" y="14" width="18" height="4" rx="2" />
-            {/* Left rotor end circle */}
-            <circle cx="6" cy="16" r="4" />
-            {/* Left connector to body */}
-            <rect x="18" y="12" width="3" height="8" rx="1.5" />
+            {/* MAIN VERTICAL BODY - Large pill on RIGHT side (most prominent) */}
+            <rect x="50" y="15" width="28" height="70" rx="14" />
 
-            {/* Right propeller arm */}
-            <rect x="44" y="14" width="18" height="4" rx="2" />
-            {/* Right rotor end circle */}
-            <circle cx="58" cy="16" r="4" />
-            {/* Right connector to body */}
-            <rect x="43" y="12" width="3" height="8" rx="1.5" />
+            {/* LARGE BOTTOM-LEFT CIRCLE - Camera gimbal */}
+            <circle cx="25" cy="75" r="18" />
 
-            {/* Main vertical body - WIDE pill shape */}
-            <rect x="23" y="8" width="18" height="42" rx="9" />
+            {/* MEDIUM MIDDLE-LEFT CIRCLE - Secondary component */}
+            <circle cx="30" cy="45" r="11" />
 
-            {/* Large bottom camera ball */}
-            <circle cx="32" cy="54" r="9" />
+            {/* LEFT PROPELLER ARM - at top */}
+            <rect x="8" y="18" width="24" height="5" rx="2.5" />
+            {/* Left rotor circle at end */}
+            <circle cx="13" cy="20.5" r="5" />
+            {/* Left vertical connector to body */}
+            <rect x="30" y="15" width="3" height="10" rx="1.5" />
 
-            {/* Medium circle on left side of body */}
-            <circle cx="26" cy="32" r="5" />
+            {/* RIGHT PROPELLER ARM - at top */}
+            <rect x="68" y="18" width="24" height="5" rx="2.5" />
+            {/* Right rotor circle at end */}
+            <circle cx="87" cy="20.5" r="5" />
+            {/* Right vertical connector to body */}
+            <rect x="67" y="15" width="3" height="10" rx="1.5" />
           </svg>
         </div>
 
