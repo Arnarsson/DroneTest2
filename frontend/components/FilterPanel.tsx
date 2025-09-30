@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import { FilterState } from '@/types'
 
 interface FilterPanelProps {
@@ -12,8 +14,15 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle }: FilterPanelProps) {
+  const [expandedSections, setExpandedSections] = useState({
+    evidence: true,
+    location: true,
+    time: true,
+  })
+
   const handleChange = (key: keyof FilterState, value: any) => {
     onChange({ ...filters, [key]: value })
+    toast.success('Filter applied', { duration: 1000 })
   }
 
   const activeFilterCount = [
@@ -32,58 +41,87 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
       assetType: null,
       dateRange: 'all'
     })
+    toast.info('Filters cleared')
+  }
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
   }
 
   return (
     <>
       {/* Mobile: Floating Filter Button */}
-      <button
+      <motion.button
         onClick={onToggle}
-        className="lg:hidden fixed bottom-6 right-6 z-[999] bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl p-4 transition-all"
+        className="lg:hidden fixed bottom-24 right-6 z-[999] bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl p-4 transition-all"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', bounce: 0.5 }}
       >
         <div className="flex items-center gap-2">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            <motion.span
+              className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', bounce: 0.6 }}
+            >
               {activeFilterCount}
-            </span>
+            </motion.span>
           )}
         </div>
-      </button>
+      </motion.button>
 
       {/* Filter Panel Overlay (Mobile) */}
-      {isOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-[998] backdrop-blur-sm"
-          onClick={onToggle}
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="lg:hidden fixed inset-0 bg-black/60 z-[998] backdrop-blur-sm"
+            onClick={onToggle}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Filter Panel */}
-      <div className={`
-        fixed lg:relative top-0 right-0 h-full
-        bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800
-        shadow-2xl lg:shadow-none
-        transition-transform duration-300 ease-in-out
-        z-[999] lg:z-auto
-        w-80 lg:w-72
-        overflow-y-auto
-        ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-      `}>
-        <div className="p-4 space-y-4">
+      <motion.div
+        className={`
+          fixed lg:relative top-0 right-0 h-full
+          bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800
+          shadow-2xl lg:shadow-none
+          z-[999] lg:z-auto
+          w-80 lg:w-80
+          overflow-y-auto
+          ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+          transition-transform duration-300 ease-out
+        `}
+        initial={false}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+      >
+        <div className="p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Filters</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {incidentCount} incident{incidentCount !== 1 ? 's' : ''}
-              </p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h2>
+              <motion.p
+                className="text-sm text-gray-500 dark:text-gray-400 mt-1"
+                key={incidentCount}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {incidentCount} incident{incidentCount !== 1 ? 's' : ''} found
+              </motion.p>
             </div>
             <button
               onClick={onToggle}
-              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -92,86 +130,80 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
           </div>
 
           {/* Active Filters & Reset */}
-          {activeFilterCount > 0 && (
-            <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <span className="text-sm text-blue-700 dark:text-blue-300">
-                {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active
-              </span>
-              <button
-                onClick={resetFilters}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          <AnimatePresence>
+            {activeFilterCount > 0 && (
+              <motion.div
+                className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
               >
-                Clear all
-              </button>
-            </div>
-          )}
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  {activeFilterCount} active filter{activeFilterCount !== 1 ? 's' : ''}
+                </span>
+                <button
+                  onClick={resetFilters}
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                >
+                  Clear all
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Quick Filters */}
           <div>
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 block">
               Quick Filters
             </label>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => handleChange('assetType', 'airport')}
-                className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                  filters.assetType === 'airport'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                ✈️ Airports
-              </button>
-              <button
-                onClick={() => handleChange('assetType', 'military')}
-                className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                  filters.assetType === 'military'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                🛡️ Military
-              </button>
-              <button
-                onClick={() => handleChange('dateRange', 'day')}
-                className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                  filters.dateRange === 'day'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                🕐 Today
-              </button>
-              <button
-                onClick={() => handleChange('minEvidence', 3)}
-                className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                  filters.minEvidence >= 3
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                ✓ Verified Only
-              </button>
+              <QuickFilterChip
+                active={filters.assetType === 'airport'}
+                onClick={() => handleChange('assetType', filters.assetType === 'airport' ? null : 'airport')}
+                icon="✈️"
+                label="Airports"
+              />
+              <QuickFilterChip
+                active={filters.assetType === 'military'}
+                onClick={() => handleChange('assetType', filters.assetType === 'military' ? null : 'military')}
+                icon="🛡️"
+                label="Military"
+              />
+              <QuickFilterChip
+                active={filters.dateRange === 'day'}
+                onClick={() => handleChange('dateRange', filters.dateRange === 'day' ? 'all' : 'day')}
+                icon="🕐"
+                label="Today"
+              />
+              <QuickFilterChip
+                active={filters.minEvidence >= 3}
+                onClick={() => handleChange('minEvidence', filters.minEvidence >= 3 ? 1 : 3)}
+                icon="✓"
+                label="Verified"
+              />
             </div>
           </div>
 
           <hr className="border-gray-200 dark:border-gray-700" />
 
-          {/* Evidence Level */}
-          <div>
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
-              Evidence Level
-            </label>
+          {/* Evidence Level Section */}
+          <FilterSection
+            title="Evidence Level"
+            isExpanded={expandedSections.evidence}
+            onToggle={() => toggleSection('evidence')}
+          >
             <div className="space-y-2">
               {[1, 2, 3, 4].map((level) => (
-                <button
+                <motion.button
                   key={level}
                   onClick={() => handleChange('minEvidence', level)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
                     filters.minEvidence === level
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-600 text-white shadow-md'
                       : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
@@ -181,90 +213,169 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                       {level === 4 && '4 Official Only'}
                     </span>
                     <div className={`w-3 h-3 rounded-full ${
-                      level === 1 && 'bg-gray-400'
-                    }${level === 2 && 'bg-yellow-400'}${
-                      level === 3 && 'bg-orange-500'
-                    }${level === 4 && 'bg-red-600'}`} />
+                      filters.minEvidence === level ? 'bg-white' :
+                      level === 1 ? 'bg-gray-400' :
+                      level === 2 ? 'bg-yellow-400' :
+                      level === 3 ? 'bg-orange-500' : 'bg-red-600'
+                    }`} />
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </FilterSection>
 
-          {/* Country */}
-          <div>
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
-              Country
-            </label>
-            <select
-              value={filters.country}
-              onChange={(e) => handleChange('country', e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Countries</option>
-              <option value="DK">🇩🇰 Denmark</option>
-              <option value="NO">🇳🇴 Norway</option>
-              <option value="SE">🇸🇪 Sweden</option>
-              <option value="FI">🇫🇮 Finland</option>
-              <option value="PL">🇵🇱 Poland</option>
-              <option value="NL">🇳🇱 Netherlands</option>
-            </select>
-          </div>
+          {/* Location Section */}
+          <FilterSection
+            title="Location"
+            isExpanded={expandedSections.location}
+            onToggle={() => toggleSection('location')}
+          >
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 block">
+                  Country
+                </label>
+                <select
+                  value={filters.country}
+                  onChange={(e) => handleChange('country', e.target.value)}
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="all">All Countries</option>
+                  <option value="DK">🇩🇰 Denmark</option>
+                  <option value="NO">🇳🇴 Norway</option>
+                  <option value="SE">🇸🇪 Sweden</option>
+                  <option value="FI">🇫🇮 Finland</option>
+                  <option value="PL">🇵🇱 Poland</option>
+                  <option value="NL">🇳🇱 Netherlands</option>
+                </select>
+              </div>
 
-          {/* Status */}
-          <div>
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
-              Status
-            </label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleChange('status', e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="resolved">Resolved</option>
-              <option value="unconfirmed">Unconfirmed</option>
-            </select>
-          </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 block">
+                  Location Type
+                </label>
+                <select
+                  value={filters.assetType || ''}
+                  onChange={(e) => handleChange('assetType', e.target.value || null)}
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="">All Types</option>
+                  <option value="airport">✈️ Airport</option>
+                  <option value="harbor">⚓ Harbor</option>
+                  <option value="military">🛡️ Military</option>
+                  <option value="powerplant">⚡ Power Plant</option>
+                  <option value="other">📍 Other</option>
+                </select>
+              </div>
 
-          {/* Location Type */}
-          <div>
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
-              Location Type
-            </label>
-            <select
-              value={filters.assetType || ''}
-              onChange={(e) => handleChange('assetType', e.target.value || null)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Types</option>
-              <option value="airport">✈️ Airport</option>
-              <option value="harbor">⚓ Harbor</option>
-              <option value="military">🛡️ Military</option>
-              <option value="powerplant">⚡ Power Plant</option>
-              <option value="other">📍 Other</option>
-            </select>
-          </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 block">
+                  Status
+                </label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => handleChange('status', e.target.value)}
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="unconfirmed">Unconfirmed</option>
+                </select>
+              </div>
+            </div>
+          </FilterSection>
 
-          {/* Time Range */}
-          <div>
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
-              Time Period
-            </label>
+          {/* Time Period Section */}
+          <FilterSection
+            title="Time Period"
+            isExpanded={expandedSections.time}
+            onToggle={() => toggleSection('time')}
+          >
             <select
               value={filters.dateRange}
               onChange={(e) => handleChange('dateRange', e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             >
               <option value="day">Last 24 Hours</option>
               <option value="week">Last 7 Days</option>
               <option value="month">Last 30 Days</option>
               <option value="all">All Time</option>
             </select>
-          </div>
+          </FilterSection>
         </div>
-      </div>
+      </motion.div>
     </>
+  )
+}
+
+interface FilterSectionProps {
+  title: string
+  isExpanded: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}
+
+function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionProps) {
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between mb-3 group"
+      >
+        <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          {title}
+        </h3>
+        <motion.svg
+          className="w-4 h-4 text-gray-500 dark:text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </motion.svg>
+      </button>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+interface QuickFilterChipProps {
+  active: boolean
+  onClick: () => void
+  icon: string
+  label: string
+}
+
+function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className={`px-3 py-2 text-sm rounded-full font-medium transition-all ${
+        active
+          ? 'bg-blue-600 text-white shadow-md'
+          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+      }`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <span className="flex items-center gap-1.5">
+        <span>{icon}</span>
+        <span>{label}</span>
+      </span>
+    </motion.button>
   )
 }
