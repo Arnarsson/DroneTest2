@@ -69,6 +69,7 @@ async def fetch_incidents(
             conn = await get_connection()
 
             # Build query with proper parameterization
+            # IMPORTANT: Only show verified or auto-verified incidents to public
             query = """
             SELECT i.id, i.title, i.narrative, i.occurred_at, i.first_seen_at, i.last_seen_at,
                    i.asset_type, i.status, i.evidence_score, i.country,
@@ -76,6 +77,8 @@ async def fetch_incidents(
                    ST_X(i.location::geometry) as lon
             FROM public.incidents i
             WHERE i.evidence_score >= $1
+              AND (i.verification_status IN ('verified', 'auto_verified')
+                   OR i.verification_status IS NULL)
             """
             params = [min_evidence]
             param_count = 1
