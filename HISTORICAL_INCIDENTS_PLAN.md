@@ -2,16 +2,19 @@
 **DroneWatch - Data Quality & Historical Coverage Enhancement**
 
 Created: 2025-09-30
-Status: Planning Phase
+Updated: 2025-09-30 (Revised scope: Jan 1, 2025+)
+Status: Planning Phase → Implementation Ready
 
 ---
 
 ## Executive Summary
 
 This plan outlines a comprehensive approach to:
-1. **Find and ingest historical drone incidents** from Danish archives and databases
+1. **Find and ingest historical drone incidents from January 1, 2025 onwards** from Danish archives and databases
 2. **Verify source credibility** before publishing incidents on the website
 3. **Implement quality controls** to ensure data accuracy and trustworthiness
+
+**Revised Scope:** Focused on **Jan 1, 2025 - Present** (~10 months, ~150-250 incidents) for faster implementation and easier verification.
 
 ---
 
@@ -58,21 +61,21 @@ This plan outlines a comprehensive approach to:
 - **Coverage:** Regulatory violations, airport incidents, NOTAM archives
 - **Method:** Web scraping + FOIA requests for incident reports
 - **Trust Level:** 4/4 (official)
-- **Historical Coverage:** 2015-present (when drone regulations began)
+- **Historical Coverage:** Jan 1, 2025 - present (current year focus)
 
 **Danish Defense (Forsvaret)**
 - **URL:** https://www.forsvaret.dk
 - **Coverage:** Military base incidents, airspace violations
 - **Method:** Press releases archive, FOIA requests
 - **Trust Level:** 4/4 (official)
-- **Historical Coverage:** 2017-present (increased drone concerns)
+- **Historical Coverage:** Jan 1, 2025 - present
 
 **NOTAM Archive**
 - **URL:** https://aim.naviair.dk (Danish AIS)
 - **Coverage:** Flight restrictions, airspace closures due to drones
 - **Method:** API access if available, otherwise manual extraction
 - **Trust Level:** 4/4 (official aviation)
-- **Historical Coverage:** 2016-present
+- **Historical Coverage:** Jan 1, 2025 - present
 
 #### Priority 2: Police Archives
 
@@ -86,7 +89,7 @@ This plan outlines a comprehensive approach to:
   # Parse older articles not in RSS feed
   ```
 - **Trust Level:** 4/4 (official)
-- **Historical Coverage:** 2018-present (full digital archives)
+- **Historical Coverage:** Jan 1, 2025 - present
 
 #### Priority 3: News Media Archives
 
@@ -136,7 +139,7 @@ This plan outlines a comprehensive approach to:
 "unmanned aircraft Copenhagen"
 ```
 
-**Date Range:** 2015-01-01 to present (pre-2015 very rare due to limited drone usage)
+**Date Range:** 2025-01-01 to present (10 months of data)
 
 ---
 
@@ -587,9 +590,9 @@ def fetch_incidents(filters):
 ## 7. Success Metrics
 
 **Data Coverage:**
-- Target: 500+ historical incidents from 2018-present
+- Target: 150-250 historical incidents from Jan 1, 2025-present
 - Geographic coverage: All major Danish airports represented
-- Temporal coverage: No gaps > 3 months
+- Temporal coverage: No gaps > 2 months
 
 **Data Quality:**
 - Verification rate: >95% of published incidents verified

@@ -20,6 +20,11 @@ from scrapers.police_scraper import PoliceScraper
 from scrapers.news_scraper import NewsScraper
 from utils import generate_incident_hash
 from db_cache import ScraperCache
+from verification import (
+    calculate_confidence_score,
+    get_verification_status,
+    requires_manual_review
+)
 
 # Configure logging
 logging.basicConfig(
@@ -51,7 +56,7 @@ class DroneWatchIngester:
         pass
 
     def send_to_api(self, incident: Dict) -> bool:
-        """Send incident to API with improved error handling"""
+        """Send incident to API with verification and improved error handling"""
         try:
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(
@@ -66,6 +71,32 @@ class DroneWatchIngester:
                 logger.info(f"⏭️  Skipping duplicate: {incident['title'][:50]}")
                 return False
 
+            # === VERIFICATION LOGIC ===
+            sources = incident.get('sources', [])
+            source_dict = {'trust_weight': sources[0].get('trust_weight', 1),
+                          'type': sources[0].get('source_type', 'unknown'),
+                          'name': sources[0].get('source_name', 'unknown')} if sources else {}
+
+            # Calculate confidence score
+            confidence_score = calculate_confidence_score(incident, sources)
+            incident['confidence_score'] = confidence_score
+
+            # Determine verification status
+            verification_status = get_verification_status(incident, sources)
+            incident['verification_status'] = verification_status
+
+            # Check if requires manual review
+            needs_review, review_reason, review_priority = requires_manual_review(
+                incident, sources, confidence_score
+            )
+            incident['requires_review'] = needs_review
+
+            # Log verification decision
+            if verification_status == 'auto_verified':
+                logger.info(f"✓ Auto-verified: {incident['title'][:50]} (confidence: {confidence_score:.2f})")
+            else:
+                logger.info(f"⚠️  Pending review: {incident['title'][:50]} - {review_reason} (priority: {review_priority})")
+
             # Send to API
             logger.debug(f"Sending incident to {self.api_url}")
             response = self.session.post(self.api_url, json=incident, timeout=15)
@@ -77,11 +108,11 @@ class DroneWatchIngester:
                 incident_hash,
                 incident['title'],
                 datetime.fromisoformat(incident['occurred_at']),
-                incident['sources'][0]['source_name'] if incident.get('sources') else 'unknown'
+                sources[0].get('source_name', 'unknown') if sources else 'unknown'
             )
 
             logger.info(f"✅ Ingested: {incident['title'][:50]}")
-            logger.debug(f"   ID: {response.json().get('id')}")
+            logger.debug(f"   ID: {response.json().get('id')}, Status: {verification_status}")
             return True
 
         except requests.exceptions.Timeout:
