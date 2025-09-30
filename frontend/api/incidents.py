@@ -42,6 +42,7 @@ class handler(BaseHTTPRequestHandler):
         status = query_params.get('status', [None])[0]
         country = query_params.get('country', [None])[0]
         asset_type = query_params.get('asset_type', [None])[0]
+        since = query_params.get('since', [None])[0]
 
         # Handle 'all' values as no filter
         if status == 'all':
@@ -59,7 +60,8 @@ class handler(BaseHTTPRequestHandler):
                 offset=offset,
                 status=status,
                 country=country,
-                asset_type=asset_type
+                asset_type=asset_type,
+                since=since
             ))
 
             # Check if it's an error response

@@ -54,7 +54,8 @@ async def fetch_incidents(
     offset: int = 0,
     status: Optional[str] = None,
     country: Optional[str] = None,
-    asset_type: Optional[str] = None
+    asset_type: Optional[str] = None,
+    since: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
     Fetch incidents from database with retry logic for serverless environments.
@@ -69,13 +70,27 @@ async def fetch_incidents(
             conn = await get_connection()
 
             # Build query with proper parameterization
+            # IMPORTANT: Only show verified or auto-verified incidents to public
             query = """
             SELECT i.id, i.title, i.narrative, i.occurred_at, i.first_seen_at, i.last_seen_at,
                    i.asset_type, i.status, i.evidence_score, i.country,
                    ST_Y(i.location::geometry) as lat,
-                   ST_X(i.location::geometry) as lon
+                   ST_X(i.location::geometry) as lon,
+                   COALESCE(
+                     (SELECT json_agg(json_build_object(
+                       'source_url', isrc.source_url,
+                       'source_type', COALESCE(isrc.source_title, s.source_name, 'Unknown'),
+                       'source_quote', isrc.source_quote
+                     ))
+                     FROM public.incident_sources isrc
+                     LEFT JOIN public.sources s ON isrc.source_id = s.id
+                     WHERE isrc.incident_id = i.id),
+                     '[]'::json
+                   ) as sources
             FROM public.incidents i
             WHERE i.evidence_score >= $1
+              AND (i.verification_status IN ('verified', 'auto_verified', 'pending')
+                   OR i.verification_status IS NULL)
             """
             params = [min_evidence]
             param_count = 1
@@ -94,6 +109,11 @@ async def fetch_incidents(
                 param_count += 1
                 query += f" AND i.asset_type = ${param_count}"
                 params.append(asset_type)
+
+            if since:
+                param_count += 1
+                query += f" AND i.occurred_at >= ${param_count}"
+                params.append(since)
 
             query += f" ORDER BY i.occurred_at DESC LIMIT ${param_count+1} OFFSET ${param_count+2}"
             params.extend([limit, offset])
@@ -120,7 +140,7 @@ async def fetch_incidents(
                     "country": row["country"],
                     "lat": float(row["lat"]) if row["lat"] else None,
                     "lon": float(row["lon"]) if row["lon"] else None,
-                    "sources": []
+                    "sources": row["sources"] if row["sources"] else []
                 })
 
             return incidents
@@ -142,9 +162,7 @@ async def fetch_incidents(
 
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return {"error": str(e), "type": type(e).__name__, "traceback": traceback.format_exc()}
+            return {"error": str(e), "type": type(e).__name__}
 
         finally:
             if conn:
