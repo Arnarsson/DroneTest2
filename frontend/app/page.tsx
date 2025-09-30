@@ -10,6 +10,7 @@ import { EvidenceLegend } from '@/components/EvidenceLegend'
 import { IncidentList } from '@/components/IncidentList'
 import { Timeline } from '@/components/Timeline'
 import { Analytics } from '@/components/Analytics'
+import { AtlasAIBadge } from '@/components/AtlasAIBadge'
 import { useIncidents } from '@/hooks/useIncidents'
 import { isWithinInterval } from 'date-fns'
 import type { FilterState, Incident } from '@/types'
@@ -135,6 +136,9 @@ export default function Home() {
             />
           )}
         </AnimatePresence>
+
+        {/* Atlas AI Badge */}
+        <AtlasAIBadge />
       </div>
     </>
   )

@@ -12,121 +12,141 @@ export function Analytics({ incidents }: AnalyticsProps) {
   const stats = useMemo(() => calculateStats(incidents), [incidents])
 
   return (
-    <div className="bg-white border-t border-gray-200 p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Analytics Dashboard</h2>
+    <div className="bg-gray-50 dark:bg-gray-950 min-h-full p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+          <span className="text-4xl">📊</span>
+          Analytics Dashboard
+        </h2>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          title="Total Incidents"
-          value={stats.total}
-          icon="🚁"
-          color="blue"
-        />
-        <StatCard
-          title="Avg Evidence Score"
-          value={stats.avgEvidence.toFixed(1)}
-          icon="⭐"
-          color="yellow"
-        />
-        <StatCard
-          title="Active"
-          value={stats.byStatus.active || 0}
-          icon="🔴"
-          color="red"
-        />
-        <StatCard
-          title="Verified (3-4)"
-          value={stats.verified}
-          icon="✓"
-          color="green"
-        />
-      </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+          <StatCard
+            title="Total Incidents"
+            value={stats.total}
+            icon="🚁"
+            color="blue"
+          />
+          <StatCard
+            title="Avg Evidence Score"
+            value={stats.avgEvidence.toFixed(1)}
+            icon="⭐"
+            color="yellow"
+          />
+          <StatCard
+            title="Active"
+            value={stats.byStatus.active || 0}
+            icon="🔴"
+            color="red"
+          />
+          <StatCard
+            title="Verified (3-4)"
+            value={stats.verified}
+            icon="✓"
+            color="green"
+          />
+        </div>
 
-      {/* Charts Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* By Country */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">By Country</h3>
-          <div className="space-y-2">
-            {Object.entries(stats.byCountry)
-              .sort(([, a], [, b]) => b - a)
-              .map(([country, count]) => (
-                <BarItem
-                  key={country}
-                  label={country}
-                  value={count}
-                  max={Math.max(...Object.values(stats.byCountry))}
-                  color="blue"
-                />
-              ))}
+        {/* Charts Grid */}
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+          {/* By Country */}
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <span className="text-xl">🌍</span>
+              By Country
+            </h3>
+            <div className="space-y-3">
+              {Object.entries(stats.byCountry)
+                .sort(([, a], [, b]) => b - a)
+                .map(([country, count]) => (
+                  <BarItem
+                    key={country}
+                    label={country}
+                    value={count}
+                    max={Math.max(...Object.values(stats.byCountry))}
+                    color="blue"
+                  />
+                ))}
+            </div>
+          </div>
+
+          {/* By Asset Type */}
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <span className="text-xl">🎯</span>
+              By Location Type
+            </h3>
+            <div className="space-y-3">
+              {Object.entries(stats.byAssetType)
+                .sort(([, a], [, b]) => b - a)
+                .map(([type, count]) => (
+                  <BarItem
+                    key={type}
+                    label={formatAssetType(type)}
+                    value={count}
+                    max={Math.max(...Object.values(stats.byAssetType))}
+                    color="green"
+                  />
+                ))}
+            </div>
+          </div>
+
+          {/* Evidence Distribution */}
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <span className="text-xl">📈</span>
+              Evidence Level
+            </h3>
+            <div className="space-y-3">
+              {Object.entries(stats.byEvidence)
+                .sort(([a], [b]) => parseInt(b) - parseInt(a))
+                .map(([level, count]) => (
+                  <BarItem
+                    key={level}
+                    label={getEvidenceLabel(parseInt(level))}
+                    value={count}
+                    max={Math.max(...Object.values(stats.byEvidence))}
+                    color={getEvidenceColor(parseInt(level))}
+                  />
+                ))}
+            </div>
+          </div>
+
+          {/* Timeline Chart */}
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <span className="text-xl">📅</span>
+              Incidents Over Time
+            </h3>
+            <TimelineChart incidents={incidents} />
           </div>
         </div>
 
-        {/* By Asset Type */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">By Location Type</h3>
-          <div className="space-y-2">
-            {Object.entries(stats.byAssetType)
-              .sort(([, a], [, b]) => b - a)
-              .map(([type, count]) => (
-                <BarItem
-                  key={type}
-                  label={formatAssetType(type)}
-                  value={count}
-                  max={Math.max(...Object.values(stats.byAssetType))}
-                  color="green"
-                />
-              ))}
-          </div>
-        </div>
-
-        {/* Evidence Distribution */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Evidence Level</h3>
-          <div className="space-y-2">
-            {Object.entries(stats.byEvidence)
-              .sort(([a], [b]) => parseInt(b) - parseInt(a))
-              .map(([level, count]) => (
-                <BarItem
-                  key={level}
-                  label={getEvidenceLabel(parseInt(level))}
-                  value={count}
-                  max={Math.max(...Object.values(stats.byEvidence))}
-                  color={getEvidenceColor(parseInt(level))}
-                />
-              ))}
-          </div>
-        </div>
-
-        {/* Timeline Chart */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Incidents Over Time</h3>
-          <TimelineChart incidents={incidents} />
-        </div>
-      </div>
-
-      {/* Top Locations */}
-      {stats.topLocations.length > 0 && (
-        <div className="mt-6 bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Most Affected Locations</h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            {stats.topLocations.slice(0, 6).map((loc, idx) => (
-              <div key={idx} className="bg-white rounded p-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {loc.name || `${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}`}
+        {/* Top Locations */}
+        {stats.topLocations.length > 0 && (
+          <div className="mt-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <span className="text-xl">📍</span>
+              Most Affected Locations
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {stats.topLocations.slice(0, 6).map((loc, idx) => (
+                <div key={idx} className="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-all">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                        {loc.name || `${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}`}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{loc.country}</div>
                     </div>
-                    <div className="text-sm text-gray-500">{loc.country}</div>
+                    <div className="text-2xl font-bold bg-gradient-to-br from-blue-600 to-blue-800 bg-clip-text text-transparent">{loc.count}</div>
                   </div>
-                  <div className="text-xl font-bold text-blue-600">{loc.count}</div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
@@ -140,21 +160,21 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color }: StatCardProps) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    red: 'bg-red-50 text-red-600',
-    green: 'bg-green-50 text-green-600',
+    blue: 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-600 dark:text-blue-400',
+    yellow: 'bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-600 dark:text-yellow-400',
+    red: 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 text-red-600 dark:text-red-400',
+    green: 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 text-green-600 dark:text-green-400',
   }
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      <div className="flex items-center gap-3">
-        <div className={`text-3xl ${colorClasses[color]} w-12 h-12 rounded-lg flex items-center justify-center`}>
+    <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft hover:shadow-md transition-all">
+      <div className="flex items-center gap-4">
+        <div className={`text-4xl ${colorClasses[color]} w-16 h-16 rounded-xl flex items-center justify-center shadow-sm`}>
           {icon}
         </div>
-        <div>
-          <div className="text-2xl font-bold text-gray-900">{value}</div>
-          <div className="text-sm text-gray-500">{title}</div>
+        <div className="flex-1">
+          <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1">{value}</div>
+          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</div>
         </div>
       </div>
     </div>
@@ -171,24 +191,24 @@ interface BarItemProps {
 function BarItem({ label, value, max, color }: BarItemProps) {
   const percentage = (value / max) * 100
 
-  const colorClasses = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    yellow: 'bg-yellow-500',
-    orange: 'bg-orange-500',
-    red: 'bg-red-500',
-    gray: 'bg-gray-500',
+  const colorGradients = {
+    blue: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    green: 'bg-gradient-to-r from-green-500 to-green-600',
+    yellow: 'bg-gradient-to-r from-yellow-500 to-yellow-600',
+    orange: 'bg-gradient-to-r from-orange-500 to-orange-600',
+    red: 'bg-gradient-to-r from-red-500 to-red-600',
+    gray: 'bg-gradient-to-r from-gray-500 to-gray-600',
   }
 
   return (
-    <div>
-      <div className="flex justify-between text-sm mb-1">
-        <span className="text-gray-700 font-medium">{label}</span>
-        <span className="text-gray-600">{value}</span>
+    <div className="group">
+      <div className="flex justify-between text-sm mb-2">
+        <span className="text-gray-700 dark:text-gray-300 font-semibold group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{label}</span>
+        <span className="text-gray-600 dark:text-gray-400 font-bold">{value}</span>
       </div>
-      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="h-2.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
         <div
-          className={`h-full ${colorClasses[color]} transition-all`}
+          className={`h-full ${colorGradients[color]} transition-all duration-500 ease-out shadow-sm`}
           style={{ width: `${percentage}%` }}
         />
       </div>

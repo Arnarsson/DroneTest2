@@ -137,37 +137,40 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 
 function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.DivIcon {
   const colors = {
-    1: '#9ca3af',
-    2: '#facc15',
-    3: '#ea580c',
-    4: '#dc2626',
+    1: { from: '#9ca3af', to: '#6b7280', glow: 'rgba(156, 163, 175, 0.4)' },
+    2: { from: '#fde047', to: '#facc15', glow: 'rgba(250, 204, 21, 0.5)' },
+    3: { from: '#fb923c', to: '#ea580c', glow: 'rgba(234, 88, 12, 0.6)' },
+    4: { from: '#f87171', to: '#dc2626', glow: 'rgba(220, 38, 38, 0.7)' },
   }
 
-  const color = colors[evidenceScore as keyof typeof colors]
+  const colorScheme = colors[evidenceScore as keyof typeof colors]
   const borderColor = isDark ? '#1f2937' : 'white'
 
   return L.divIcon({
     html: `
       <div style="
-        width: 32px;
-        height: 32px;
-        background: ${color};
+        width: 38px;
+        height: 38px;
+        background: radial-gradient(circle at 30% 30%, ${colorScheme.from}, ${colorScheme.to});
         border: 3px solid ${borderColor};
         border-radius: 50%;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${colorScheme.glow};
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 15px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: float 3s ease-in-out infinite;
       ">
         ${evidenceScore}
       </div>
     `,
-    className: 'custom-marker',
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    className: 'custom-marker gpu-accelerated',
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   })
 }
 
@@ -181,36 +184,50 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
     4: 'Official',
   }
 
-  const evidenceColors = {
-    1: '#9ca3af',
-    2: '#facc15',
-    3: '#ea580c',
-    4: '#dc2626',
+  const evidenceGradients = {
+    1: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+    2: 'linear-gradient(135deg, #fde047 0%, #facc15 100%)',
+    3: 'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)',
+    4: 'linear-gradient(135deg, #f87171 0%, #dc2626 100%)',
   }
 
   // Theme-aware colors
   const textPrimary = isDark ? '#f3f4f6' : '#111827'
   const textSecondary = isDark ? '#9ca3af' : '#4b5563'
   const textMuted = isDark ? '#6b7280' : '#6b7280'
-  const badgeBg = isDark ? '#374151' : '#f3f4f6'
+  const badgeBg = isDark ? 'rgba(55, 65, 81, 0.8)' : 'rgba(243, 244, 246, 0.8)'
   const badgeText = isDark ? '#d1d5db' : '#4b5563'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const borderColor = isDark ? 'rgba(55, 65, 81, 0.5)' : 'rgba(229, 231, 235, 0.5)'
   const linkColor = isDark ? '#60a5fa' : '#2563eb'
+  const linkBg = isDark ? 'rgba(37, 99, 235, 0.1)' : 'rgba(37, 99, 235, 0.08)'
+
+  // Extract domain for favicon
+  const getFavicon = (url: string) => {
+    try {
+      const domain = new URL(url).hostname
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=16`
+    } catch {
+      return ''
+    }
+  }
 
   return `
-    <div style="font-family: system-ui, -apple-system, sans-serif;">
-      <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: ${textPrimary};">
+    <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
+      <h3 style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: ${textPrimary}; line-height: 1.3;">
         ${incident.title}
       </h3>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
         <span style="
-          background: ${evidenceColors[incident.evidence_score as keyof typeof evidenceColors]};
+          background: ${evidenceGradients[incident.evidence_score as keyof typeof evidenceGradients]};
           color: white;
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 14px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         ">
           ${evidenceLabels[incident.evidence_score as keyof typeof evidenceLabels]}
         </span>
@@ -218,38 +235,57 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
           <span style="
             background: ${badgeBg};
             color: ${badgeText};
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid ${borderColor};
           ">
             ${incident.asset_type}
           </span>
         ` : ''}
-        <span style="color: ${textMuted}; font-size: 12px;">
+        <span style="color: ${textMuted}; font-size: 11px; font-weight: 500;">
           ${timeAgo}
         </span>
       </div>
 
       ${incident.narrative ? `
-        <p style="margin: 0 0 12px 0; color: ${textSecondary}; font-size: 14px; line-height: 1.5;">
+        <p style="margin: 0 0 14px 0; color: ${textSecondary}; font-size: 13px; line-height: 1.6;">
           ${incident.narrative}
         </p>
       ` : ''}
 
       ${incident.sources && incident.sources.length > 0 ? `
-        <div style="border-top: 1px solid ${borderColor}; padding-top: 8px;">
-          <div style="font-size: 12px; color: ${textMuted}; margin-bottom: 4px;">Sources:</div>
-          ${incident.sources.map(source => `
-            <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
-              display: inline-block;
-              margin-right: 8px;
-              color: ${linkColor};
-              font-size: 12px;
-              text-decoration: none;
-            ">
-              ${source.source_type} →
-            </a>
-          `).join('')}
+        <div style="border-top: 1px solid ${borderColor}; padding-top: 10px; margin-top: 8px;">
+          <div style="font-size: 11px; color: ${textMuted}; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sources</div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            ${incident.sources.map(source => {
+              const favicon = getFavicon(source.source_url)
+              return `
+                <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 6px;
+                  padding: 4px 8px;
+                  background: ${linkBg};
+                  border-radius: 8px;
+                  color: ${linkColor};
+                  font-size: 12px;
+                  text-decoration: none;
+                  font-weight: 500;
+                  transition: all 0.2s;
+                  border: 1px solid ${borderColor};
+                ">
+                  ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : ''}
+                  <span>${source.source_type}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                  </svg>
+                </a>
+              `
+            }).join('')}
+          </div>
         </div>
       ` : ''}
     </div>

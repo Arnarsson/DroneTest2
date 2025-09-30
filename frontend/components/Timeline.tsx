@@ -119,7 +119,7 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
 
   return (
     <motion.div
-      className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-2xl z-40"
+      className="fixed bottom-0 left-0 right-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl border-t border-gray-200/70 dark:border-gray-800/70 shadow-elevated z-40"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       exit={{ y: 100 }}
