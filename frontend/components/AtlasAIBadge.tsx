@@ -37,34 +37,34 @@ export function AtlasAIBadge() {
           {/* Static outer glow */}
           <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:bg-white/40 transition-all" />
 
-          {/* Drone SVG - matches reference design */}
+          {/* Drone SVG - accurately matches reference design */}
           <svg
-            className="w-6 h-6 md:w-8 md:h-8 relative text-white"
-            viewBox="0 0 48 48"
+            className="w-7 h-7 md:w-9 md:h-9 relative text-white"
+            viewBox="0 0 64 64"
             fill="currentColor"
           >
             {/* Left propeller arm */}
-            <rect x="2" y="12" width="14" height="3" rx="1.5" />
-            {/* Left rotor circle */}
-            <circle cx="6" cy="13.5" r="3.5" />
-            {/* Left rotor connector */}
-            <rect x="14" y="10" width="2" height="7" rx="1" />
+            <rect x="2" y="14" width="18" height="4" rx="2" />
+            {/* Left rotor end circle */}
+            <circle cx="6" cy="16" r="4" />
+            {/* Left connector to body */}
+            <rect x="18" y="12" width="3" height="8" rx="1.5" />
 
             {/* Right propeller arm */}
-            <rect x="32" y="12" width="14" height="3" rx="1.5" />
-            {/* Right rotor circle */}
-            <circle cx="42" cy="13.5" r="3.5" />
-            {/* Right rotor connector */}
-            <rect x="32" y="10" width="2" height="7" rx="1" />
+            <rect x="44" y="14" width="18" height="4" rx="2" />
+            {/* Right rotor end circle */}
+            <circle cx="58" cy="16" r="4" />
+            {/* Right connector to body */}
+            <rect x="43" y="12" width="3" height="8" rx="1.5" />
 
-            {/* Central vertical body - tall rounded rectangle */}
-            <rect x="19" y="6" width="10" height="28" rx="5" />
+            {/* Main vertical body - WIDE pill shape */}
+            <rect x="23" y="8" width="18" height="42" rx="9" />
 
-            {/* Large bottom camera gimbal ball */}
-            <circle cx="24" cy="38" r="7" />
+            {/* Large bottom camera ball */}
+            <circle cx="32" cy="54" r="9" />
 
-            {/* Small upper connector circle */}
-            <circle cx="24" cy="12" r="2.5" />
+            {/* Medium circle on left side of body */}
+            <circle cx="26" cy="32" r="5" />
           </svg>
         </div>
 
