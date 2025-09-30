@@ -39,10 +39,13 @@ export function Filters({ filters, onChange, view, onViewChange }: FiltersProps)
               onChange={(e) => handleChange('country', e.target.value)}
               className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="all">All Countries</option>
               <option value="DK">Denmark 🇩🇰</option>
               <option value="NO">Norway 🇳🇴</option>
               <option value="SE">Sweden 🇸🇪</option>
               <option value="FI">Finland 🇫🇮</option>
+              <option value="PL">Poland 🇵🇱</option>
+              <option value="NL">Netherlands 🇳🇱</option>
             </select>
           </div>
 
@@ -54,6 +57,7 @@ export function Filters({ filters, onChange, view, onViewChange }: FiltersProps)
               onChange={(e) => handleChange('status', e.target.value)}
               className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="resolved">Resolved</option>
               <option value="unconfirmed">Unconfirmed</option>
