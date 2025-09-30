@@ -17,11 +17,11 @@ const Map = dynamic(() => import('@/components/Map'), {
 export default function Home() {
   const [view, setView] = useState<'map' | 'list'>('map')
   const [filters, setFilters] = useState<FilterState>({
-    minEvidence: 2,
-    country: 'DK',
-    status: 'active',
+    minEvidence: 1,
+    country: 'all',
+    status: 'all',
     assetType: null,
-    dateRange: 'week'
+    dateRange: 'all'
   })
 
   const { data: incidents, isLoading, error } = useIncidents(filters)
