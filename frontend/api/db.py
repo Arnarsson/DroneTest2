@@ -77,7 +77,7 @@ async def fetch_incidents(
                    ST_X(i.location::geometry) as lon
             FROM public.incidents i
             WHERE i.evidence_score >= $1
-              AND (i.verification_status IN ('verified', 'auto_verified')
+              AND (i.verification_status IN ('verified', 'auto_verified', 'pending')
                    OR i.verification_status IS NULL)
             """
             params = [min_evidence]
