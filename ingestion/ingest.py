@@ -121,7 +121,7 @@ class DroneWatchIngester:
         except requests.exceptions.HTTPError as e:
             logger.error(f"❌ HTTP Error ({e.response.status_code}): {incident['title'][:50]}")
             if hasattr(e.response, 'text'):
-                logger.debug(f"   Response: {e.response.text[:200]}")
+                logger.error(f"   Response: {e.response.text[:500]}")
             return False
         except requests.exceptions.RequestException as e:
             logger.error(f"❌ API Error: {e}")
