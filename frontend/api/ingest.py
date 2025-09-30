@@ -33,13 +33,13 @@ async def insert_incident(incident_data):
         first_seen_at = parse_datetime(incident_data.get('first_seen_at', incident_data.get('occurred_at')))
         last_seen_at = parse_datetime(incident_data.get('last_seen_at', incident_data.get('occurred_at')))
 
-        # Insert incident
+        # Insert incident with explicit verification_status
         query = """
         INSERT INTO public.incidents
         (title, narrative, occurred_at, first_seen_at, last_seen_at,
-         asset_type, status, evidence_score, country, location)
+         asset_type, status, evidence_score, country, location, verification_status)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
-                ST_SetSRID(ST_MakePoint($10, $11), 4326))
+                ST_SetSRID(ST_MakePoint($10, $11), 4326), $12)
         RETURNING id
         """
 
@@ -50,12 +50,13 @@ async def insert_incident(incident_data):
             occurred_at,
             first_seen_at,
             last_seen_at,
-            incident_data.get('asset_type', 'other'),  # Use 'other' as default instead of 'unknown'
+            incident_data.get('asset_type', 'other'),
             incident_data.get('status', 'active'),
             incident_data.get('evidence_score', 1),
             incident_data.get('country', 'DK'),
             incident_data.get('lon'),
-            incident_data.get('lat')
+            incident_data.get('lat'),
+            incident_data.get('verification_status', 'pending')
         )
 
         # Insert sources if provided
