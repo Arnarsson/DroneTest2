@@ -53,7 +53,8 @@ async def fetch_incidents(
     limit: int = 200,
     offset: int = 0,
     status: Optional[str] = None,
-    country: Optional[str] = None
+    country: Optional[str] = None,
+    asset_type: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
     Fetch incidents from database with retry logic for serverless environments.
@@ -88,6 +89,11 @@ async def fetch_incidents(
                 param_count += 1
                 query += f" AND i.country = ${param_count}"
                 params.append(country)
+
+            if asset_type:
+                param_count += 1
+                query += f" AND i.asset_type = ${param_count}"
+                params.append(asset_type)
 
             query += f" ORDER BY i.occurred_at DESC LIMIT ${param_count+1} OFFSET ${param_count+2}"
             params.extend([limit, offset])

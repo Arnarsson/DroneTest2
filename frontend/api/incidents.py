@@ -41,12 +41,15 @@ class handler(BaseHTTPRequestHandler):
         offset = int(query_params.get('offset', ['0'])[0])
         status = query_params.get('status', [None])[0]
         country = query_params.get('country', [None])[0]
+        asset_type = query_params.get('asset_type', [None])[0]
 
         # Handle 'all' values as no filter
         if status == 'all':
             status = None
         if country == 'all':
             country = None
+        if asset_type == 'all' or asset_type == '':
+            asset_type = None
 
         # Fetch incidents from database
         try:
@@ -55,7 +58,8 @@ class handler(BaseHTTPRequestHandler):
                 limit=limit,
                 offset=offset,
                 status=status,
-                country=country
+                country=country,
+                asset_type=asset_type
             ))
 
             # Check if it's an error response
