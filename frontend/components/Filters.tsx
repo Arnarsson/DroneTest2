@@ -3,8 +3,8 @@ import { FilterState } from '@/types'
 interface FiltersProps {
   filters: FilterState
   onChange: (filters: FilterState) => void
-  view: 'map' | 'list'
-  onViewChange: (view: 'map' | 'list') => void
+  view: 'map' | 'list' | 'analytics'
+  onViewChange: (view: 'map' | 'list' | 'analytics') => void
 }
 
 export function Filters({ filters, onChange, view, onViewChange }: FiltersProps) {
@@ -120,6 +120,16 @@ export function Filters({ filters, onChange, view, onViewChange }: FiltersProps)
               }`}
             >
               📋 List
+            </button>
+            <button
+              onClick={() => onViewChange('analytics')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                view === 'analytics'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📊 Analytics
             </button>
           </div>
         </div>
