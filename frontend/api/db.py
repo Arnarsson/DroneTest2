@@ -162,9 +162,7 @@ async def fetch_incidents(
 
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return {"error": str(e), "type": type(e).__name__, "traceback": traceback.format_exc()}
+            return {"error": str(e), "type": type(e).__name__}
 
         finally:
             if conn:
