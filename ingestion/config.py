@@ -12,7 +12,8 @@ INGEST_TOKEN = os.getenv("INGEST_TOKEN", "dw-secret-2025-nordic-drone-watch")
 
 # Source configurations
 SOURCES = {
-    "danish_police": {
+    # === POLICE SOURCES (All Danish Police Districts) ===
+    "nordjyllands_police": {
         "name": "Nordjyllands Politi",
         "url": "https://politi.dk/nordjyllands-politi/nyhedsliste",
         "rss": "https://politi.dk/nordjyllands-politi/nyhedsliste/rss.xml",
@@ -28,19 +29,145 @@ SOURCES = {
         "trust_weight": 4,
         "keywords": ["drone", "dron", "uav", "luftfartøj", "kastrup"]
     },
+    "vestsjællands_police": {
+        "name": "Midt- og Vestsjællands Politi",
+        "url": "https://politi.dk/midt-og-vestsjaellands-politi/nyhedsliste",
+        "rss": "https://politi.dk/midt-og-vestsjaellands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj"]
+    },
+    "sydsjællands_police": {
+        "name": "Sydsjællands og Lolland-Falsters Politi",
+        "url": "https://politi.dk/sydsjaellands-og-lolland-falsters-politi/nyhedsliste",
+        "rss": "https://politi.dk/sydsjaellands-og-lolland-falsters-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj"]
+    },
+    "fyn_police": {
+        "name": "Fyns Politi",
+        "url": "https://politi.dk/fyns-politi/nyhedsliste",
+        "rss": "https://politi.dk/fyns-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj", "odense"]
+    },
+    "syddanmark_police": {
+        "name": "Syd- og Sønderjyllands Politi",
+        "url": "https://politi.dk/syd-og-soenderjyllands-politi/nyhedsliste",
+        "rss": "https://politi.dk/syd-og-soenderjyllands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj", "esbjerg", "billund"]
+    },
+    "sydøstjyllands_police": {
+        "name": "Sydøstjyllands Politi",
+        "url": "https://politi.dk/sydoestjyllands-politi/nyhedsliste",
+        "rss": "https://politi.dk/sydoestjyllands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj"]
+    },
+    "østjyllands_police": {
+        "name": "Østjyllands Politi",
+        "url": "https://politi.dk/oestjyllands-politi/nyhedsliste",
+        "rss": "https://politi.dk/oestjyllands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj", "aarhus"]
+    },
+    "midtjyllands_police": {
+        "name": "Midt- og Vestjyllands Politi",
+        "url": "https://politi.dk/midt-og-vestjyllands-politi/nyhedsliste",
+        "rss": "https://politi.dk/midt-og-vestjyllands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj"]
+    },
+    "nordjyllands_police": {
+        "name": "Nordjyllands Politi",
+        "url": "https://politi.dk/nordjyllands-politi/nyhedsliste",
+        "rss": "https://politi.dk/nordjyllands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj", "aalborg"]
+    },
+    "nordsjællands_police": {
+        "name": "Nordsjællands Politi",
+        "url": "https://politi.dk/nordsjaellands-politi/nyhedsliste",
+        "rss": "https://politi.dk/nordsjaellands-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj", "helsingør"]
+    },
+    "bornholms_police": {
+        "name": "Bornholms Politi",
+        "url": "https://politi.dk/bornholms-politi/nyhedsliste",
+        "rss": "https://politi.dk/bornholms-politi/nyhedsliste/rss.xml",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "luftfartøj"]
+    },
+
+    # === NATIONAL NEWS SOURCES ===
     "dr_news": {
         "name": "DR Nyheder",
         "rss": "https://www.dr.dk/nyheder/service/feeds/allenyheder",
         "type": "media",
         "trust_weight": 3,
-        "keywords": ["drone", "dron", "lufthavn", "forsvar"]
+        "keywords": ["drone", "dron", "lufthavn", "forsvar", "uav"]
     },
     "tv2_news": {
         "name": "TV2 News",
         "rss": "https://feeds.tv2.dk/nyheder/rss",
         "type": "media",
         "trust_weight": 3,
-        "keywords": ["drone", "dron", "luftrum"]
+        "keywords": ["drone", "dron", "luftrum", "lufthavn"]
+    },
+    "berlingske": {
+        "name": "Berlingske",
+        "rss": "https://www.berlingske.dk/rss",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "dron", "lufthavn", "forsvar"]
+    },
+    "jyllands_posten": {
+        "name": "Jyllands-Posten",
+        "rss": "https://jyllands-posten.dk/rss",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "dron", "lufthavn", "luftrum"]
+    },
+    "politiken": {
+        "name": "Politiken",
+        "rss": "https://politiken.dk/rss/",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "dron", "lufthavn"]
+    },
+
+    # === REGIONAL NEWS ===
+    "tv2_lorry": {
+        "name": "TV2 Lorry (Copenhagen Region)",
+        "rss": "https://www.tv2lorry.dk/rss",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "dron", "kastrup", "københav"]
+    },
+    "tv2_nord": {
+        "name": "TV2 Nord (North Jutland)",
+        "rss": "https://www.tv2nord.dk/rss",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "dron", "aalborg"]
+    },
+    "tv2_østjylland": {
+        "name": "TV2 Østjylland (Aarhus Region)",
+        "rss": "https://www.tv2ostjylland.dk/rss",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "dron", "aarhus"]
     }
 }
 
