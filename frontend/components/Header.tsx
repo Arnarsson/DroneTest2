@@ -1,17 +1,19 @@
+import { ThemeToggle } from './ThemeToggle'
+
 export function Header({ incidentCount, isLoading }: {
   incidentCount: number
   isLoading: boolean
 }) {
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="text-3xl">🚁</span>
               DroneWatch
             </h1>
-            <span className="ml-4 text-sm text-gray-500">
+            <span className="ml-4 text-sm text-gray-500 dark:text-gray-400">
               Real-time drone incident tracking
             </span>
           </div>
@@ -20,15 +22,18 @@ export function Header({ incidentCount, isLoading }: {
             {/* Live indicator */}
             <div className="flex items-center gap-2">
               <div className={`h-3 w-3 rounded-full ${isLoading ? 'bg-yellow-400' : 'bg-green-500'} animate-pulse`} />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isLoading ? 'Updating...' : `${incidentCount} incidents`}
               </span>
             </div>
 
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* Info button */}
             <button
               onClick={() => window.open('/about', '_blank')}
-              className="text-gray-500 hover:text-gray-700 p-2"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-2 transition-colors"
               title="About DroneWatch"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
