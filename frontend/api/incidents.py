@@ -18,6 +18,8 @@ class handler(BaseHTTPRequestHandler):
         origin = self.headers.get('Origin', '')
         self.send_response(200)
         if origin and ('.vercel.app' in origin or origin in [
+            "https://dronemap.cc",
+            "https://www.dronemap.cc",
             "https://dronewatch.cc",
             "https://www.dronewatch.cc",
             "https://dronewatchv2.vercel.app",
@@ -64,6 +66,9 @@ class handler(BaseHTTPRequestHandler):
                 incidents = result
                 status_code = 200
         except Exception as e:
+            print(f"Error fetching incidents: {str(e)}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
             incidents = []
             status_code = 500
 
@@ -76,6 +81,8 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Cache-Control', 'public, max-age=15')
 
         if origin and ('.vercel.app' in origin or origin in [
+            "https://dronemap.cc",
+            "https://www.dronemap.cc",
             "https://dronewatch.cc",
             "https://www.dronewatch.cc",
             "https://dronewatchv2.vercel.app",
