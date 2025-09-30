@@ -39,18 +39,46 @@ export default function Home() {
 
   const { data: allIncidents, isLoading, error } = useIncidents(filters)
 
-  // Apply timeline filtering on top of regular filters
+  // Apply client-side date filtering and timeline filtering
   const incidents = useMemo(() => {
     if (!allIncidents) return []
-    if (!timelineRange.start || !timelineRange.end) return allIncidents
 
-    return allIncidents.filter((inc: Incident) =>
-      isWithinInterval(new Date(inc.occurred_at), {
-        start: timelineRange.start!,
-        end: timelineRange.end!,
-      })
-    )
-  }, [allIncidents, timelineRange])
+    let filtered = allIncidents
+
+    // Apply date range filter (client-side fallback)
+    if (filters.dateRange !== 'all') {
+      const now = new Date()
+      const since = new Date()
+
+      switch (filters.dateRange) {
+        case 'day':
+          since.setDate(now.getDate() - 1)
+          break
+        case 'week':
+          since.setDate(now.getDate() - 7)
+          break
+        case 'month':
+          since.setMonth(now.getMonth() - 1)
+          break
+      }
+
+      filtered = filtered.filter((inc: Incident) =>
+        new Date(inc.occurred_at) >= since
+      )
+    }
+
+    // Apply timeline filtering
+    if (timelineRange.start && timelineRange.end) {
+      filtered = filtered.filter((inc: Incident) =>
+        isWithinInterval(new Date(inc.occurred_at), {
+          start: timelineRange.start!,
+          end: timelineRange.end!,
+        })
+      )
+    }
+
+    return filtered
+  }, [allIncidents, timelineRange, filters.dateRange])
 
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters)
@@ -125,8 +153,8 @@ export default function Home() {
           />
         </main>
 
-        {/* Timeline at bottom - only for map view */}
-        <AnimatePresence>
+        {/* Timeline at bottom - HIDDEN */}
+        {/* <AnimatePresence>
           {view === 'map' && (
             <Timeline
               incidents={allIncidents || []}
@@ -135,7 +163,7 @@ export default function Home() {
               onToggle={() => setIsTimelineOpen(!isTimelineOpen)}
             />
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
 
         {/* Atlas AI Badge */}
         <AtlasAIBadge />
