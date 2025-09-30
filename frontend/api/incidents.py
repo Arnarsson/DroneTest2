@@ -40,6 +40,12 @@ class handler(BaseHTTPRequestHandler):
         status = query_params.get('status', [None])[0]
         country = query_params.get('country', [None])[0]
 
+        # Handle 'all' values as no filter
+        if status == 'all':
+            status = None
+        if country == 'all':
+            country = None
+
         # Fetch incidents from database
         try:
             result = run_async(fetch_incidents(
