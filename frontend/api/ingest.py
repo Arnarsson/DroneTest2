@@ -62,16 +62,28 @@ async def insert_incident(incident_data):
         # Insert sources if provided
         if incident_data.get('sources'):
             for source in incident_data['sources']:
+                # First, get or create source in sources table
+                source_id = await conn.fetchval("""
+                    INSERT INTO public.sources (source_name, trust_weight)
+                    VALUES ($1, $2)
+                    ON CONFLICT (source_name) DO UPDATE SET source_name = EXCLUDED.source_name
+                    RETURNING id
+                """, source.get('source_name', source.get('source_type', 'Unknown')),
+                    source.get('trust_weight', 1))
+
+                # Then insert into incident_sources
                 source_query = """
                 INSERT INTO public.incident_sources
-                (incident_id, source_url, source_type, source_quote)
-                VALUES ($1, $2, $3, $4)
+                (incident_id, source_id, source_url, source_title, source_quote)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (incident_id, source_url) DO NOTHING
                 """
                 await conn.execute(
                     source_query,
                     incident_id,
+                    source_id,
                     source.get('source_url', ''),
-                    source.get('source_type', 'unknown'),
+                    source.get('source_type', source.get('source_name', 'Unknown')),
                     source.get('source_quote', '')
                 )
 
