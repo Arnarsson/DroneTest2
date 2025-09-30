@@ -47,7 +47,7 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 min-h-full">
       <motion.div
         className="space-y-4"
         initial={{ opacity: 0 }}

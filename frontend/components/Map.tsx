@@ -123,10 +123,10 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
   return (
     <>
       {isLoading && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white dark:bg-gray-800 rounded-lg shadow-lg px-4 py-2">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Loading incidents...</span>
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl rounded-xl shadow-elevated px-5 py-3 border border-gray-200/70 dark:border-gray-800/70">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Loading incidents...</span>
           </div>
         </div>
       )}
