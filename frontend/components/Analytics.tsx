@@ -14,9 +14,8 @@ export function Analytics({ incidents }: AnalyticsProps) {
   return (
     <div className="bg-gray-50 dark:bg-gray-950 min-h-full p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
-          <span className="text-4xl">📊</span>
-          Analytics Dashboard
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 tracking-tight uppercase text-sm letter-spacing-wide">
+          ANALYTICS DASHBOARD
         </h2>
 
         {/* Summary Cards */}
@@ -51,8 +50,7 @@ export function Analytics({ incidents }: AnalyticsProps) {
         <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           {/* By Country */}
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="text-xl">🌍</span>
+            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-5 uppercase tracking-wider">
               By Country
             </h3>
             <div className="space-y-3">
@@ -72,8 +70,7 @@ export function Analytics({ incidents }: AnalyticsProps) {
 
           {/* By Asset Type */}
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="text-xl">🎯</span>
+            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-5 uppercase tracking-wider">
               By Location Type
             </h3>
             <div className="space-y-3">
@@ -93,8 +90,7 @@ export function Analytics({ incidents }: AnalyticsProps) {
 
           {/* Evidence Distribution */}
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="text-xl">📈</span>
+            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-5 uppercase tracking-wider">
               Evidence Level
             </h3>
             <div className="space-y-3">
@@ -114,8 +110,7 @@ export function Analytics({ incidents }: AnalyticsProps) {
 
           {/* Timeline Chart */}
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="text-xl">📅</span>
+            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-5 uppercase tracking-wider">
               Incidents Over Time
             </h3>
             <TimelineChart incidents={incidents} />
@@ -125,8 +120,7 @@ export function Analytics({ incidents }: AnalyticsProps) {
         {/* Top Locations */}
         {stats.topLocations.length > 0 && (
           <div className="mt-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="text-xl">📍</span>
+            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-5 uppercase tracking-wider">
               Most Affected Locations
             </h3>
             <div className="grid md:grid-cols-3 gap-4">
