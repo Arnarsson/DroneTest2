@@ -23,25 +23,25 @@ export function Analytics({ incidents }: AnalyticsProps) {
           <StatCard
             title="Total Incidents"
             value={stats.total}
-            icon="🚁"
+            iconType="total"
             color="blue"
           />
           <StatCard
             title="Avg Evidence Score"
             value={stats.avgEvidence.toFixed(1)}
-            icon="⭐"
+            iconType="star"
             color="yellow"
           />
           <StatCard
             title="Active"
             value={stats.byStatus.active || 0}
-            icon="🔴"
+            iconType="active"
             color="red"
           />
           <StatCard
             title="Verified (3-4)"
             value={stats.verified}
-            icon="✓"
+            iconType="check"
             color="green"
           />
         </div>
@@ -148,11 +148,11 @@ export function Analytics({ incidents }: AnalyticsProps) {
 interface StatCardProps {
   title: string
   value: string | number
-  icon: string
+  iconType: 'total' | 'star' | 'active' | 'check'
   color: 'blue' | 'yellow' | 'red' | 'green'
 }
 
-function StatCard({ title, value, icon, color }: StatCardProps) {
+function StatCard({ title, value, iconType, color }: StatCardProps) {
   const colorClasses = {
     blue: 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-600 dark:text-blue-400',
     yellow: 'bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-600 dark:text-yellow-400',
@@ -160,11 +160,34 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
     green: 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 text-green-600 dark:text-green-400',
   }
 
+  const icons = {
+    total: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    star: (
+      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+    ),
+    active: (
+      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8" />
+      </svg>
+    ),
+    check: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+      </svg>
+    ),
+  }
+
   return (
     <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-soft hover:shadow-md transition-all">
       <div className="flex items-center gap-4">
-        <div className={`text-4xl ${colorClasses[color]} w-16 h-16 rounded-xl flex items-center justify-center shadow-sm`}>
-          {icon}
+        <div className={`${colorClasses[color]} w-16 h-16 rounded-xl flex items-center justify-center shadow-sm`}>
+          {icons[iconType]}
         </div>
         <div className="flex-1">
           <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1">{value}</div>
