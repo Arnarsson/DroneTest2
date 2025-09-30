@@ -36,14 +36,7 @@ jobs:
       env:
         API_BASE_URL: ${{ secrets.API_BASE_URL }}
         INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
         cd ingestion
         python ingest.py
-
-    - name: Commit processed hashes (optional)
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add ingestion/processed_incidents.json || true
-        git diff --staged --quiet || git commit -m "Update processed incidents cache"
-        git push || true

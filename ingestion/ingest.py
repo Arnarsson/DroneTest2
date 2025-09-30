@@ -7,8 +7,10 @@ import os
 import sys
 import json
 import requests
+import logging
 from datetime import datetime
 from typing import List, Dict
+import uuid
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +19,14 @@ from config import API_BASE_URL, INGEST_TOKEN
 from scrapers.police_scraper import PoliceScraper
 from scrapers.news_scraper import NewsScraper
 from utils import generate_incident_hash
+from db_cache import ScraperCache
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 class DroneWatchIngester:
     def __init__(self):
@@ -27,29 +37,21 @@ class DroneWatchIngester:
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json'
         })
-        self.processed_hashes = self.load_processed_hashes()
+        self.cache = ScraperCache()
+        self.processed_hashes = self.cache.load_sync()
+        self.run_id = str(uuid.uuid4())
+        logger.info(f"Initialized ingester (run_id: {self.run_id})")
 
     def load_processed_hashes(self) -> set:
-        """Load previously processed incident hashes to avoid duplicates"""
-        cache_file = 'processed_incidents.json'
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, 'r') as f:
-                    return set(json.load(f))
-            except:
-                return set()
-        return set()
+        """DEPRECATED: Now handled by ScraperCache"""
+        return self.processed_hashes
 
     def save_processed_hashes(self):
-        """Save processed incident hashes"""
-        cache_file = 'processed_incidents.json'
-        # Keep only last 1000 hashes
-        recent_hashes = list(self.processed_hashes)[-1000:]
-        with open(cache_file, 'w') as f:
-            json.dump(recent_hashes, f)
+        """DEPRECATED: Now handled by ScraperCache (auto-saves)"""
+        pass
 
     def send_to_api(self, incident: Dict) -> bool:
-        """Send incident to API"""
+        """Send incident to API with improved error handling"""
         try:
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(
@@ -61,27 +63,40 @@ class DroneWatchIngester:
 
             # Skip if already processed
             if incident_hash in self.processed_hashes:
-                print(f"⏭️  Skipping duplicate: {incident['title'][:50]}")
+                logger.info(f"⏭️  Skipping duplicate: {incident['title'][:50]}")
                 return False
 
             # Send to API
-            response = self.session.post(self.api_url, json=incident, timeout=10)
+            logger.debug(f"Sending incident to {self.api_url}")
+            response = self.session.post(self.api_url, json=incident, timeout=15)
             response.raise_for_status()
 
-            # Mark as processed
+            # Mark as processed in cache
             self.processed_hashes.add(incident_hash)
+            self.cache.add_sync(
+                incident_hash,
+                incident['title'],
+                datetime.fromisoformat(incident['occurred_at']),
+                incident['sources'][0]['source_name'] if incident.get('sources') else 'unknown'
+            )
 
-            print(f"✅ Ingested: {incident['title'][:50]}")
-            print(f"   ID: {response.json().get('id')}")
+            logger.info(f"✅ Ingested: {incident['title'][:50]}")
+            logger.debug(f"   ID: {response.json().get('id')}")
             return True
 
-        except requests.exceptions.RequestException as e:
-            print(f"❌ API Error: {e}")
+        except requests.exceptions.Timeout:
+            logger.error(f"⏱️  API Timeout: {incident['title'][:50]}")
+            return False
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"❌ HTTP Error ({e.response.status_code}): {incident['title'][:50]}")
             if hasattr(e.response, 'text'):
-                print(f"   Response: {e.response.text}")
+                logger.debug(f"   Response: {e.response.text[:200]}")
+            return False
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ API Error: {e}")
             return False
         except Exception as e:
-            print(f"❌ Error: {e}")
+            logger.error(f"❌ Unexpected error: {e}", exc_info=True)
             return False
 
     def run_ingestion(self, test_mode: bool = False):
