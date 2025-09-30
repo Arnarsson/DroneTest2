@@ -1,0 +1,89 @@
+{
+  "common": {
+    "appName": "DroneWatch",
+    "tagline": "Real-time drone incident tracking",
+    "loading": "Loading...",
+    "error": "Error",
+    "noData": "No data available",
+    "incidents": "incidents",
+    "about": "About DroneWatch"
+  },
+  "header": {
+    "title": "DroneWatch",
+    "subtitle": "Real-time drone incident tracking"
+  },
+  "filters": {
+    "evidence": "Evidence",
+    "evidenceAll": "All Levels",
+    "evidenceOsint": "OSINT+ (≥2)",
+    "evidenceVerified": "Verified (≥3)",
+    "evidenceOfficial": "Official Only (4)",
+    "country": "Country",
+    "countryAll": "All Countries",
+    "status": "Status",
+    "statusAll": "All Status",
+    "statusActive": "Active",
+    "statusResolved": "Resolved",
+    "statusUnconfirmed": "Unconfirmed",
+    "location": "Location",
+    "locationAll": "All Types",
+    "locationAirport": "✈️ Airport",
+    "locationHarbor": "⚓ Harbor",
+    "locationMilitary": "🛡️ Military",
+    "locationPower": "⚡ Power Plant",
+    "locationOther": "📍 Other",
+    "time": "Time",
+    "timeLast24h": "Last 24h",
+    "timeLastWeek": "Last Week",
+    "timeLastMonth": "Last Month",
+    "timeAll": "All Time"
+  },
+  "views": {
+    "map": "🗺️ Map",
+    "list": "📋 List",
+    "analytics": "📊 Analytics"
+  },
+  "incidents": {
+    "title": "Incidents",
+    "noIncidents": "No incidents found",
+    "adjustFilters": "Try adjusting your filters",
+    "evidenceUnverified": "Unverified",
+    "evidenceOsint": "OSINT",
+    "evidenceVerifiedMedia": "Verified Media",
+    "evidenceOfficial": "Official",
+    "sources": "Sources",
+    "viewSource": "View source"
+  },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "totalIncidents": "Total Incidents",
+    "activeIncidents": "Active",
+    "resolvedIncidents": "Resolved",
+    "byCountry": "Incidents by Country",
+    "byAssetType": "By Asset Type",
+    "byEvidenceScore": "By Evidence Level",
+    "timeline": "Timeline",
+    "lastUpdated": "Last updated",
+    "assetAirport": "Airport",
+    "assetHarbor": "Harbor",
+    "assetMilitary": "Military",
+    "assetPower": "Power Plant",
+    "assetOther": "Other"
+  },
+  "about": {
+    "title": "About DroneWatch",
+    "description": "DroneWatch is a real-time tracking system for drone incidents near critical infrastructure across the Nordic region and Europe.",
+    "mission": "Our Mission",
+    "missionText": "To provide transparent, verified information about drone incidents affecting airports, harbors, military installations, and other critical infrastructure.",
+    "sources": "Data Sources",
+    "sourcesText": "We aggregate data from 44+ sources including police departments, news outlets, and aviation authorities across Denmark, Norway, Sweden, Finland, and international aviation media.",
+    "verification": "Verification Process",
+    "verificationText": "All incidents are scored based on source reliability, evidence quality, and cross-source verification. Only verified or auto-verified incidents are displayed publicly."
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "da": "Dansk",
+    "de": "Deutsch"
+  }
+}
