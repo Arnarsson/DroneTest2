@@ -36,23 +36,13 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   }
 
   const url = `${API_URL}/incidents?${params}`
-  console.log('[DroneWatch] Fetching incidents from:', url)
-  console.log('[DroneWatch] Filters:', filters)
-
   const response = await fetch(url)
 
-  console.log('[DroneWatch] Response status:', response.status, response.statusText)
-  console.log('[DroneWatch] Response headers:', Object.fromEntries(response.headers.entries()))
-
   if (!response.ok) {
-    const errorText = await response.text()
-    console.error('[DroneWatch] API error response:', errorText)
-    throw new Error(`API error: ${response.status} - ${errorText}`)
+    throw new Error(`API error: ${response.status}`)
   }
 
-  const data = await response.json()
-  console.log('[DroneWatch] Received incidents:', data.length)
-  return data
+  return response.json()
 }
 
 export function useIncidents(filters: FilterState) {
