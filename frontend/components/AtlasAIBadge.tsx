@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 export function AtlasAIBadge() {
   return (
     <motion.div
-      className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[100] pointer-events-auto"
+      className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[100] pointer-events-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1.5, duration: 0.6, ease: 'easeOut' }}
@@ -14,50 +14,68 @@ export function AtlasAIBadge() {
         href="https://atlas-ai.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center gap-2 bg-gradient-to-r from-slate-900/95 to-slate-800/95 dark:from-slate-950/95 dark:to-slate-900/95 backdrop-blur-xl rounded-full shadow-xl border border-slate-700/50 dark:border-slate-600/50 px-4 py-2.5 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
-        whileHover={{ scale: 1.02, x: -2 }}
+        className="group flex items-center gap-2 md:gap-3 bg-black/95 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl border border-gray-700/30 px-3 py-2 md:px-5 md:py-3 hover:border-gray-600/50 transition-all duration-300"
+        whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-sm opacity-75 group-hover:opacity-100 transition-opacity" />
-            <svg
-              className="w-5 h-5 relative text-blue-400 group-hover:text-blue-300 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">
-              POWERED BY
-            </span>
-            <span className="text-sm font-bold text-white leading-tight tracking-tight">
-              Atlas AI
-            </span>
-          </div>
-        </div>
-        <div className="ml-1 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+        {/* Drone Icon */}
+        <div className="relative">
+          {/* Animated glow effect */}
+          <motion.div
+            className="absolute inset-0 bg-white/30 rounded-full blur-lg"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+
+          {/* Static outer glow */}
+          <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:bg-white/40 transition-all" />
+
+          {/* Drone SVG - matches reference EXACTLY */}
           <svg
-            className="w-3.5 h-3.5 text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            className="w-8 h-8 md:w-10 md:h-10 relative text-white"
+            viewBox="0 0 100 100"
+            fill="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+            {/* MAIN VERTICAL BODY - Large pill on RIGHT side (most prominent) */}
+            <rect x="50" y="15" width="28" height="70" rx="14" />
+
+            {/* LARGE BOTTOM-LEFT CIRCLE - Camera gimbal */}
+            <circle cx="25" cy="75" r="18" />
+
+            {/* MEDIUM MIDDLE-LEFT CIRCLE - Secondary component */}
+            <circle cx="30" cy="45" r="11" />
+
+            {/* LEFT PROPELLER ARM - at top */}
+            <rect x="8" y="18" width="24" height="5" rx="2.5" />
+            {/* Left rotor circle at end */}
+            <circle cx="13" cy="20.5" r="5" />
+            {/* Left vertical connector to body */}
+            <rect x="30" y="15" width="3" height="10" rx="1.5" />
+
+            {/* RIGHT PROPELLER ARM - at top */}
+            <rect x="68" y="18" width="24" height="5" rx="2.5" />
+            {/* Right rotor circle at end */}
+            <circle cx="87" cy="20.5" r="5" />
+            {/* Right vertical connector to body */}
+            <rect x="67" y="15" width="3" height="10" rx="1.5" />
           </svg>
+        </div>
+
+        {/* Text */}
+        <div className="flex flex-col">
+          <span className="text-[9px] md:text-[11px] uppercase tracking-widest text-gray-400 font-bold leading-none mb-0.5">
+            Powered by
+          </span>
+          <span className="text-sm md:text-base font-bold text-white leading-tight tracking-tight">
+            Atlas AI
+          </span>
         </div>
       </motion.a>
     </motion.div>
