@@ -168,6 +168,164 @@ SOURCES = {
         "type": "media",
         "trust_weight": 2,
         "keywords": ["drone", "dron", "aarhus"]
+    },
+
+    # === NORWEGIAN SOURCES ===
+    "politiet_no": {
+        "name": "Politiet (Norwegian National Police)",
+        "url": "https://www.politiet.no/aktuelt-tall-og-fakta/aktuelt/",
+        "rss": "https://www.politiet.no/aktuelt-tall-og-fakta/aktuelt/rss/",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "uav", "lufthavn", "flyplass"]
+    },
+    "nrk_news": {
+        "name": "NRK Nyheter",
+        "rss": "https://www.nrk.no/toppsaker.rss",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "lufthavn", "forsvar", "gardermoen", "oslo lufthavn"]
+    },
+    "aftenposten": {
+        "name": "Aftenposten",
+        "rss": "https://www.aftenposten.no/rss",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "lufthavn", "forsvar"]
+    },
+    "vg_no": {
+        "name": "VG (Verdens Gang)",
+        "rss": "https://www.vg.no/rss/feed/",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "lufthavn", "gardermoen"]
+    },
+    "dagbladet_no": {
+        "name": "Dagbladet",
+        "rss": "https://www.dagbladet.no/rss",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "lufthavn"]
+    },
+
+    # === SWEDISH SOURCES ===
+    "polisen_se": {
+        "name": "Polisen (Swedish National Police)",
+        "url": "https://polisen.se/aktuellt/nyheter/",
+        "rss": "https://polisen.se/aktuellt/rss/",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "arlanda", "bromma"]
+    },
+    "svt_nyheter": {
+        "name": "SVT Nyheter",
+        "rss": "https://www.svt.se/nyheter/rss.xml",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drönare", "drone", "flygplats", "försvar"]
+    },
+    "dagens_nyheter": {
+        "name": "Dagens Nyheter",
+        "rss": "https://www.dn.se/rss/",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drönare", "drone", "flygplats", "arlanda"]
+    },
+    "svenska_dagbladet": {
+        "name": "Svenska Dagbladet",
+        "rss": "https://www.svd.se/rss.xml",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drönare", "drone", "flygplats"]
+    },
+    "aftonbladet": {
+        "name": "Aftonbladet",
+        "rss": "https://rss.aftonbladet.se/rss2/small/pages/sections/senastenytt/",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drönare", "drone", "flygplats"]
+    },
+    "expressen": {
+        "name": "Expressen",
+        "rss": "https://feeds.expressen.se/nyheter/",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drönare", "drone", "flygplats"]
+    },
+
+    # === FINNISH SOURCES ===
+    "poliisi_fi": {
+        "name": "Poliisi (Finnish National Police)",
+        "url": "https://poliisi.fi/tietoa-poliisista/tiedotteet",
+        "rss": "https://poliisi.fi/rss/tiedotteet",
+        "type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "lennokki", "miehittämätön ilma-alus", "lentokenttä", "helsinki-vantaa"]
+    },
+    "yle_uutiset": {
+        "name": "YLE Uutiset",
+        "rss": "https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "lennokki", "lentokenttä", "puolustusvoimat"]
+    },
+    "helsingin_sanomat": {
+        "name": "Helsingin Sanomat",
+        "rss": "https://www.hs.fi/rss/tuoreimmat.xml",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "lennokki", "lentokenttä"]
+    },
+    "ilta_sanomat": {
+        "name": "Ilta-Sanomat",
+        "rss": "https://www.is.fi/rss/tuoreimmat.xml",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "lennokki", "lentokenttä"]
+    },
+
+    # === INTERNATIONAL AVIATION & DEFENSE ===
+    "flightglobal": {
+        "name": "FlightGlobal",
+        "rss": "https://www.flightglobal.com/rss/articles/all/feed.xml",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "uas", "airport", "airspace", "security"]
+    },
+    "aviation_week": {
+        "name": "Aviation Week",
+        "rss": "https://aviationweek.com/rss.xml",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "unmanned", "airport security", "counter-drone"]
+    },
+    "defense_news": {
+        "name": "Defense News",
+        "rss": "https://www.defensenews.com/arc/outboundfeeds/rss/",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "unmanned system", "nordic defense", "baltic"]
+    },
+    "janes_defense": {
+        "name": "Jane's Defence",
+        "url": "https://www.janes.com/",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "unmanned", "nordic", "baltic", "european defense"]
+    },
+    "the_drive_warzone": {
+        "name": "The Drive - The War Zone",
+        "rss": "https://www.thedrive.com/the-war-zone/rss",
+        "type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "uav", "unmanned", "european airspace", "nato"]
+    },
+    "breaking_defense": {
+        "name": "Breaking Defense",
+        "rss": "https://breakingdefense.com/feed/",
+        "type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "unmanned", "european defense", "nato", "baltic"]
     }
 }
 
