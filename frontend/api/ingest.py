@@ -8,7 +8,7 @@ from datetime import datetime
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db import run_async
+from db import run_async, get_connection
 import asyncpg
 
 def parse_datetime(dt_string):
@@ -25,16 +25,8 @@ def parse_datetime(dt_string):
 async def insert_incident(incident_data):
     """Insert incident into database"""
     try:
-        DATABASE_URL = os.getenv("DATABASE_URL")
-        if not DATABASE_URL:
-            return {"error": "DATABASE_URL not configured"}
-
-        # Connect to database
-        if 'supabase.co' in DATABASE_URL or 'supabase.com' in DATABASE_URL:
-            clean_url = DATABASE_URL.split('?')[0] if '?' in DATABASE_URL else DATABASE_URL
-            conn = await asyncpg.connect(clean_url, ssl='require', statement_cache_size=0)
-        else:
-            conn = await asyncpg.connect(DATABASE_URL)
+        # Use shared database connection utility
+        conn = await get_connection()
 
         # Parse datetime strings
         occurred_at = parse_datetime(incident_data.get('occurred_at'))
