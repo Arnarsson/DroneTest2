@@ -86,3 +86,21 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    #374151 25%,
+    #1f2937 50%,
+    #374151 75%
+  );
+}
+
+/* Dark mode leaflet popup */
+.dark .leaflet-popup-content-wrapper {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.dark .leaflet-popup-tip {
+  background-color: #1f2937;
+}

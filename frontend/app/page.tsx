@@ -56,7 +56,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
       <Header incidentCount={incidents?.length || 0} isLoading={isLoading} />
 
       <Filters
@@ -68,8 +68,8 @@ export default function Home() {
 
       <main className="flex-1 relative overflow-hidden flex flex-col">
         {error && (
-          <div className="absolute top-0 left-0 right-0 z-10 bg-red-50 border-b border-red-200 px-4 py-2">
-            <p className="text-sm text-red-800">
+          <div className="absolute top-0 left-0 right-0 z-10 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-2">
+            <p className="text-sm text-red-800 dark:text-red-200">
               Error loading incidents. Retrying...
             </p>
           </div>
