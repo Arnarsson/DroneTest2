@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTheme } from 'next-themes'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -28,18 +29,29 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null)
+  const tileLayerRef = useRef<L.TileLayer | null>(null)
+  const { theme, resolvedTheme } = useTheme()
 
+  // Initialize map
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
 
     // Initialize map
     mapInstanceRef.current = L.map(mapRef.current).setView(center, zoom)
 
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
-    }).addTo(mapInstanceRef.current)
+    // Add initial tile layer (will be updated by theme effect)
+    const isDark = resolvedTheme === 'dark'
+    tileLayerRef.current = L.tileLayer(
+      isDark
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        attribution: isDark
+          ? '© OpenStreetMap contributors © CARTO'
+          : '© OpenStreetMap contributors',
+        maxZoom: 18,
+      }
+    ).addTo(mapInstanceRef.current)
 
     // Initialize marker cluster group
     clusterRef.current = (L as any).markerClusterGroup({
@@ -59,7 +71,30 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
         mapInstanceRef.current = null
       }
     }
-  }, [center, zoom])
+  }, [center, zoom, resolvedTheme])
+
+  // Update tile layer when theme changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !tileLayerRef.current) return
+
+    const isDark = resolvedTheme === 'dark'
+
+    // Remove old tile layer
+    tileLayerRef.current.remove()
+
+    // Add new tile layer based on theme
+    tileLayerRef.current = L.tileLayer(
+      isDark
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        attribution: isDark
+          ? '© OpenStreetMap contributors © CARTO'
+          : '© OpenStreetMap contributors',
+        maxZoom: 18,
+      }
+    ).addTo(mapInstanceRef.current)
+  }, [resolvedTheme])
 
   useEffect(() => {
     if (!clusterRef.current) return
@@ -67,13 +102,15 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
     // Clear existing markers
     clusterRef.current.clearLayers()
 
+    const isDark = resolvedTheme === 'dark'
+
     // Add new markers
     incidents.forEach((incident) => {
-      const icon = createIncidentIcon(incident.evidence_score)
+      const icon = createIncidentIcon(incident.evidence_score, isDark)
       const marker = L.marker([incident.lat, incident.lon], { icon })
 
       // Create popup content
-      const popupContent = createPopupContent(incident)
+      const popupContent = createPopupContent(incident, isDark)
       marker.bindPopup(popupContent, {
         maxWidth: 350,
         className: 'incident-popup',
@@ -81,15 +118,15 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 
       clusterRef.current!.addLayer(marker)
     })
-  }, [incidents])
+  }, [incidents, resolvedTheme])
 
   return (
     <>
       {isLoading && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white rounded-lg shadow-lg px-4 py-2">
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white dark:bg-gray-800 rounded-lg shadow-lg px-4 py-2">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium">Loading incidents...</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Loading incidents...</span>
           </div>
         </div>
       )}
@@ -98,7 +135,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
   )
 }
 
-function createIncidentIcon(evidenceScore: number): L.DivIcon {
+function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.DivIcon {
   const colors = {
     1: '#9ca3af',
     2: '#facc15',
@@ -107,6 +144,7 @@ function createIncidentIcon(evidenceScore: number): L.DivIcon {
   }
 
   const color = colors[evidenceScore as keyof typeof colors]
+  const borderColor = isDark ? '#1f2937' : 'white'
 
   return L.divIcon({
     html: `
@@ -114,7 +152,7 @@ function createIncidentIcon(evidenceScore: number): L.DivIcon {
         width: 32px;
         height: 32px;
         background: ${color};
-        border: 3px solid white;
+        border: 3px solid ${borderColor};
         border-radius: 50%;
         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         display: flex;
@@ -133,7 +171,7 @@ function createIncidentIcon(evidenceScore: number): L.DivIcon {
   })
 }
 
-function createPopupContent(incident: Incident): string {
+function createPopupContent(incident: Incident, isDark: boolean = false): string {
   const timeAgo = formatDistance(new Date(incident.occurred_at), new Date(), { addSuffix: true })
 
   const evidenceLabels = {
@@ -150,9 +188,18 @@ function createPopupContent(incident: Incident): string {
     4: '#dc2626',
   }
 
+  // Theme-aware colors
+  const textPrimary = isDark ? '#f3f4f6' : '#111827'
+  const textSecondary = isDark ? '#9ca3af' : '#4b5563'
+  const textMuted = isDark ? '#6b7280' : '#6b7280'
+  const badgeBg = isDark ? '#374151' : '#f3f4f6'
+  const badgeText = isDark ? '#d1d5db' : '#4b5563'
+  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const linkColor = isDark ? '#60a5fa' : '#2563eb'
+
   return `
     <div style="font-family: system-ui, -apple-system, sans-serif;">
-      <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #111827;">
+      <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: ${textPrimary};">
         ${incident.title}
       </h3>
 
@@ -169,8 +216,8 @@ function createPopupContent(incident: Incident): string {
         </span>
         ${incident.asset_type ? `
           <span style="
-            background: #f3f4f6;
-            color: #4b5563;
+            background: ${badgeBg};
+            color: ${badgeText};
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 12px;
@@ -178,25 +225,25 @@ function createPopupContent(incident: Incident): string {
             ${incident.asset_type}
           </span>
         ` : ''}
-        <span style="color: #6b7280; font-size: 12px;">
+        <span style="color: ${textMuted}; font-size: 12px;">
           ${timeAgo}
         </span>
       </div>
 
       ${incident.narrative ? `
-        <p style="margin: 0 0 12px 0; color: #4b5563; font-size: 14px; line-height: 1.5;">
+        <p style="margin: 0 0 12px 0; color: ${textSecondary}; font-size: 14px; line-height: 1.5;">
           ${incident.narrative}
         </p>
       ` : ''}
 
       ${incident.sources && incident.sources.length > 0 ? `
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 8px;">
-          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Sources:</div>
+        <div style="border-top: 1px solid ${borderColor}; padding-top: 8px;">
+          <div style="font-size: 12px; color: ${textMuted}; margin-bottom: 4px;">Sources:</div>
           ${incident.sources.map(source => `
             <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
               display: inline-block;
               margin-right: 8px;
-              color: #2563eb;
+              color: ${linkColor};
               font-size: 12px;
               text-decoration: none;
             ">
