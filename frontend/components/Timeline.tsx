@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns'
 import type { Incident } from '@/types'
 
@@ -22,9 +23,6 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
   // Calculate date range from incidents
   const { minDate, maxDate, dateRange } = useIncidentDateRange(incidents)
 
-  // Don't initialize current date automatically - let user activate timeline
-  // This prevents the timeline from filtering incidents on page load
-
   // Handle animation playback
   useEffect(() => {
     if (!isPlaying || !currentDate || !maxDate) {
@@ -34,7 +32,6 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
       return
     }
 
-    // Move forward one day every interval based on speed
     const intervalMs = 1000 / playSpeed
     intervalRef.current = setInterval(() => {
       setCurrentDate((prev) => {
@@ -43,7 +40,6 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
         const nextDate = new Date(prev)
         nextDate.setDate(nextDate.getDate() + 1)
 
-        // Stop at end
         if (nextDate > maxDate) {
           setIsPlaying(false)
           return maxDate
@@ -90,7 +86,6 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
   }, [dateRange])
 
   const togglePlay = useCallback(() => {
-    // Initialize current date on first play
     if (!currentDate && minDate) {
       setCurrentDate(minDate)
     }
@@ -123,114 +118,162 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
     : []
 
   return (
-    <div className="bg-white border-t border-gray-200 shadow-lg">
+    <motion.div
+      className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-2xl z-40"
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      exit={{ y: 100 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+    >
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        className="w-full px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
       >
-        <div className="flex items-center gap-2">
-          <span className="text-lg">⏱️</span>
-          <span className="font-medium text-gray-900">Timeline</span>
-          {currentDate && (
-            <span className="text-sm text-gray-500">
-              {format(currentDate, 'MMM d, yyyy')} • {incidentsOnCurrentDay.length} incident{incidentsOnCurrentDay.length !== 1 ? 's' : ''}
-            </span>
-          )}
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">⏱️</span>
+          <div>
+            <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              Timeline
+              {currentDate && (
+                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  {format(currentDate, 'MMM d, yyyy')}
+                </span>
+              )}
+            </div>
+            {currentDate && (
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {incidentsOnCurrentDay.length} incident{incidentsOnCurrentDay.length !== 1 ? 's' : ''} on this day
+              </div>
+            )}
+          </div>
         </div>
-        <svg
-          className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        <motion.svg
+          className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        </motion.svg>
       </button>
 
       {/* Timeline Controls */}
-      {isOpen && (
-        <div className="px-4 pb-4 space-y-4">
-          {/* Slider */}
-          <div className="relative">
-            <input
-              type="range"
-              min={0}
-              max={dateRange.length - 1}
-              value={currentDayIndex}
-              onChange={handleDateChange}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-              style={{
-                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(currentDayIndex / (dateRange.length - 1)) * 100}%, #e5e7eb ${(currentDayIndex / (dateRange.length - 1)) * 100}%, #e5e7eb 100%)`
-              }}
-            />
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="px-4 pb-4 space-y-4"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Slider */}
+            <div className="relative px-1">
+              <input
+                type="range"
+                min={0}
+                max={dateRange.length - 1}
+                value={currentDayIndex}
+                onChange={handleDateChange}
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider accent-blue-600"
+                style={{
+                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(currentDayIndex / (dateRange.length - 1)) * 100}%, #e5e7eb ${(currentDayIndex / (dateRange.length - 1)) * 100}%, #e5e7eb 100%)`
+                }}
+              />
 
-            {/* Date markers */}
-            <div className="flex justify-between mt-2 text-xs text-gray-500">
-              <span>{format(minDate, 'MMM d')}</span>
-              <span>{format(maxDate, 'MMM d')}</span>
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {/* Play/Pause */}
-              <button
-                onClick={togglePlay}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                {isPlaying ? '⏸ Pause' : '▶ Play'}
-              </button>
-
-              {/* Show All / Reset */}
-              <button
-                onClick={handleShowAll}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                {currentDate ? '✕ Show All' : '↺ Reset'}
-              </button>
-
-              {/* Speed */}
-              <button
-                onClick={cycleSpeed}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                {playSpeed}x Speed
-              </button>
+              {/* Date markers */}
+              <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                <span>{format(minDate, 'MMM d, yyyy')}</span>
+                <span>{format(maxDate, 'MMM d, yyyy')}</span>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="text-sm text-gray-600">
-              Day {currentDayIndex + 1} of {dateRange.length}
+            {/* Controls Row */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                {/* Play/Pause */}
+                <motion.button
+                  onClick={togglePlay}
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md flex items-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {isPlaying ? (
+                    <>
+                      <span className="text-base">⏸</span>
+                      <span>Pause</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-base">▶</span>
+                      <span>Play</span>
+                    </>
+                  )}
+                </motion.button>
+
+                {/* Show All / Reset */}
+                <motion.button
+                  onClick={handleShowAll}
+                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {currentDate ? 'Show All' : 'Reset'}
+                </motion.button>
+
+                {/* Speed */}
+                <motion.button
+                  onClick={cycleSpeed}
+                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {playSpeed}x
+                </motion.button>
+              </div>
+
+              {/* Stats */}
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-400 hidden sm:block">
+                Day {currentDayIndex + 1} of {dateRange.length}
+              </div>
             </div>
-          </div>
 
-          {/* Incident Distribution Graph */}
-          <div className="h-12 flex items-end gap-0.5">
-            {dateRange.map((day, idx) => {
-              const height = day.count === 0 ? 2 : Math.max(8, (day.count / Math.max(...dateRange.map(d => d.count))) * 100)
-              const isActive = idx === currentDayIndex
+            {/* Incident Distribution Graph */}
+            <div>
+              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                Incident Distribution
+              </div>
+              <div className="h-16 flex items-end gap-0.5">
+                {dateRange.map((day, idx) => {
+                  const height = day.count === 0 ? 2 : Math.max(12, (day.count / Math.max(...dateRange.map(d => d.count))) * 100)
+                  const isActive = idx === currentDayIndex
 
-              return (
-                <div
-                  key={idx}
-                  className={`flex-1 rounded-t transition-all cursor-pointer ${
-                    isActive ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  style={{ height: `${height}%` }}
-                  onClick={() => {
-                    setIsPlaying(false)
-                    setCurrentDate(day.date)
-                  }}
-                  title={`${format(day.date, 'MMM d')}: ${day.count} incident${day.count !== 1 ? 's' : ''}`}
-                />
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+                  return (
+                    <motion.div
+                      key={idx}
+                      className={`flex-1 rounded-t cursor-pointer transition-all ${
+                        isActive ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
+                      }`}
+                      style={{ height: `${height}%` }}
+                      onClick={() => {
+                        setIsPlaying(false)
+                        setCurrentDate(day.date)
+                      }}
+                      title={`${format(day.date, 'MMM d')}: ${day.count} incident${day.count !== 1 ? 's' : ''}`}
+                      whileHover={{ scale: 1.02, zIndex: 10 }}
+                      whileTap={{ scale: 0.98 }}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
