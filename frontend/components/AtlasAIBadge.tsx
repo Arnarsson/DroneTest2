@@ -37,30 +37,34 @@ export function AtlasAIBadge() {
           {/* Static outer glow */}
           <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:bg-white/40 transition-all" />
 
-          {/* Drone SVG */}
+          {/* Drone SVG - matches reference design */}
           <svg
-            className="w-5 h-5 md:w-7 md:h-7 relative text-white"
-            viewBox="0 0 32 32"
+            className="w-6 h-6 md:w-8 md:h-8 relative text-white"
+            viewBox="0 0 48 48"
             fill="currentColor"
           >
-            {/* Left propeller arm with rotor */}
-            <rect x="2" y="8" width="8" height="2.5" rx="1.25" />
-            <circle cx="4" cy="9.25" r="2" />
-            <rect x="8.5" y="7" width="1.5" height="4.5" rx="0.75" />
+            {/* Left propeller arm */}
+            <rect x="2" y="12" width="14" height="3" rx="1.5" />
+            {/* Left rotor circle */}
+            <circle cx="6" cy="13.5" r="3.5" />
+            {/* Left rotor connector */}
+            <rect x="14" y="10" width="2" height="7" rx="1" />
 
-            {/* Right propeller arm with rotor */}
-            <rect x="22" y="8" width="8" height="2.5" rx="1.25" />
-            <circle cx="28" cy="9.25" r="2" />
-            <rect x="22" y="7" width="1.5" height="4.5" rx="0.75" />
+            {/* Right propeller arm */}
+            <rect x="32" y="12" width="14" height="3" rx="1.5" />
+            {/* Right rotor circle */}
+            <circle cx="42" cy="13.5" r="3.5" />
+            {/* Right rotor connector */}
+            <rect x="32" y="10" width="2" height="7" rx="1" />
 
-            {/* Main body/fuselage - tall vertical capsule */}
-            <rect x="13" y="4" width="6" height="18" rx="3" />
+            {/* Central vertical body - tall rounded rectangle */}
+            <rect x="19" y="6" width="10" height="28" rx="5" />
 
-            {/* Bottom camera gimbal - large circle */}
-            <circle cx="16" cy="24" r="4.5" />
+            {/* Large bottom camera gimbal ball */}
+            <circle cx="24" cy="38" r="7" />
 
-            {/* Small top connector/sensor */}
-            <circle cx="16" cy="6" r="1.5" />
+            {/* Small upper connector circle */}
+            <circle cx="24" cy="12" r="2.5" />
           </svg>
         </div>
 
