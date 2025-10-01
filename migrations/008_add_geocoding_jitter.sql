@@ -6,21 +6,25 @@ BEGIN;
 
 -- Step 1: Identify incidents sharing exact coordinates
 CREATE TEMP TABLE overlapping_incidents AS
-SELECT
-    i.id,
-    i.title,
-    i.occurred_at,
-    ST_X(i.location::geometry) as lon,
-    ST_Y(i.location::geometry) as lat,
-    ROW_NUMBER() OVER (
-        PARTITION BY ST_X(i.location::geometry), ST_Y(i.location::geometry)
-        ORDER BY i.occurred_at DESC
-    ) as row_num
-FROM public.incidents i
-GROUP BY i.id, i.title, i.occurred_at, i.location
-HAVING COUNT(*) OVER (
-    PARTITION BY ST_X(i.location::geometry), ST_Y(i.location::geometry)
-) > 1;
+WITH incident_counts AS (
+    SELECT
+        i.id,
+        i.title,
+        i.occurred_at,
+        ST_X(i.location::geometry) as lon,
+        ST_Y(i.location::geometry) as lat,
+        ROW_NUMBER() OVER (
+            PARTITION BY ST_X(i.location::geometry), ST_Y(i.location::geometry)
+            ORDER BY i.occurred_at DESC
+        ) as row_num,
+        COUNT(*) OVER (
+            PARTITION BY ST_X(i.location::geometry), ST_Y(i.location::geometry)
+        ) as location_count
+    FROM public.incidents i
+)
+SELECT id, title, occurred_at, lon, lat, row_num
+FROM incident_counts
+WHERE location_count > 1;
 
 -- Step 2: Show what will be modified
 SELECT
