@@ -50,16 +50,28 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - ✅ **About/Analytics/List**: All redesigned pages working
 - ✅ **Local dev**: Hot reload working with production API fallback
 
-### Pending (High Priority) ⚠️
-- ⏳ **Performance indexes**: Migration ready, needs manual application (11.4s → <3s expected)
+### Pending Manual Actions (CRITICAL) 🚨
+- 🔥 **Merge duplicates**: Run migration 007 in Supabase (32 duplicates exist!)
+  - Current: 46 incidents (22 at one location, 10 at another)
+  - Expected: ~14-16 unique incidents after merge
+  - See: `RUN_MIGRATIONS_SIMPLE.md` for instructions
+- 🔥 **Performance indexes**: Run migration 006 in Supabase (11.4s → <3s)
+  - Must run each CREATE INDEX separately (CONCURRENT limitation)
+  - See: `RUN_MIGRATIONS_SIMPLE.md` for step-by-step
 - ⏳ **Source population**: Next scraper run will populate (API fix deployed)
+
+### Future Enhancements
 - 📝 **Timeline slider**: Not yet implemented
 - 📝 **User submission form**: Pending
+- 📝 **Embed mode**: For newsroom integration
+- 📝 **Keyboard shortcuts**: Accessibility enhancement
 
-### Important Notes
-- **Deduplication**: System uses content_hash + location + time matching
-- **One incident per event**: Multiple sources should link to same incident_id via junction table
-- **Evidence scoring**: Automatically calculated based on source types and count
+### Important Deduplication Notes
+- **Fixed in code** (Oct 1): Deduplication now uses location+time only (not title)
+- **Existing duplicates**: Must run migration 007 to clean up
+- **New incidents**: Will automatically deduplicate going forward
+- **Strategy**: Same location (±1km) + same time (±6hr) = add as source, not new incident
+- **Evidence scoring**: Increases with more credible sources
 
 ---
 
@@ -528,8 +540,24 @@ const config = getEvidenceConfig(incident.evidence_score)
 
 ---
 
+---
+
+## 🔖 Checkpoint
+
+**For detailed status snapshot, see:** `CHECKPOINT.md`
+
+**Quick status:**
+- ✅ All code deployed to production
+- ⏳ Migrations ready (need manual Supabase execution)
+- 🔥 32 duplicates exist (run migration 007 to fix)
+- ⚡ API slow (run migration 006 to fix)
+
+**Next actions:** Run migrations 006 & 007 in Supabase SQL Editor
+
+---
+
 **Last Updated**: October 1, 2025
 **Version**: 1.1.0 (Brand Overhaul)
-**Status**: Production with active development
+**Status**: Production deployed, migrations pending
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
