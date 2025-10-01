@@ -64,10 +64,11 @@ UPDATE public.incidents pri
 SET
     -- Use longest narrative (most detailed)
     narrative = COALESCE((
-        SELECT narrative
-        FROM public.incidents
-        WHERE id = ANY((SELECT all_ids FROM duplicate_groups WHERE primary_id = pri.id))
-        ORDER BY LENGTH(narrative) DESC
+        SELECT i.narrative
+        FROM public.incidents i
+        JOIN duplicate_groups dg ON dg.primary_id = pri.id
+        WHERE i.id = ANY(dg.all_ids)
+        ORDER BY LENGTH(i.narrative) DESC
         LIMIT 1
     ), pri.narrative),
 
@@ -75,9 +76,10 @@ SET
     evidence_score = GREATEST(
         pri.evidence_score,
         COALESCE((
-            SELECT MAX(evidence_score)
-            FROM public.incidents
-            WHERE id = ANY((SELECT all_ids FROM duplicate_groups WHERE primary_id = pri.id))
+            SELECT MAX(i.evidence_score)
+            FROM public.incidents i
+            JOIN duplicate_groups dg ON dg.primary_id = pri.id
+            WHERE i.id = ANY(dg.all_ids)
         ), pri.evidence_score)
     ),
 
@@ -85,9 +87,10 @@ SET
     last_seen_at = GREATEST(
         pri.last_seen_at,
         COALESCE((
-            SELECT MAX(last_seen_at)
-            FROM public.incidents
-            WHERE id = ANY((SELECT all_ids FROM duplicate_groups WHERE primary_id = pri.id))
+            SELECT MAX(i.last_seen_at)
+            FROM public.incidents i
+            JOIN duplicate_groups dg ON dg.primary_id = pri.id
+            WHERE i.id = ANY(dg.all_ids)
         ), pri.last_seen_at)
     )
 WHERE pri.id IN (SELECT primary_id FROM duplicate_groups);
