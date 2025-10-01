@@ -6,6 +6,11 @@
 
 BEGIN;
 
+-- Step 0: Ensure 'Merged Duplicate' source exists
+INSERT INTO public.sources (name, source_type, trust_weight)
+VALUES ('Merged Duplicate', 'other', 1)
+ON CONFLICT (domain, source_type) DO NOTHING;
+
 -- Step 1: Find duplicate groups (same location within 1km, same day)
 CREATE TEMP TABLE duplicate_groups AS
 SELECT
