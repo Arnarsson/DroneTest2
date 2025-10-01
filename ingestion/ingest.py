@@ -3,25 +3,23 @@
 Master Ingestion Script for DroneWatch
 Orchestrates all scrapers and sends data to API
 """
-from verification import (
-    calculate_confidence_score,
-    get_verification_status,
-    requires_manual_review
-)
-from openai_client import OpenAIClient, OpenAIClientError
-from db_cache import ScraperCache
-from utils import generate_incident_hash
-from scrapers.news_scraper import NewsScraper
-from scrapers.police_scraper import PoliceScraper
-from config import API_BASE_URL, INGEST_TOKEN
+import json
+import logging
 import os
 import sys
-import json
-import requests
-import logging
-from datetime import datetime
-from typing import List, Dict
 import uuid
+from datetime import datetime
+from typing import Dict, List
+
+import requests
+from config import API_BASE_URL, INGEST_TOKEN
+from db_cache import ScraperCache
+from openai_client import OpenAIClient, OpenAIClientError
+from scrapers.news_scraper import NewsScraper
+from scrapers.police_scraper import PoliceScraper
+from utils import generate_incident_hash
+from verification import (calculate_confidence_score, get_verification_status,
+                          requires_manual_review)
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

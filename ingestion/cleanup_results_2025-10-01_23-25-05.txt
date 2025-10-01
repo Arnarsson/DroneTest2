@@ -262,3 +262,61 @@ When A
 IMPROVEMENT: Removed 223 characters
 ================================================================================
 
+INCIDENT 23: Skunk Works Unveils Vectis Air Combat Drone That Puts A Premium On Stealth
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Skunk Works Unveils Vectis Air Combat Drone That Puts A Premium On Stealth Lockheed's new Collaborative Combat Aircraft, targeted to fly in two years, reflects a higher-end approach compared to types the USAF has selected so far. By Joseph Trevithick Published Sep 21, 2025 12:01 AM EDT 0 Lockheed Martin The TWZ Newsletter Weekly insights and analysis on the latest developments in military technology, strategy, and foreign policy. Email address Sign Up Thank you! Terms of Service and Privacy Poli
+
+CLEANED (286 chars):
+Skunk Works Unveils Vectis Air Combat Drone That Puts A Premium On Stealth
+Lockheed's new Collaborative Combat Aircraft, targeted to fly in two years, reflects a higher-end approach compared to types the USAF has selected so far.
+By Joseph Trevithick
+Published Sep 21, 2025 12:01 AM EDT
+
+IMPROVEMENT: Removed 214 characters
+================================================================================
+
+INCIDENT 24: Warsaw Chopin Airport - Russian Drone Fleet Incursion
+------------------------------------------------------------
+ORIGINAL (312 chars):
+At least 19 military drones entered Polish airspace from Russia and Belarus at 11:30 PM CEST. Warsaw Chopin Airport closed for 2 hours. Polish and NATO forces scrambled jets, shooting down at least 8 drones. First time NATO engaged Russian assets since Ukraine war began. Poland invoked Article 4 of NATO treaty.
+
+CLEANED (312 chars):
+At least 19 military drones entered Polish airspace from Russia and Belarus at 11:30 PM CEST. Warsaw Chopin Airport closed for 2 hours. Polish and NATO forces scrambled jets, shooting down at least 8 drones. First time NATO engaged Russian assets since Ukraine war began. Poland invoked Article 4 of NATO treaty.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 25: Warsaw Modlin Airport - Russian Drone Closure
+------------------------------------------------------------
+ORIGINAL (157 chars):
+Airport closed simultaneously with Warsaw Chopin during Russian drone incursion. Part of coordinated response to 19 military drones entering Polish airspace.
+
+CLEANED (157 chars):
+Airport closed simultaneously with Warsaw Chopin during Russian drone incursion. Part of coordinated response to 19 military drones entering Polish airspace.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 26: Rzeszów-Jasionka Airport - Eastern Poland Closure
+------------------------------------------------------------
+ORIGINAL (127 chars):
+Airport near Ukrainian border closed during Russian drone incursion. Strategic location for NATO operations supporting Ukraine.
+
+CLEANED (127 chars):
+Airport near Ukrainian border closed during Russian drone incursion. Strategic location for NATO operations supporting Ukraine.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 27: Lublin Airport - Airspace Protection Closure
+------------------------------------------------------------
+ORIGINAL (168 chars):
+Airport closed as part of coordinated Polish response to Russian drone fleet entering airspace. Quick Reaction Alert triggered with multiple NATO air forces responding.
+
+CLEANED (168 chars):
+Airport closed as part of coordinated Polish response to Russian drone fleet entering airspace. Quick Reaction Alert triggered with multiple NATO air forces responding.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
