@@ -54,12 +54,58 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       }
     ).addTo(mapInstanceRef.current)
 
-    // Initialize marker cluster group
+    // Initialize marker cluster group with improved clustering for overlapping incidents
     clusterRef.current = (L as any).markerClusterGroup({
       chunkedLoading: true,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      spiderfyOnEveryZoom: true, // Spiderfy even at intermediate zoom levels
+      spiderfyDistanceMultiplier: 1.5, // Spread markers further apart
       maxClusterRadius: 50,
+      disableClusteringAtZoom: 16, // Show individual markers when zoomed in
+      iconCreateFunction: function (cluster: any) {
+        const count = cluster.getChildCount()
+        const isDark = document.documentElement.classList.contains('dark')
+
+        // Color code clusters by size for better UX
+        let clusterClass = 'marker-cluster-small'
+        let gradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
+
+        if (count > 10) {
+          clusterClass = 'marker-cluster-large'
+          gradient = 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)'
+        } else if (count > 5) {
+          clusterClass = 'marker-cluster-medium'
+          gradient = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
+        }
+
+        return L.divIcon({
+          html: `
+            <div style="
+              width: 46px;
+              height: 46px;
+              background: ${gradient};
+              border: 3px solid ${isDark ? '#1f2937' : 'white'};
+              border-radius: 50%;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: bold;
+              font-size: 16px;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+              cursor: pointer;
+              transition: transform 0.2s;
+            " title="${count} incidents at this location - click to expand">
+              ${count}
+            </div>
+          `,
+          className: clusterClass,
+          iconSize: [46, 46],
+        })
+      },
     })
 
     if (clusterRef.current) {
