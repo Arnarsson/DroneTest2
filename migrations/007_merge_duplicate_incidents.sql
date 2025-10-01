@@ -6,10 +6,15 @@
 
 BEGIN;
 
--- Step 0: Ensure 'Merged Duplicate' source exists
-INSERT INTO public.sources (name, source_type, trust_weight)
-VALUES ('Merged Duplicate', 'other', 1)
-ON CONFLICT (domain, source_type) DO NOTHING;
+-- Step 0: Ensure 'Merged Duplicate' source exists (already created, but checking)
+-- Note: Source was created via Supabase with id: c9c25894-3f20-4ed5-8211-3fb1f45d7844
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM public.sources WHERE name = 'Merged Duplicate') THEN
+        INSERT INTO public.sources (name, source_type, trust_weight)
+        VALUES ('Merged Duplicate', 'other', 1);
+    END IF;
+END $$;
 
 -- Step 1: Find duplicate groups (same location within 1km, same day)
 CREATE TEMP TABLE duplicate_groups AS
