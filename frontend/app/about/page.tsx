@@ -40,7 +40,7 @@ export default function AboutPage() {
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
-            About DroneWatch
+            DroneWatch
           </h1>
           <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 font-medium max-w-3xl mx-auto">
             Safety Through Transparency
@@ -49,10 +49,6 @@ export default function AboutPage() {
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Live Data</span>
-            </div>
-            <span>•</span>
-            <div className="flex items-center gap-2">
-              <span>Evidence-Based</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-2">
@@ -75,7 +71,7 @@ export default function AboutPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Our Mission</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">About</h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                 DroneWatch provides real-time, evidence-based tracking of unauthorized drone incidents across Europe.
                 We serve security researchers, aviation professionals, journalists, and policy makers who need reliable,
@@ -108,7 +104,7 @@ export default function AboutPage() {
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              We use a rigorous 4-tier scoring system based on source reliability and verification.
+              We use a 4-tier scoring system based on source reliability and verification.
               Each incident receives a score from 1 (unconfirmed) to 4 (officially verified).
             </p>
 
