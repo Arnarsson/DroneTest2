@@ -61,9 +61,9 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       spiderfyOnEveryZoom: true, // Spiderfy even at intermediate zoom levels
-      spiderfyDistanceMultiplier: 1.5, // Spread markers further apart
-      maxClusterRadius: 50,
-      disableClusteringAtZoom: 16, // Show individual markers when zoomed in
+      spiderfyDistanceMultiplier: 2, // Spread markers further apart
+      maxClusterRadius: 30, // Reduced from 50 to show nearby incidents separately
+      disableClusteringAtZoom: 13, // Show individual markers earlier (was 16)
       iconCreateFunction: function (cluster: any) {
         const count = cluster.getChildCount()
         const isDark = document.documentElement.classList.contains('dark')
