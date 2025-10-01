@@ -96,6 +96,11 @@ class PoliceScraper:
                     # Extract location
                     lat, lon, asset_type = extract_location(title + " " + full_content)
 
+                    # Skip incidents without valid location
+                    if lat is None or lon is None:
+                        logger.info(f"⏭️  Skipping (no location): {title[:60]}...")
+                        continue
+
                     # Extract datetime
                     published = entry.get('published_parsed')
                     if published:

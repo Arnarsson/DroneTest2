@@ -11,7 +11,10 @@ from config import DANISH_AIRPORTS, DANISH_HARBORS, CRITICAL_KEYWORDS
 def extract_location(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
     """
     Extract location from text by looking for known places
-    Returns (lat, lon, asset_type)
+    Returns (lat, lon, asset_type) or (None, None, None) if location cannot be determined
+
+    NOTE: We return None instead of default coordinates to avoid clustering
+    unrelated incidents at the same fallback location.
     """
     text_lower = text.lower()
 
@@ -25,13 +28,13 @@ def extract_location(text: str) -> Tuple[Optional[float], Optional[float], Optio
         if harbor in text_lower:
             return coords["lat"], coords["lon"], "harbor"
 
-    # Check for military/defense mentions
-    if any(word in text_lower for word in ["militær", "military", "forsvar", "defense"]):
-        # Default to Copenhagen for now
-        return 55.6761, 12.5683, "military"
+    # Check for military/defense mentions with specific locations
+    # TODO: Add more specific military base coordinates
+    # For now, skip incidents without specific location mentions
 
-    # Default to Copenhagen center if no specific location found
-    return 55.6761, 12.5683, "other"
+    # Return None if no specific location found
+    # This prevents clustering unrelated incidents at a default coordinate
+    return None, None, None
 
 def extract_datetime(text: str, fallback: datetime = None) -> datetime:
     """
