@@ -1,6 +1,10 @@
 -- Performance indexes for DroneWatch API optimization
 -- Target: Reduce query time from 11.4s to <3s
 
+-- IMPORTANT: Do NOT run this inside a transaction block
+-- CONCURRENT index creation cannot be inside BEGIN/COMMIT
+-- If using Supabase SQL Editor, run each CREATE INDEX command separately
+
 -- Index for main API query (evidence_score + occurred_at DESC)
 -- Used by: /api/incidents?min_evidence=X&limit=Y
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_incidents_evidence_occurred

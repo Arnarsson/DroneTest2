@@ -9,7 +9,7 @@ BEGIN;
 -- Step 1: Find duplicate groups (same location within 1km, same day)
 CREATE TEMP TABLE duplicate_groups AS
 SELECT
-    MIN(id) as primary_id,
+    (array_agg(id ORDER BY evidence_score DESC, occurred_at ASC))[1] as primary_id,
     array_agg(id ORDER BY evidence_score DESC, occurred_at ASC) as all_ids,
     COUNT(*) as duplicate_count,
     occurred_at::date as event_date,
