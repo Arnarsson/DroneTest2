@@ -15,27 +15,36 @@
 
 ### What's Working ✅
 - **Frontend**: Next.js 14 app deployed on Vercel - **LIVE**
-- **API**: Serverless functions returning 43 incidents across 5 countries
-- **Database**: Supabase PostgreSQL with PostGIS - 43 verified incidents
+- **API**: Serverless functions returning 45+ incidents across 5 countries
+- **Database**: Supabase PostgreSQL with PostGIS - Full incident database
 - **Scraper**: GitHub Actions running every 15 minutes with deduplication
-- **Data**: 20+ sources across 5 countries (Denmark, Norway, Sweden, Finland, Netherlands, Poland)
+- **Data**: 20+ sources across 6 countries (Denmark, Norway, Sweden, Finland, Netherlands, Poland)
 - **Features**: Real-time map, filtering, evidence scoring, responsive design
+- **Brand**: Professional logo, tagline, redesigned pages
 
-### Production Restoration (Oct 1, 2025) 🎉
-Successfully resolved production outage and restored full functionality:
-- ✅ Fixed API_BASE_URL configuration (was pointing to localhost)
-- ✅ Fixed database connection pooling for Supabase serverless
-- ✅ Set verification_status='pending' on all incidents
-- ✅ Fixed sources field type error (JSON string → array)
-- ✅ Removed problematic sources subquery temporarily
-- ✅ All 43 incidents now visible on live map
-- **Latest Commits**: b5e46b9, aecd6d8, 03702b2, 0edbe66
+### Brand Overhaul (Oct 1, 2025) 🎨
+Complete UI/UX redesign for trust and professionalism (PR #41):
+- ✅ **New brand identity**: Minimalist logo + "Safety Through Transparency" tagline
+- ✅ **Evidence system**: Color-coded badges (🟢 Official → 🔴 Unconfirmed)
+- ✅ **Source transparency**: Badge components with trust indicators
+- ✅ **Page redesigns**: About, Analytics, List views completely rebuilt
+- ✅ **Consistency**: Single constants system for all evidence colors/labels
+- ✅ **Auto-opening legend**: First-time visitor education
+- ✅ **Latest Commits**: dc5f1e2, f59373d, 694dabb (PR #41 squash merge)
 
-### Known Issues & Roadmap ⚠️
-- Sources subquery disabled - incidents show without source attribution
-- Timeline slider not yet implemented
-- User submission form pending
-- Need to restore sources display with proper error handling
+### Critical Fixes (Oct 1, 2025) 🔥
+- ✅ **Sources API query**: Re-enabled sources subquery with proper joins
+- ✅ **Ingest endpoint**: Fixed schema mismatch (name/domain/source_type)
+- ✅ **Type definitions**: Added source_title and published_at fields
+- ✅ **Local dev**: Auto-fallback to production API when DATABASE_URL unavailable
+- ✅ **Map markers**: Fixed colors to match evidence badge system
+- ✅ **Evidence Legend**: Updated colors/labels for consistency
+
+### Pending (High Priority) ⚠️
+- ⏳ **Performance indexes**: Migration ready, needs application (11.4s → <3s expected)
+- ⏳ **Source population**: Scraper running with fixed API (sources will populate next run)
+- 📝 **Timeline slider**: Not yet implemented
+- 📝 **User submission form**: Pending
 
 ---
 
@@ -71,19 +80,29 @@ Deployment:
 ```
 /
 ├── frontend/                 # Next.js application
-│   ├── app/                 # Pages and layouts
-│   ├── components/          # React components
-│   │   ├── Map.tsx         # Leaflet map with clustering
-│   │   ├── FilterPanel.tsx # Country/status/evidence filters
-│   │   └── IncidentCard.tsx
+│   ├── app/
+│   │   ├── page.tsx             # Main map view
+│   │   └── about/page.tsx       # About page (redesigned Oct 1)
+│   ├── components/
+│   │   ├── Map.tsx              # Leaflet map with clustering
+│   │   ├── FilterPanel.tsx      # Country/status/evidence filters
+│   │   ├── IncidentList.tsx     # List view (improved Oct 1)
+│   │   ├── Analytics.tsx        # Analytics dashboard (redesigned Oct 1)
+│   │   ├── Header.tsx           # Header with logo and tagline
+│   │   ├── DroneWatchLogo.tsx   # NEW: Brand logo component
+│   │   ├── EvidenceBadge.tsx    # NEW: Evidence scoring badges
+│   │   ├── SourceBadge.tsx      # NEW: Source attribution badges
+│   │   └── EvidenceLegend.tsx   # Evidence explanation (auto-opens)
+│   ├── constants/
+│   │   └── evidence.ts          # NEW: Single source of truth for evidence system
 │   ├── hooks/
-│   │   └── useIncidents.ts # API data fetching
-│   ├── api/                # Vercel serverless functions
-│   │   ├── incidents.py    # Main API endpoint
-│   │   ├── ingest.py       # Scraper ingestion
-│   │   └── db.py          # Database utilities
+│   │   └── useIncidents.ts      # API data fetching (prod fallback added)
+│   ├── api/                     # Vercel serverless functions
+│   │   ├── incidents.py         # Main API endpoint (sources enabled)
+│   │   ├── ingest.py            # Scraper ingestion (schema fixed Oct 1)
+│   │   └── db.py                # Database utilities (sources subquery)
 │   └── types/
-│       └── incident.ts     # TypeScript definitions
+│       └── index.ts             # TypeScript definitions (updated)
 │
 ├── ingestion/              # Scraper system
 │   ├── config.py          # 20+ source configurations (13KB)
@@ -92,15 +111,20 @@ Deployment:
 │   ├── verification.py    # Confidence scoring system
 │   ├── utils.py           # Helper functions
 │   └── scrapers/
-│       ├── police_scraper.py  # RSS feed scraper
-│       └── news_scraper.py    # News source scraper
+│       ├── police_scraper.py  # RSS feed scraper (creates sources)
+│       └── news_scraper.py    # News source scraper (creates sources)
 │
 ├── .github/workflows/
-│   └── ingest.yml         # Scheduled scraper execution
+│   └── ingest.yml         # Scheduled scraper execution (15 min)
 │
-├── migrations/            # Database schema evolution
+├── migrations/
+│   ├── 001-005...         # Previous migrations
+│   └── 006_performance_indexes.sql  # NEW: Performance optimization
+│
 ├── sql/                   # Database queries and setup
-└── docs/                  # Additional documentation
+├── DEPLOYMENT_COMPLETE.md # NEW: Deployment guide
+├── APPLY_INDEXES.md       # NEW: Index application guide
+└── TESTING_CHECKLIST.md   # NEW: QA checklist
 ```
 
 ---
@@ -135,17 +159,20 @@ INGEST_TOKEN=your-secret-token-here
 
 **Local Development** (`.env.local`):
 ```bash
-API_BASE_URL=http://localhost:8000
-INGEST_TOKEN=dw-secret-2025-nordic-drone-watch
+# Option 1: Pull from Vercel (recommended)
+vercel env pull .env.local --environment production --yes
+
+# Option 2: Manual (if needed)
 DATABASE_URL=your-supabase-connection-string
+INGEST_TOKEN=dw-secret-2025-nordic-drone-watch
+
+# Note: Local dev will auto-use production API if DATABASE_URL not set
 ```
 
 ### Git Workflow
 ```bash
 # Current active branches
-main                              # Production
-terragon/modern-ui-overhaul      # UI improvements + integrated scraper (PR #40)
-terragon/scraper-improvements    # Can be archived after PR #40 merge
+main                              # Production - Latest: dc5f1e2
 
 # Creating features
 git checkout -b feature/your-feature-name
@@ -205,24 +232,34 @@ git push origin main
 ## 🔧 Key Files to Know
 
 ### Critical Configuration Files
-- `frontend/api/db.py` - Database connection and queries (IMPORTANT: Uses sources subquery)
-- `ingestion/config.py` - 20+ source configurations (13KB, recently expanded)
-- `ingestion/db_cache.py` - Deduplication caching (recently added)
-- `ingestion/verification.py` - Incident verification logic (recently added)
-- `.github/workflows/ingest.yml` - Scraper automation
+- `frontend/constants/evidence.ts` - **IMPORTANT**: Single source of truth for evidence system
+- `frontend/api/db.py` - Database connection and queries (sources subquery enabled)
+- `frontend/api/ingest.py` - **CRITICAL**: Scraper endpoint (schema fixed Oct 1)
+- `ingestion/config.py` - 20+ source configurations (13KB)
+- `ingestion/db_cache.py` - Database-backed deduplication
+- `ingestion/verification.py` - Incident verification logic
+- `.github/workflows/ingest.yml` - Scheduled scraper execution
+
+### Brand & UI Components (New Oct 1, 2025)
+- `frontend/components/DroneWatchLogo.tsx` - Minimalist quadcopter logo
+- `frontend/components/EvidenceBadge.tsx` - Evidence scoring UI with tooltips
+- `frontend/components/SourceBadge.tsx` - Source attribution with icons
+- `frontend/components/Header.tsx` - "Safety Through Transparency" tagline
+- `frontend/app/about/page.tsx` - Complete evidence methodology explanation
 
 ### Important Scripts
 - `ingestion/ingest.py` - Main scraper orchestration
+- `migrations/006_performance_indexes.sql` - **APPLY THIS**: 73% speed improvement
 - `setup-scraper.sh` - One-time scraper setup
-- `cleanup_codebase.sh` - Code cleanup utility
 - `final_cleanup.sql` - Duplicate removal script
 
 ### Documentation
+- `DEPLOYMENT_COMPLETE.md` - **NEW**: Latest deployment status and steps
+- `APPLY_INDEXES.md` - **NEW**: How to apply performance indexes
+- `TESTING_CHECKLIST.md` - **NEW**: QA checklist for deployments
 - `README.md` - Project overview and API docs
 - `FORWARD_PLAN.md` - Roadmap and future features
-- `DEPLOYMENT_GUIDE.md` - Deployment instructions
 - `SUPABASE_SETUP.md` - Database setup guide
-- `OPTIMIZATION_SUMMARY.md` - Performance optimizations
 
 ---
 
@@ -273,7 +310,26 @@ npm run type-check
 
 ## 📝 Recent Changes & History
 
-### September 30, 2025 - Major Integration
+### October 1, 2025 - Brand & UX Overhaul (PR #41)
+**Commits**: 694dabb (merge), f59373d, dc5f1e2
+
+**What Changed**:
+- **Brand Identity**: New logo + "Safety Through Transparency" tagline
+- **Evidence Constants**: `constants/evidence.ts` - single source of truth
+- **New Components**: DroneWatchLogo, EvidenceBadge, SourceBadge
+- **Page Redesigns**: About, Analytics, List views completely rebuilt
+- **API Fixes**: Re-enabled sources subquery, fixed ingest schema mismatch
+- **Performance**: Created migration 006 for database indexes
+- **Consistency**: All evidence colors/labels now match across Map/List/Popups/Legend
+
+**Impact**:
+- Professional, trustworthy design
+- Perfect visual consistency
+- Source attribution ready (pending scraper population)
+- 73% faster API (when indexes applied)
+- Auto-opening legend for first-time visitors
+
+### September 30, 2025 - Scraper Integration
 **Commit**: `3d765d2` - "feat: Integrate scraper-improvements into modern-ui-overhaul"
 
 **What Changed**:
@@ -281,43 +337,48 @@ npm run type-check
 - Added `ingestion/verification.py` (9.6KB) - Confidence scoring
 - Expanded `config.py` from 2.9KB to 13KB (4 → 20+ sources)
 - Enhanced scrapers with retry logic and error isolation
-- Fixed `frontend/api/db.py` - Re-enabled sources subquery
-- Resolved import errors and configuration mismatches
 
 **Impact**:
 - 5x more data sources
 - Robust error handling
-- No more duplicate incidents
-- Ready for production merge
-
-### Earlier September 2025
-- Multiple UI improvements (badge design, animations)
-- Database query optimizations
-- Performance profiling and fixes
-- Evidence scoring system implementation
+- Deduplication working
 
 ---
 
 ## 🎯 Immediate Next Steps
 
-### Must Do (Before merging PR #40)
-1. ✅ Review PR #40: https://github.com/Arnarsson/2/pull/40
-2. ✅ Test integrated scraper in production
-3. ✅ Verify all 20+ sources are working
-4. ✅ Merge to main
-5. ✅ Archive `terragon/scraper-improvements` branch
+### CRITICAL - Must Do Now (5-10 minutes) 🔥
+1. **Apply Performance Indexes** (see `APPLY_INDEXES.md`)
+   ```bash
+   psql $DATABASE_URL -f migrations/006_performance_indexes.sql
+   ```
+   **Impact**: API speed 11.4s → <3s (73% faster!)
+
+2. **Verify Sources Populate** (after next scraper run)
+   - Scraper runs every 15 minutes
+   - Check: `curl "https://www.dronemap.cc/api/incidents?limit=3"`
+   - Look for non-empty `sources` arrays
+
+3. **Test Production Site**
+   - Visit https://www.dronemap.cc
+   - Verify new logo and tagline
+   - Check About page loads
+   - Test Analytics dashboard
+   - Verify List view shows source counts
 
 ### Should Do (This Week)
-1. Run duplicate cleanup script on database
-2. Add unique constraint to prevent future duplicates
-3. Document evidence scoring criteria
-4. Test scraper with all new sources
+1. ✅ Brand overhaul (completed Oct 1)
+2. ✅ Evidence system consistency (completed Oct 1)
+3. Monitor scraper for source population
+4. Performance testing after index application
+5. Mobile UX testing
 
-### Nice to Have (Next Week)
-1. Implement timeline slider
-2. Add user submission form
-3. Create analytics dashboard
-4. Expand to more countries
+### Nice to Have (Future)
+1. Timeline slider implementation
+2. User submission form
+3. Embed mode for newsrooms
+4. Keyboard shortcuts
+5. Expand to more countries
 
 ---
 
@@ -423,8 +484,37 @@ CREATE INDEX idx_incidents_country ON incidents(country);
 
 ---
 
-**Last Updated**: September 30, 2025
-**Version**: 1.0.0
+---
+
+## 🎨 Evidence System Reference
+
+**ALL components must use** `constants/evidence.ts` for consistency
+
+### Evidence Scores
+- 🟢 **Score 4 - OFFICIAL**: Emerald (#10b981) - Police/Military/NOTAM
+- 🟡 **Score 3 - VERIFIED**: Amber (#f59e0b) - Multiple credible sources
+- 🟠 **Score 2 - REPORTED**: Orange (#f97316) - Single credible source
+- 🔴 **Score 1 - UNCONFIRMED**: Red (#ef4444) - Unverified reports
+
+### Components Using Evidence System
+- `EvidenceBadge.tsx` - UI badges with icons and tooltips
+- `Map.tsx` - Marker colors and popup badges
+- `EvidenceLegend.tsx` - Legend panel
+- `Analytics.tsx` - Chart colors
+- Any future components - **MUST import from constants**
+
+### How to Use
+```typescript
+import { EVIDENCE_SYSTEM, getEvidenceConfig } from '@/constants/evidence'
+
+const config = getEvidenceConfig(incident.evidence_score)
+// Returns: { label, color, bgClass, description, icon, etc. }
+```
+
+---
+
+**Last Updated**: October 1, 2025
+**Version**: 1.1.0 (Brand Overhaul)
 **Status**: Production with active development
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
