@@ -62,30 +62,45 @@ async def insert_incident(incident_data):
         # Insert sources if provided
         if incident_data.get('sources'):
             for source in incident_data['sources']:
-                # First, get or create source in sources table
-                source_id = await conn.fetchval("""
-                    INSERT INTO public.sources (source_name, trust_weight)
-                    VALUES ($1, $2)
-                    ON CONFLICT (source_name) DO UPDATE SET source_name = EXCLUDED.source_name
-                    RETURNING id
-                """, source.get('source_name', source.get('source_type', 'Unknown')),
-                    source.get('trust_weight', 1))
+                try:
+                    # Extract domain from source_url
+                    from urllib.parse import urlparse
+                    domain = urlparse(source.get('source_url', '')).netloc or 'unknown'
 
-                # Then insert into incident_sources
-                source_query = """
-                INSERT INTO public.incident_sources
-                (incident_id, source_id, source_url, source_title, source_quote)
-                VALUES ($1, $2, $3, $4, $5)
-                ON CONFLICT (incident_id, source_url) DO NOTHING
-                """
-                await conn.execute(
-                    source_query,
-                    incident_id,
-                    source_id,
-                    source.get('source_url', ''),
-                    source.get('source_type', source.get('source_name', 'Unknown')),
-                    source.get('source_quote', '')
-                )
+                    # First, get or create source in sources table
+                    # Schema: UNIQUE (domain, source_type)
+                    source_id = await conn.fetchval("""
+                        INSERT INTO public.sources (name, domain, source_type, trust_weight)
+                        VALUES ($1, $2, $3, $4)
+                        ON CONFLICT (domain, source_type)
+                        DO UPDATE SET
+                            name = EXCLUDED.name,
+                            trust_weight = GREATEST(sources.trust_weight, EXCLUDED.trust_weight)
+                        RETURNING id
+                    """,
+                        source.get('source_name', 'Unknown'),  # name field
+                        domain,  # domain field
+                        source.get('source_type', 'other'),  # source_type (required)
+                        source.get('trust_weight', 1)  # trust_weight
+                    )
+
+                    # Then insert into incident_sources junction table
+                    await conn.execute("""
+                        INSERT INTO public.incident_sources
+                        (incident_id, source_id, source_url, source_title, source_quote)
+                        VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT (incident_id, source_url) DO NOTHING
+                    """,
+                        incident_id,
+                        source_id,
+                        source.get('source_url', ''),
+                        source.get('source_name', ''),  # source_title
+                        source.get('source_quote', '')
+                    )
+                except Exception as source_error:
+                    # Log source insertion errors but continue with incident
+                    logger.error(f"Failed to insert source: {source_error}")
+                    continue
 
         await conn.close()
 
