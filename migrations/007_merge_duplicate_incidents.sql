@@ -13,8 +13,8 @@ SELECT
     array_agg(id ORDER BY evidence_score DESC, occurred_at ASC) as all_ids,
     COUNT(*) as duplicate_count,
     occurred_at::date as event_date,
-    ST_Y(location::geometry) as lat,
-    ST_X(location::geometry) as lon
+    ROUND(ST_Y(location::geometry)::numeric, 2) as lat,
+    ROUND(ST_X(location::geometry)::numeric, 2) as lon
 FROM public.incidents
 GROUP BY
     occurred_at::date,
