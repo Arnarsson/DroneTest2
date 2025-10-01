@@ -20,9 +20,9 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
     time: true,
   })
 
+
   const handleChange = (key: keyof FilterState, value: any) => {
     onChange({ ...filters, [key]: value })
-    toast.success('Filter applied', { duration: 1000 })
   }
 
   const activeFilterCount = [
@@ -41,7 +41,6 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
       assetType: null,
       dateRange: 'all'
     })
-    toast.info('Filters cleared')
   }
 
   const toggleSection = (section: keyof typeof expandedSections) => {
