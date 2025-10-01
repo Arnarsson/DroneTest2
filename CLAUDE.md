@@ -40,11 +40,26 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - ✅ **Map markers**: Fixed colors to match evidence badge system
 - ✅ **Evidence Legend**: Updated colors/labels for consistency
 
+### Verified Working (Oct 1, 2025) ✅
+- ✅ **Logo and branding**: Displaying correctly in dark mode
+- ✅ **Evidence badges**: Perfect color consistency (🟢🟡🟠🔴)
+- ✅ **Map markers**: 46 incidents rendering with correct colors
+- ✅ **Popups**: Evidence badges and incident details displaying
+- ✅ **Legend**: Auto-opens on first visit
+- ✅ **No duplicates**: Deduplication system working (46 unique incidents)
+- ✅ **About/Analytics/List**: All redesigned pages working
+- ✅ **Local dev**: Hot reload working with production API fallback
+
 ### Pending (High Priority) ⚠️
-- ⏳ **Performance indexes**: Migration ready, needs application (11.4s → <3s expected)
-- ⏳ **Source population**: Scraper running with fixed API (sources will populate next run)
+- ⏳ **Performance indexes**: Migration ready, needs manual application (11.4s → <3s expected)
+- ⏳ **Source population**: Next scraper run will populate (API fix deployed)
 - 📝 **Timeline slider**: Not yet implemented
 - 📝 **User submission form**: Pending
+
+### Important Notes
+- **Deduplication**: System uses content_hash + location + time matching
+- **One incident per event**: Multiple sources should link to same incident_id via junction table
+- **Evidence scoring**: Automatically calculated based on source types and count
 
 ---
 
