@@ -130,7 +130,7 @@ async def fetch_incidents(
                     "country": row["country"],
                     "lat": float(row["lat"]) if row["lat"] else None,
                     "lon": float(row["lon"]) if row["lon"] else None,
-                    "sources": row["sources"] if row["sources"] else []
+                    "sources": [] if row["sources"] == "[]" else (row["sources"] if isinstance(row["sources"], list) else [])
                 })
 
             return incidents
