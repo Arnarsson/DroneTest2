@@ -48,6 +48,8 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - ✅ **Code cleanup**: Python cache removed, .gitignore updated
 - ✅ **Serena MCP installed**: Available for coding assistance
 - ✅ **Map display clean**: Cluster "33" → "14" (much better!)
+- ✅ **Map clustering improved** (commit 8e4d06a): Enhanced spiderfying and color-coded clusters
+- ✅ **Migration 008 created**: Ready to apply geocoding jitter for overlapping coordinates
 
 ### Verified Working (Oct 1, 2025) ✅
 - ✅ **Logo and branding**: Displaying correctly in dark mode
@@ -58,6 +60,14 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - ✅ **Database**: Clean, deduplicated data (27 unique events)
 - ✅ **About/Analytics/List**: All redesigned pages working
 - ✅ **Local dev**: Hot reload working with production API fallback
+
+### Pending (Manual Action Required) ⏳
+- ⏳ **Migration 008** - Apply geocoding jitter to separate overlapping incidents
+  - **Issue**: 13 incidents share exact coordinates (8 at one location, 5 at another)
+  - **Cause**: Generic geocoding defaults (e.g., "Copenhagen" → same coordinates)
+  - **Solution**: Run `psql $DATABASE_URL -f migrations/008_add_geocoding_jitter.sql`
+  - **Effect**: Spreads overlapping incidents in 200m radius for better visibility
+  - **Note**: These are separate incidents (different dates), NOT duplicates
 
 ### Pending (Automatic) ⏳
 - ⏳ **Source population**: Waiting for next scraper run (every 15 min)
