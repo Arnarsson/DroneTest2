@@ -3,7 +3,10 @@ import type { Incident, FilterState } from '@/types'
 
 // Use relative API URL - the API is in the same deployment
 // Force relative URL to avoid CORS issues with Vercel preview URLs
-const API_URL = '/api'
+// For local dev without DATABASE_URL, use production API
+const API_URL = process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL
+  ? 'https://www.dronemap.cc/api'
+  : '/api'
 
 async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   const params = new URLSearchParams({

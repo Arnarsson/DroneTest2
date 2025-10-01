@@ -6,35 +6,36 @@
 
 - **Repository**: https://github.com/Arnarsson/2
 - **Live Site**: https://www.dronemap.cc
-- **Status**: Production (v1.0) - Active Development
-- **Last Major Update**: September 30, 2025
+- **Status**: Production (v1.0) - Fully Operational ✅
+- **Last Major Update**: October 1, 2025
 
 ---
 
 ## 📊 Current Status
 
 ### What's Working ✅
-- **Frontend**: Next.js 14 app deployed on Vercel
-- **API**: Serverless functions handling 200+ incidents/request
-- **Database**: Supabase PostgreSQL with PostGIS for geospatial data
-- **Scraper**: GitHub Actions running every 15 minutes
-- **Data**: 20+ sources across 4 countries (Denmark, Norway, Sweden, Finland)
+- **Frontend**: Next.js 14 app deployed on Vercel - **LIVE**
+- **API**: Serverless functions returning 43 incidents across 5 countries
+- **Database**: Supabase PostgreSQL with PostGIS - 43 verified incidents
+- **Scraper**: GitHub Actions running every 15 minutes with deduplication
+- **Data**: 20+ sources across 5 countries (Denmark, Norway, Sweden, Finland, Netherlands, Poland)
 - **Features**: Real-time map, filtering, evidence scoring, responsive design
 
-### Recent Integration (Sept 30, 2025) 🎉
-Successfully merged `terragon/scraper-improvements` into `terragon/modern-ui-overhaul`:
-- ✅ Added missing files: `db_cache.py`, `verification.py`
-- ✅ Expanded from 4 to 20+ data sources
-- ✅ Enhanced error handling with exponential backoff
-- ✅ Database-backed deduplication
-- ✅ Fixed database debugging code
-- **PR #40**: https://github.com/Arnarsson/2/pull/40 (Open - Ready to merge)
+### Production Restoration (Oct 1, 2025) 🎉
+Successfully resolved production outage and restored full functionality:
+- ✅ Fixed API_BASE_URL configuration (was pointing to localhost)
+- ✅ Fixed database connection pooling for Supabase serverless
+- ✅ Set verification_status='pending' on all incidents
+- ✅ Fixed sources field type error (JSON string → array)
+- ✅ Removed problematic sources subquery temporarily
+- ✅ All 43 incidents now visible on live map
+- **Latest Commits**: b5e46b9, aecd6d8, 03702b2, 0edbe66
 
-### Known Issues ⚠️
-- Scraper had interference issues between branches (NOW RESOLVED)
-- Some duplicate incidents in database (cleanup script available)
+### Known Issues & Roadmap ⚠️
+- Sources subquery disabled - incidents show without source attribution
 - Timeline slider not yet implemented
 - User submission form pending
+- Need to restore sources display with proper error handling
 
 ---
 

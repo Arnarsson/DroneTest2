@@ -9,6 +9,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import type { Incident } from '@/types'
 import { formatDistance } from 'date-fns'
+import { EVIDENCE_SYSTEM } from '@/constants/evidence'
 
 // Fix Leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -136,14 +137,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 }
 
 function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.DivIcon {
-  const colors = {
-    1: { from: '#9ca3af', to: '#6b7280', glow: 'rgba(156, 163, 175, 0.4)' },
-    2: { from: '#fde047', to: '#facc15', glow: 'rgba(250, 204, 21, 0.5)' },
-    3: { from: '#fb923c', to: '#ea580c', glow: 'rgba(234, 88, 12, 0.6)' },
-    4: { from: '#f87171', to: '#dc2626', glow: 'rgba(220, 38, 38, 0.7)' },
-  }
-
-  const colorScheme = colors[evidenceScore as keyof typeof colors]
+  const config = EVIDENCE_SYSTEM[evidenceScore as 1 | 2 | 3 | 4]
   const borderColor = isDark ? '#1f2937' : 'white'
 
   return L.divIcon({
@@ -151,10 +145,10 @@ function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.D
       <div style="
         width: 38px;
         height: 38px;
-        background: radial-gradient(circle at 30% 30%, ${colorScheme.from}, ${colorScheme.to});
+        background: ${config.gradient};
         border: 3px solid ${borderColor};
         border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${colorScheme.glow};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${config.glow};
         display: flex;
         align-items: center;
         justify-content: center;
@@ -163,12 +157,11 @@ function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.D
         font-size: 15px;
         text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: float 3s ease-in-out infinite;
       ">
         ${evidenceScore}
       </div>
     `,
-    className: 'custom-marker gpu-accelerated',
+    className: 'custom-marker',
     iconSize: [38, 38],
     iconAnchor: [19, 19],
   })
@@ -176,20 +169,7 @@ function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.D
 
 function createPopupContent(incident: Incident, isDark: boolean = false): string {
   const timeAgo = formatDistance(new Date(incident.occurred_at), new Date(), { addSuffix: true })
-
-  const evidenceLabels = {
-    1: 'Unverified',
-    2: 'OSINT',
-    3: 'Verified Media',
-    4: 'Official',
-  }
-
-  const evidenceGradients = {
-    1: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
-    2: 'linear-gradient(135deg, #fde047 0%, #facc15 100%)',
-    3: 'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)',
-    4: 'linear-gradient(135deg, #f87171 0%, #dc2626 100%)',
-  }
+  const config = EVIDENCE_SYSTEM[incident.evidence_score as 1 | 2 | 3 | 4]
 
   // Theme-aware colors
   const textPrimary = isDark ? '#f3f4f6' : '#111827'
@@ -219,7 +199,7 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
 
       <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
         <span style="
-          background: ${evidenceGradients[incident.evidence_score as keyof typeof evidenceGradients]};
+          background: ${config.gradient};
           color: white;
           padding: 4px 10px;
           border-radius: 14px;
@@ -229,7 +209,7 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
           text-shadow: 0 1px 2px rgba(0,0,0,0.2);
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         ">
-          ${evidenceLabels[incident.evidence_score as keyof typeof evidenceLabels]}
+          ${config.label}
         </span>
         ${incident.asset_type ? `
           <span style="
@@ -262,6 +242,15 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
           <div style="display: flex; flex-direction: column; gap: 4px;">
             ${incident.sources.map(source => {
               const favicon = getFavicon(source.source_url)
+              const typeEmojis: Record<string, string> = {
+                'police': '🚔',
+                'notam': '🛫',
+                'media': '📰',
+                'news': '📰',
+                'social': '💬',
+                'other': '🔗'
+              }
+              const emoji = typeEmojis[source.source_type?.toLowerCase() || 'other'] || '🔗'
               return `
                 <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
                   display: inline-flex;
@@ -277,8 +266,8 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
                   transition: all 0.2s;
                   border: 1px solid ${borderColor};
                 ">
-                  ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : ''}
-                  <span>${source.source_type}</span>
+                  ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
+                  <span>${source.source_type || 'Unknown'}</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
                   </svg>

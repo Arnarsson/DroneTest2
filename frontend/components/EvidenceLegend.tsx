@@ -1,10 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { EVIDENCE_SYSTEM } from '@/constants/evidence'
 
 export function EvidenceLegend() {
   const [isOpen, setIsOpen] = useState(false)
+  const [hasSeenLegend, setHasSeenLegend] = useState(false)
+
+  // Auto-open legend on first visit
+  useEffect(() => {
+    const seen = localStorage.getItem('dronewatch_legend_seen')
+    if (!seen) {
+      setIsOpen(true)
+      setHasSeenLegend(false)
+    } else {
+      setHasSeenLegend(true)
+    }
+  }, [])
+
+  const handleClose = () => {
+    setIsOpen(false)
+    if (!hasSeenLegend) {
+      localStorage.setItem('dronewatch_legend_seen', 'true')
+      setHasSeenLegend(true)
+    }
+  }
 
   return (
     <div className="absolute bottom-24 left-4 z-[500]">
@@ -40,7 +61,7 @@ export function EvidenceLegend() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-gray-900 dark:text-white">Evidence Levels</h3>
               <motion.button
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
@@ -52,34 +73,19 @@ export function EvidenceLegend() {
             </div>
 
             <div className="space-y-3">
-              <LegendItem
-                level={4}
-                color="bg-red-600"
-                title="Official Report"
-                description="Police, military, or aviation authority"
-                delay={0}
-              />
-              <LegendItem
-                level={3}
-                color="bg-orange-500"
-                title="Verified Media"
-                description="Confirmed by trusted news sources"
-                delay={0.05}
-              />
-              <LegendItem
-                level={2}
-                color="bg-yellow-400"
-                title="OSINT"
-                description="Open-source intelligence"
-                delay={0.1}
-              />
-              <LegendItem
-                level={1}
-                color="bg-gray-400"
-                title="Unverified"
-                description="Social media or single source"
-                delay={0.15}
-              />
+              {[4, 3, 2, 1].map((level, idx) => {
+                const config = EVIDENCE_SYSTEM[level as 1 | 2 | 3 | 4]
+                return (
+                  <LegendItem
+                    key={level}
+                    level={level}
+                    color={config.bgClass}
+                    title={config.label}
+                    description={config.description}
+                    delay={idx * 0.05}
+                  />
+                )
+              })}
             </div>
 
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

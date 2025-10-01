@@ -76,7 +76,18 @@ async def fetch_incidents(
                    i.asset_type, i.status, i.evidence_score, i.country,
                    ST_Y(i.location::geometry) as lat,
                    ST_X(i.location::geometry) as lon,
-                   '[]'::json as sources
+                   COALESCE((
+                     SELECT json_agg(json_build_object(
+                       'source_url', is2.source_url,
+                       'source_type', COALESCE(s.name, 'unknown'),
+                       'source_title', is2.source_title,
+                       'source_quote', is2.source_quote,
+                       'published_at', is2.published_at
+                     ))
+                     FROM public.incident_sources is2
+                     LEFT JOIN public.sources s ON is2.source_id = s.id
+                     WHERE is2.incident_id = i.id
+                   ), '[]'::json) as sources
             FROM public.incidents i
             WHERE i.evidence_score >= $1
               AND (i.verification_status IN ('verified', 'auto_verified', 'pending')

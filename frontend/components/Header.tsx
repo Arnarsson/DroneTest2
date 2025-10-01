@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ThemeToggle } from './ThemeToggle'
+import { DroneWatchLogo } from './DroneWatchLogo'
 
 interface HeaderProps {
   incidentCount: number
@@ -23,13 +24,11 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             transition={{ duration: 0.3 }}
           >
             <h1 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5 tracking-tight">
-              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23,11.5C23,11.5 22.9,11.7 22.9,11.8C22.9,11.9 22.9,12 22.8,12.1C22.7,12.2 22.6,12.3 22.5,12.4L19.8,14.4L19.1,17.8C19.1,17.9 19,18 18.9,18.1C18.8,18.2 18.7,18.2 18.6,18.2H18.5L15.5,17L12.5,18.2C12.4,18.2 12.3,18.2 12.2,18.2H12C11.9,18.2 11.8,18.1 11.7,18.1C11.6,18 11.6,17.9 11.5,17.8L10.8,14.4L8.1,12.4C8,12.3 7.9,12.2 7.8,12.1C7.7,12 7.7,11.9 7.7,11.8C7.7,11.7 7.7,11.5 7.7,11.5L10.4,9.5L10.4,6C10.4,5.8 10.5,5.7 10.6,5.6C10.7,5.5 10.9,5.4 11,5.4H13C13.2,5.4 13.3,5.5 13.4,5.6C13.5,5.7 13.6,5.8 13.6,6L13.6,9.5L16.3,11.5L23,11.5Z" />
-              </svg>
+              <DroneWatchLogo size="md" />
               <span className="hidden sm:inline">DroneWatch</span>
             </h1>
             <span className="hidden md:inline text-[10px] text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-[0.1em] border-l border-gray-300 dark:border-gray-700 pl-4">
-              Incident Tracking
+              Safety Through Transparency
             </span>
           </motion.div>
 

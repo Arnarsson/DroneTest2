@@ -20,8 +20,10 @@ export interface Incident {
 export interface IncidentSource {
   source_name?: string
   source_url: string
-  source_type: 'police' | 'notam' | 'media' | 'social' | 'osint' | 'other'
+  source_type: string
+  source_title?: string
   source_quote?: string
+  published_at?: string
   domain?: string
   trust_weight?: number
 }
