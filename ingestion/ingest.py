@@ -3,6 +3,17 @@
 Master Ingestion Script for DroneWatch
 Orchestrates all scrapers and sends data to API
 """
+from verification import (
+    calculate_confidence_score,
+    get_verification_status,
+    requires_manual_review
+)
+from openai_client import OpenAIClient, OpenAIClientError
+from db_cache import ScraperCache
+from utils import generate_incident_hash
+from scrapers.news_scraper import NewsScraper
+from scrapers.police_scraper import PoliceScraper
+from config import API_BASE_URL, INGEST_TOKEN
 import os
 import sys
 import json
@@ -15,16 +26,6 @@ import uuid
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from config import API_BASE_URL, INGEST_TOKEN
-from scrapers.police_scraper import PoliceScraper
-from scrapers.news_scraper import NewsScraper
-from utils import generate_incident_hash
-from db_cache import ScraperCache
-from verification import (
-    calculate_confidence_score,
-    get_verification_status,
-    requires_manual_review
-)
 
 # Configure logging
 logging.basicConfig(
@@ -32,6 +33,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 class DroneWatchIngester:
     def __init__(self):
@@ -45,6 +47,7 @@ class DroneWatchIngester:
         self.cache = ScraperCache()
         self.processed_hashes = self.cache.load_sync()
         self.run_id = str(uuid.uuid4())
+        self._openai_client = None
         logger.info(f"Initialized ingester (run_id: {self.run_id})")
 
     def load_processed_hashes(self) -> set:
@@ -58,6 +61,7 @@ class DroneWatchIngester:
     def send_to_api(self, incident: Dict) -> bool:
         """Send incident to API with verification and improved error handling"""
         try:
+            incident = self._cleanup_incident(incident)
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(
                 incident['title'],
@@ -68,14 +72,15 @@ class DroneWatchIngester:
 
             # Skip if already processed
             if incident_hash in self.processed_hashes:
-                logger.info(f"⏭️  Skipping duplicate: {incident['title'][:50]}")
+                logger.info(
+                    f"⏭️  Skipping duplicate: {incident['title'][:50]}")
                 return False
 
             # === VERIFICATION LOGIC ===
             sources = incident.get('sources', [])
             source_dict = {'trust_weight': sources[0].get('trust_weight', 1),
-                          'type': sources[0].get('source_type', 'unknown'),
-                          'name': sources[0].get('source_name', 'unknown')} if sources else {}
+                           'type': sources[0].get('source_type', 'unknown'),
+                           'name': sources[0].get('source_name', 'unknown')} if sources else {}
 
             # Calculate confidence score
             confidence_score = calculate_confidence_score(incident, sources)
@@ -93,13 +98,16 @@ class DroneWatchIngester:
 
             # Log verification decision
             if verification_status == 'auto_verified':
-                logger.info(f"✓ Auto-verified: {incident['title'][:50]} (confidence: {confidence_score:.2f})")
+                logger.info(
+                    f"✓ Auto-verified: {incident['title'][:50]} (confidence: {confidence_score:.2f})")
             else:
-                logger.info(f"⚠️  Pending review: {incident['title'][:50]} - {review_reason} (priority: {review_priority})")
+                logger.info(
+                    f"⚠️  Pending review: {incident['title'][:50]} - {review_reason} (priority: {review_priority})")
 
             # Send to API
             logger.debug(f"Sending incident to {self.api_url}")
-            response = self.session.post(self.api_url, json=incident, timeout=15)
+            response = self.session.post(
+                self.api_url, json=incident, timeout=15)
             response.raise_for_status()
 
             # Mark as processed in cache
@@ -108,18 +116,21 @@ class DroneWatchIngester:
                 incident_hash,
                 incident['title'],
                 datetime.fromisoformat(incident['occurred_at']),
-                sources[0].get('source_name', 'unknown') if sources else 'unknown'
+                sources[0].get(
+                    'source_name', 'unknown') if sources else 'unknown'
             )
 
             logger.info(f"✅ Ingested: {incident['title'][:50]}")
-            logger.debug(f"   ID: {response.json().get('id')}, Status: {verification_status}")
+            logger.debug(
+                f"   ID: {response.json().get('id')}, Status: {verification_status}")
             return True
 
         except requests.exceptions.Timeout:
             logger.error(f"⏱️  API Timeout: {incident['title'][:50]}")
             return False
         except requests.exceptions.HTTPError as e:
-            logger.error(f"❌ HTTP Error ({e.response.status_code}): {incident['title'][:50]}")
+            logger.error(
+                f"❌ HTTP Error ({e.response.status_code}): {incident['title'][:50]}")
             if hasattr(e.response, 'text'):
                 logger.error(f"   Response: {e.response.text[:500]}")
             return False
@@ -129,6 +140,30 @@ class DroneWatchIngester:
         except Exception as e:
             logger.error(f"❌ Unexpected error: {e}", exc_info=True)
             return False
+
+    def _cleanup_incident(self, incident: Dict) -> Dict:
+        """Normalize text fields using OpenAI cleanup."""
+        try:
+            client = self._get_openai_client()
+        except ValueError:
+            logger.debug("OPENAI_API_KEY not set; skipping OpenAI cleanup")
+            return incident
+
+        if not incident.get('narrative'):
+            return incident
+
+        try:
+            cleaned_narrative = client.cleanup_text(incident['narrative'])
+            incident['narrative'] = cleaned_narrative
+        except OpenAIClientError:
+            logger.warning("OpenAI cleanup failed; using original narrative")
+
+        return incident
+
+    def _get_openai_client(self) -> OpenAIClient:
+        if self._openai_client is None:
+            self._openai_client = OpenAIClient()
+        return self._openai_client
 
     def run_ingestion(self, test_mode: bool = False):
         """Run all scrapers and ingest data"""
@@ -184,15 +219,18 @@ class DroneWatchIngester:
         print(f"{'='*60}")
         print(f"✅ Success: {success_count}")
         print(f"❌ Errors: {error_count}")
-        print(f"⏭️  Skipped: {len(all_incidents) - success_count - error_count}")
+        print(
+            f"⏭️  Skipped: {len(all_incidents) - success_count - error_count}")
         print(f"{'='*60}\n")
 
         return success_count, error_count
 
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='DroneWatch Ingestion Script')
-    parser.add_argument('--test', action='store_true', help='Test mode - show data without sending')
+    parser.add_argument('--test', action='store_true',
+                        help='Test mode - show data without sending')
     parser.add_argument('--api-url', help='Override API URL', default=None)
     args = parser.parse_args()
 
@@ -204,6 +242,7 @@ def main():
     # Run ingestion
     ingester = DroneWatchIngester()
     ingester.run_ingestion(test_mode=args.test)
+
 
 if __name__ == "__main__":
     main()
