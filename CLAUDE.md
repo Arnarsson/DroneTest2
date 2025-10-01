@@ -15,12 +15,13 @@
 
 ### What's Working ✅
 - **Frontend**: Next.js 14 app deployed on Vercel - **LIVE**
-- **API**: Serverless functions returning 45+ incidents across 5 countries
-- **Database**: Supabase PostgreSQL with PostGIS - Full incident database
-- **Scraper**: GitHub Actions running every 15 minutes with deduplication
+- **API**: Serverless functions returning 27 unique incidents (deduplicated!)
+- **Database**: Supabase PostgreSQL with PostGIS - Clean, deduplicated data
+- **Scraper**: GitHub Actions running every 15 minutes with location filtering
 - **Data**: 20+ sources across 6 countries (Denmark, Norway, Sweden, Finland, Netherlands, Poland)
 - **Features**: Real-time map, filtering, evidence scoring, responsive design
 - **Brand**: Professional logo, tagline, redesigned pages
+- **Deduplication**: Working perfectly - one incident per event ✅
 
 ### Brand Overhaul (Oct 1, 2025) 🎨
 Complete UI/UX redesign for trust and professionalism (PR #41):
@@ -40,25 +41,31 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - ✅ **Map markers**: Fixed colors to match evidence badge system
 - ✅ **Evidence Legend**: Updated colors/labels for consistency
 
+### Latest Updates (Oct 1, 2025 - Evening) 🎉
+- ✅ **Migration 007 COMPLETED**: 46 → 27 unique incidents (41% reduction!)
+- ✅ **Deduplication working**: Same event from multiple sources = one incident
+- ✅ **Geocoding fixed**: No more default coordinate clustering
+- ✅ **Code cleanup**: Python cache removed, .gitignore updated
+- ✅ **Serena MCP installed**: Available for coding assistance
+- ✅ **Map display clean**: Cluster "33" → "14" (much better!)
+
 ### Verified Working (Oct 1, 2025) ✅
 - ✅ **Logo and branding**: Displaying correctly in dark mode
 - ✅ **Evidence badges**: Perfect color consistency (🟢🟡🟠🔴)
-- ✅ **Map markers**: 46 incidents rendering with correct colors
+- ✅ **Map markers**: 27 unique incidents rendering with correct colors
 - ✅ **Popups**: Evidence badges and incident details displaying
 - ✅ **Legend**: Auto-opens on first visit
-- ✅ **No duplicates**: Deduplication system working (46 unique incidents)
+- ✅ **Database**: Clean, deduplicated data (27 unique events)
 - ✅ **About/Analytics/List**: All redesigned pages working
 - ✅ **Local dev**: Hot reload working with production API fallback
 
-### Pending Manual Actions (CRITICAL) 🚨
-- 🔥 **Merge duplicates**: Run migration 007 in Supabase (32 duplicates exist!)
-  - Current: 46 incidents (22 at one location, 10 at another)
-  - Expected: ~14-16 unique incidents after merge
-  - See: `RUN_MIGRATIONS_SIMPLE.md` for instructions
-- 🔥 **Performance indexes**: Run migration 006 in Supabase (11.4s → <3s)
-  - Must run each CREATE INDEX separately (CONCURRENT limitation)
-  - See: `RUN_MIGRATIONS_SIMPLE.md` for step-by-step
-- ⏳ **Source population**: Next scraper run will populate (API fix deployed)
+### Pending (Automatic) ⏳
+- ⏳ **Source population**: Waiting for next scraper run (every 15 min)
+  - Sources arrays will populate automatically
+  - Each incident will show multiple news sources
+- ⏳ **Geocoding improvements**: Future incidents will only show if location is known
+  - Prevents clustering at default coordinates
+  - International incidents now filtered out unless specific location found
 
 ### Future Enhancements
 - 📝 **Timeline slider**: Not yet implemented
@@ -66,12 +73,18 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - 📝 **Embed mode**: For newsroom integration
 - 📝 **Keyboard shortcuts**: Accessibility enhancement
 
-### Important Deduplication Notes
-- **Fixed in code** (Oct 1): Deduplication now uses location+time only (not title)
-- **Existing duplicates**: Must run migration 007 to clean up
-- **New incidents**: Will automatically deduplicate going forward
-- **Strategy**: Same location (±1km) + same time (±6hr) = add as source, not new incident
+### Deduplication System ✅
+- **Strategy**: Location+time based (not title-based)
+- **Rule**: Same location (±1km) + same time (±6hr) = Same incident, add as source
+- **Status**: Working perfectly after migration 007
+- **Result**: 27 unique events (down from 46 duplicates)
 - **Evidence scoring**: Increases with more credible sources
+
+### Geocoding System ✅
+- **Strategy**: Only incidents with known specific locations
+- **Fix**: Returns None instead of default Copenhagen coordinates
+- **Result**: No more false clustering of unrelated incidents
+- **Future**: International incidents skipped unless specific location found
 
 ---
 
