@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 import sys
+import logging
 from urllib.parse import parse_qs, urlparse
 from datetime import datetime
 
@@ -10,6 +11,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from db import run_async, get_connection
 import asyncpg
+
+logger = logging.getLogger(__name__)
 
 def parse_datetime(dt_string):
     """Parse ISO datetime string to datetime object"""
@@ -23,7 +26,14 @@ def parse_datetime(dt_string):
     return datetime.fromisoformat(dt_string)
 
 async def insert_incident(incident_data):
-    """Insert incident into database"""
+    """
+    Insert incident or add as source to existing incident.
+
+    Deduplication strategy:
+    - Check for existing incident at same location (±1km) and time (±6 hours)
+    - If exists: Add as source, update evidence score
+    - If new: Create new incident
+    """
     try:
         # Use shared database connection utility
         conn = await get_connection()
@@ -33,31 +43,63 @@ async def insert_incident(incident_data):
         first_seen_at = parse_datetime(incident_data.get('first_seen_at', incident_data.get('occurred_at')))
         last_seen_at = parse_datetime(incident_data.get('last_seen_at', incident_data.get('occurred_at')))
 
-        # Insert incident with explicit verification_status
-        query = """
-        INSERT INTO public.incidents
-        (title, narrative, occurred_at, first_seen_at, last_seen_at,
-         asset_type, status, evidence_score, country, location, verification_status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
-                ST_SetSRID(ST_MakePoint($10, $11), 4326), $12)
-        RETURNING id
-        """
+        lat = incident_data.get('lat')
+        lon = incident_data.get('lon')
 
-        incident_id = await conn.fetchval(
-            query,
-            incident_data['title'],
-            incident_data.get('narrative', ''),
-            occurred_at,
-            first_seen_at,
-            last_seen_at,
-            incident_data.get('asset_type', 'other'),
-            incident_data.get('status', 'active'),
-            incident_data.get('evidence_score', 1),
-            incident_data.get('country', 'DK'),
-            incident_data.get('lon'),
-            incident_data.get('lat'),
-            incident_data.get('verification_status', 'pending')
-        )
+        # Check for existing incident at same location and time
+        # Location: ±0.01° (≈1.1km), Time: ±6 hours
+        existing_incident = await conn.fetchrow("""
+            SELECT id, evidence_score, title
+            FROM public.incidents
+            WHERE ST_DWithin(
+                location::geography,
+                ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                1100  -- 1.1km radius
+            )
+            AND occurred_at BETWEEN $3 - INTERVAL '6 hours' AND $3 + INTERVAL '6 hours'
+            ORDER BY occurred_at DESC
+            LIMIT 1
+        """, lon, lat, occurred_at)
+
+        if existing_incident:
+            # Incident already exists - add this as a source instead
+            incident_id = existing_incident['id']
+            logger.info(f"Found existing incident: {existing_incident['title'][:50]}")
+            logger.info(f"Adding new article as source: {incident_data['title'][:50]}")
+
+            # Update last_seen_at to show it's still being reported
+            await conn.execute("""
+                UPDATE public.incidents
+                SET last_seen_at = GREATEST(last_seen_at, $1)
+                WHERE id = $2
+            """, last_seen_at, incident_id)
+
+        else:
+            # New incident - create it
+            query = """
+            INSERT INTO public.incidents
+            (title, narrative, occurred_at, first_seen_at, last_seen_at,
+             asset_type, status, evidence_score, country, location, verification_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
+                    ST_SetSRID(ST_MakePoint($10, $11), 4326), $12)
+            RETURNING id
+            """
+
+            incident_id = await conn.fetchval(
+                query,
+                incident_data['title'],
+                incident_data.get('narrative', ''),
+                occurred_at,
+                first_seen_at,
+                last_seen_at,
+                incident_data.get('asset_type', 'other'),
+                incident_data.get('status', 'active'),
+                incident_data.get('evidence_score', 1),
+                incident_data.get('country', 'DK'),
+                incident_data.get('lon'),
+                incident_data.get('lat'),
+                incident_data.get('verification_status', 'pending')
+            )
 
         # Insert sources if provided
         if incident_data.get('sources'):

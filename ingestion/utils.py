@@ -77,12 +77,28 @@ def calculate_evidence_score(source_type: str, has_quote: bool, has_official: bo
 
 def generate_incident_hash(title: str, occurred_at: datetime, lat: float, lon: float) -> str:
     """
-    Generate a hash for deduplication
+    Generate a hash for deduplication based on location and time window.
+
+    IMPORTANT: Title is NOT used in hash generation because:
+    - Different news outlets report the same event with different headlines
+    - Same incident gets multiple articles with different titles
+    - We want ONE incident with MULTIPLE sources, not multiple incidents
+
+    Deduplication strategy:
+    - Location rounded to 0.01° (≈1.1km radius)
+    - Time rounded to 6-hour window
+    - Same location+time = Same incident → Add as source
     """
-    # Round time to nearest hour and location to 2 decimals
-    time_str = occurred_at.strftime("%Y-%m-%d-%H")
+    # Round time to 6-hour window (00, 06, 12, 18)
+    # This groups articles about events happening in the same general timeframe
+    hour_window = (occurred_at.hour // 6) * 6
+    time_str = f"{occurred_at.strftime('%Y-%m-%d')}-{hour_window:02d}"
+
+    # Round location to ~1km precision (0.01 degrees)
     location_str = f"{lat:.2f},{lon:.2f}"
-    content = f"{title[:50]}_{time_str}_{location_str}"
+
+    # Hash based ONLY on location + time (NOT title)
+    content = f"{time_str}_{location_str}"
     return hashlib.md5(content.encode()).hexdigest()
 
 def extract_quote(text: str) -> Optional[str]:
