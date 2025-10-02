@@ -79,7 +79,8 @@ async def fetch_incidents(
                    COALESCE((
                      SELECT json_agg(json_build_object(
                        'source_url', is2.source_url,
-                       'source_type', COALESCE(s.name, 'unknown'),
+                       'source_type', COALESCE(s.source_type, 'unknown'),
+                       'source_name', COALESCE(s.name, 'Unknown'),
                        'source_title', is2.source_title,
                        'source_quote', is2.source_quote,
                        'published_at', is2.published_at
