@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-export function AtlasAIBadge() {
+export function AtlasBadge() {
   return (
     <motion.div
       className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[100] pointer-events-auto"
