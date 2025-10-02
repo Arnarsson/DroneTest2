@@ -48,6 +48,8 @@ Complete UI/UX redesign for trust and professionalism (PR #41):
 - ✅ **Code cleanup**: Python cache removed, .gitignore updated
 - ✅ **Serena MCP installed**: Available for coding assistance
 - ✅ **Map display clean**: Cluster "33" → "14" (much better!)
+- ✅ **AI Deduplication**: Smart time validation + 6-layer anti-hallucination protection
+- ✅ **Geocoding conflict detection**: Prevents merging incidents with suspicious coordinates
 - ✅ **Map clustering improved** (commit 8e4d06a): Enhanced spiderfying and color-coded clusters
 - ✅ **Migration 008 created**: Ready to apply geocoding jitter for overlapping coordinates
 
