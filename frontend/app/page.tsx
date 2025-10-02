@@ -1,70 +1,73 @@
-'use client'
+"use client";
 
-import { useState, useCallback, useMemo } from 'react'
-import dynamic from 'next/dynamic'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Toaster } from 'sonner'
-import { Header } from '@/components/Header'
-import { FilterPanel } from '@/components/FilterPanel'
-import { EvidenceLegend } from '@/components/EvidenceLegend'
-import { IncidentList } from '@/components/IncidentList'
-import { Timeline } from '@/components/Timeline'
-import { Analytics } from '@/components/Analytics'
-import { AtlasAIBadge } from '@/components/AtlasAIBadge'
-import { useIncidents } from '@/hooks/useIncidents'
-import { isWithinInterval } from 'date-fns'
-import type { FilterState, Incident } from '@/types'
+import { Analytics } from "@/components/Analytics";
+import { AtlasBadge } from "@/components/AtlasBadge";
+import { EvidenceLegend } from "@/components/EvidenceLegend";
+import { FilterPanel } from "@/components/FilterPanel";
+import { Header } from "@/components/Header";
+import { IncidentList } from "@/components/IncidentList";
+import { useIncidents } from "@/hooks/useIncidents";
+import type { FilterState, Incident } from "@/types";
+import { isWithinInterval } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { useCallback, useMemo, useState } from "react";
+import { Toaster } from "sonner";
 
 // Dynamic import for map (no SSR)
-const Map = dynamic(() => import('@/components/Map'), {
+const Map = dynamic(() => import("@/components/Map"), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-gray-100 dark:bg-gray-900 animate-pulse" />
-})
+  loading: () => (
+    <div className="w-full h-full bg-gray-100 dark:bg-gray-900 animate-pulse" />
+  ),
+});
 
 export default function Home() {
-  const [view, setView] = useState<'map' | 'list' | 'analytics'>('map')
-  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
-  const [isTimelineOpen, setIsTimelineOpen] = useState(false)
-  const [timelineRange, setTimelineRange] = useState<{ start: Date | null; end: Date | null }>({
+  const [view, setView] = useState<"map" | "list" | "analytics">("map");
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [timelineRange, setTimelineRange] = useState<{
+    start: Date | null;
+    end: Date | null;
+  }>({
     start: null,
     end: null,
-  })
+  });
   const [filters, setFilters] = useState<FilterState>({
     minEvidence: 1,
-    country: 'all',
-    status: 'all',
+    country: "all",
+    status: "all",
     assetType: null,
-    dateRange: 'all'
-  })
+    dateRange: "all",
+  });
 
-  const { data: allIncidents, isLoading, error } = useIncidents(filters)
+  const { data: allIncidents, isLoading, error } = useIncidents(filters);
 
   // Apply client-side date filtering and timeline filtering
   const incidents = useMemo(() => {
-    if (!allIncidents) return []
+    if (!allIncidents) return [];
 
-    let filtered = allIncidents
+    let filtered = allIncidents;
 
     // Apply date range filter (client-side fallback)
-    if (filters.dateRange !== 'all') {
-      const now = new Date()
-      const since = new Date()
+    if (filters.dateRange !== "all") {
+      const now = new Date();
+      const since = new Date();
 
       switch (filters.dateRange) {
-        case 'day':
-          since.setDate(now.getDate() - 1)
-          break
-        case 'week':
-          since.setDate(now.getDate() - 7)
-          break
-        case 'month':
-          since.setMonth(now.getMonth() - 1)
-          break
+        case "day":
+          since.setDate(now.getDate() - 1);
+          break;
+        case "week":
+          since.setDate(now.getDate() - 7);
+          break;
+        case "month":
+          since.setMonth(now.getMonth() - 1);
+          break;
       }
 
-      filtered = filtered.filter((inc: Incident) =>
-        new Date(inc.occurred_at) >= since
-      )
+      filtered = filtered.filter(
+        (inc: Incident) => new Date(inc.occurred_at) >= since
+      );
     }
 
     // Apply timeline filtering
@@ -74,19 +77,15 @@ export default function Home() {
           start: timelineRange.start!,
           end: timelineRange.end!,
         })
-      )
+      );
     }
 
-    return filtered
-  }, [allIncidents, timelineRange, filters.dateRange])
+    return filtered;
+  }, [allIncidents, timelineRange, filters.dateRange]);
 
   const handleFilterChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters)
-  }, [])
-
-  const handleTimelineRangeChange = useCallback((start: Date | null, end: Date | null) => {
-    setTimelineRange({ start, end })
-  }, [])
+    setFilters(newFilters);
+  }, []);
 
   return (
     <>
@@ -123,7 +122,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
           >
-            {view === 'map' ? (
+            {view === "map" ? (
               <>
                 <Map
                   incidents={incidents || []}
@@ -133,11 +132,8 @@ export default function Home() {
                 />
                 <EvidenceLegend />
               </>
-            ) : view === 'list' ? (
-              <IncidentList
-                incidents={incidents || []}
-                isLoading={isLoading}
-              />
+            ) : view === "list" ? (
+              <IncidentList incidents={incidents || []} isLoading={isLoading} />
             ) : (
               <Analytics incidents={incidents || []} />
             )}
@@ -166,8 +162,8 @@ export default function Home() {
         </AnimatePresence> */}
 
         {/* Atlas AI Badge */}
-        <AtlasAIBadge />
+        <AtlasBadge />
       </div>
     </>
-  )
+  );
 }

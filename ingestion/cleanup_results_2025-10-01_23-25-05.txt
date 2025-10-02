@@ -1,0 +1,322 @@
+OpenAI Text Cleanup Results
+==================================================
+
+INCIDENT 1: Udenlandske soldater skal hjælpe Danmark efter dronehændelser
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Starter etterforskning etter droneobservasjon i Nordsjøen Politiet har startet etterforskning etter en droneobservasjon ved Sleipner-feltet i Nordsjøen mandag kveld. Det var ved Sleipner-feltet vest for Stavanger at det ble gjort en mulig droneobservasjon mandag. Nå har politiet startet etterforskning. Foto: Ole Berg-Rusten Håkon Jonassen Norheim – Journalist Journalist Publisert 01.10.2025, kl. 10.02 Oppdatert 01.10.2025, kl. 10.13 – Politiet fikk melding om droneobservasjon ved Sleipner-feltet
+
+CLEANED (369 chars):
+Starter etterforskning etter droneobservasjon i Nordsjøen
+
+Politiet har startet etterforskning etter en droneobservasjon ved Sleipner-feltet i Nordsjøen mandag kveld. Det var ved Sleipner-feltet vest for Stavanger at det ble gjort en mulig droneobservasjon mandag. Nå har politiet startet etterforskning.
+
+– Politiet fikk melding om droneobservasjon ved Sleipner-feltet
+
+IMPROVEMENT: Removed 131 characters
+================================================================================
+
+INCIDENT 2: Eksplosiv vækst: Droneangreb har fået mange til at melde sig
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Eksplosiv vækst: Droneangreb har fået mange til at melde sig Hjemmeværnets styrke af soldater vokser - især efter sidste uges hybridangreb med droner. Men der er brug for endnu flere, siger lektor ved Forsvarsakademiet. Foto: Liselotte Sabroe/Ritzau Scanpix Er du klar til at beskytte Danmark i tilfælde af krig? Det spørgsmål ser ud til at have rumsteret i flere danskeres sind efter sidste uges droneangreb, der lammede flytrafikken i København og Jylland. I hvert fald er tilmeldingen til Hjemmevæ
+
+CLEANED (462 chars):
+Eksplosiv vækst: Droneangreb har fået mange til at melde sig
+Hjemmeværnets styrke af soldater vokser - især efter sidste uges hybridangreb med droner. Men der er brug for endnu flere, siger lektor ved Forsvarsakademiet.
+Er du klar til at beskytte Danmark i tilfælde af krig? Det spørgsmål ser ud til at have rumsteret i flere danskeres sind efter sidste uges droneangreb, der lammede flytrafikken i København og Jylland. I hvert fald er tilmeldingen til Hjemmevæ
+
+IMPROVEMENT: Removed 38 characters
+================================================================================
+
+INCIDENT 3: Skib med mulig forbindelse til dronesagen efterforskes i Frankrig
+------------------------------------------------------------
+ORIGINAL (500 chars):
+play-circle play-circle Læs op USA har drone-værn i København under topmøde USA støtter Danmark med " anti-drone kapabiliteter" i forbindelse med ugens EU-topmøde i København. Det skriver Forsvarsministeriet på X. - Vi er glade for og taknemmelige over, at USA også støtter Danmark med antidrone kapabiliteter i forbindelse med det kommende topmøde. - Den amerikanske støtte er et udtryk for det tætte transatlantiske samarbejde, som også står stærkt i håndteringen af hybride angreb, skriver ministe
+
+CLEANED (469 chars):
+USA har drone-værn i København under topmøde
+USA støtter Danmark med " anti-drone kapabiliteter" i forbindelse med ugens EU-topmøde i København. Det skriver Forsvarsministeriet på X.
+- Vi er glade for og taknemmelige over, at USA også støtter Danmark med antidrone kapabiliteter i forbindelse med det kommende topmøde.
+- Den amerikanske støtte er et udtryk for det tætte transatlantiske samarbejde, som også står stærkt i håndteringen af hybride angreb, skriver ministe
+
+IMPROVEMENT: Removed 31 characters
+================================================================================
+
+INCIDENT 4: Forsvaret bekrefter: Økning av droneobservasjoner ved militære anlegg
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Forsvaret orientert om mulig droneobservasjon ved Sleipner-plattformen Forsvaret er orientert om gårsdagens droneobservasjon i Nordsjøen. Men har foreløpig ikke noen aktiv rolle i det. Det var ved Sleipner-plattformen vest for Stavanger at den mulige droneobservasjonen ble gjort. Foto: Dag Tore Anfinsen / Statoil Håkon Jonassen Norheim – Journalist Journalist Even Hye Tytlandsvik Barka – Journalist Journalist Simon Elias Vik Bogen – Journalist Journalist Vi rapporterer fra Stavanger Publisert 30
+
+CLEANED (280 chars):
+Forsvaret orientert om mulig droneobservasjon ved Sleipner-plattformen
+Forsvaret er orientert om gårsdagens droneobservasjon i Nordsjøen. Men har foreløpig ikke noen aktiv rolle i det. Det var ved Sleipner-plattformen vest for Stavanger at den mulige droneobservasjonen ble gjort.
+
+IMPROVEMENT: Removed 220 characters
+================================================================================
+
+INCIDENT 5: France, Sweden send anti-drone units to Denmark to secure EU summit
+------------------------------------------------------------
+ORIGINAL (500 chars):
+PARIS — France sent a military anti-drone unit to Denmark, and Sweden is planning to do the same, as the allies seek to help secure an informal European Union summit in Copenhagen this week against aerial threats, following recent flights of unidentified drones in Danish airspace. The French military has deployed a team of 35 personnel with a Fennec light helicopter and “active anti-drone capabilities,” the country’s Armed Forces Ministry said in a statement Monday. Meanwhile, Sweden will send a
+
+CLEANED (500 chars):
+PARIS — France sent a military anti-drone unit to Denmark, and Sweden is planning to do the same, as the allies seek to help secure an informal European Union summit in Copenhagen this week against aerial threats, following recent flights of unidentified drones in Danish airspace. The French military has deployed a team of 35 personnel with a Fennec light helicopter and “active anti-drone capabilities,” the country’s Armed Forces Ministry said in a statement Monday. Meanwhile, Sweden will send a
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 6: EU vows haste in ‘drone wall’ plan for eastern borders
+------------------------------------------------------------
+ORIGINAL (500 chars):
+BERLIN — The European Union has jump-started the development of a so-called “drone wall” to protect European skies against incursions by unmanned aerial vehicles from Russia, alongside a broader set of measures designed to protect the eastern flank of the continent. The package of proposed measures will be called Eastern Flank Watch and was announced by EU Commission President Ursula von der Leyen in a landmark speech earlier this month . Details emerged on Friday, with the EU commissioner for d
+
+CLEANED (500 chars):
+BERLIN — The European Union has jump-started the development of a so-called “drone wall” to protect European skies against incursions by unmanned aerial vehicles from Russia, alongside a broader set of measures designed to protect the eastern flank of the continent. The package of proposed measures will be called Eastern Flank Watch and was announced by EU Commission President Ursula von der Leyen in a landmark speech earlier this month . Details emerged on Friday, with the EU commissioner for d
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 7: Karup Air Base - Denmark's Largest Military Base
+------------------------------------------------------------
+ORIGINAL (331 chars):
+1-2 drones observed around 8:15 PM both inside and outside the fence of Denmark's largest military base, which houses all armed forces helicopters, airspace surveillance, flight school and support functions. Midtjylland civilian airport sharing runways was briefly closed. NATO deployed FGS Hamburg air-defence frigate in response.
+
+CLEANED (331 chars):
+1-2 drones observed around 8:15 PM both inside and outside the fence of Denmark's largest military base, which houses all armed forces helicopters, airspace surveillance, flight school and support functions. Midtjylland civilian airport sharing runways was briefly closed. NATO deployed FGS Hamburg air-defence frigate in response.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 8: Amsterdam Schiphol - Drone Near Miss with Transavia Jet
+------------------------------------------------------------
+ORIGINAL (241 chars):
+Drone came within 50 meters of a Transavia jet forcing runway closure on September 27. Part of wider pattern of drone incidents at major European airports. Schiphol joins Copenhagen, Aalborg, Frankfurt, Stockholm in recent drone disruptions.
+
+CLEANED (241 chars):
+Drone came within 50 meters of a Transavia jet forcing runway closure on September 27. Part of wider pattern of drone incidents at major European airports. Schiphol joins Copenhagen, Aalborg, Frankfurt, Stockholm in recent drone disruptions.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 9: Kastrup Airbase - Brief Airspace Closure
+------------------------------------------------------------
+ORIGINAL (181 chars):
+Drone activity detected over Kastrup military airbase at 20:15 CEST leading to brief civil airspace closure. Part of ongoing drone incidents affecting Danish military installations.
+
+CLEANED (181 chars):
+Drone activity detected over Kastrup military airbase at 20:15 CEST leading to brief civil airspace closure. Part of ongoing drone incidents affecting Danish military installations.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 10: European navies test new drone tech for undersea operations
+------------------------------------------------------------
+ORIGINAL (500 chars):
+SESIMBRA, Portugal — An hour from Portugal’s capital, Lisbon, on a clear sunny day in late September, a large, penguin-like robot peeks above the sea surface. It circles a Portuguese Navy ship from a distance, hardly visible to the human eye, concealed by the deep blue waters of the Atlantic ocean. The system is the Greyshark from Germany’s EuroAtlas, an autonomous underwater vehicle measuring 6.5 meters in length and weighing as much as a delivery van. It is one of the naval drones the German N
+
+CLEANED (500 chars):
+SESIMBRA, Portugal — An hour from Portugal’s capital, Lisbon, on a clear sunny day in late September, a large, penguin-like robot peeks above the sea surface. It circles a Portuguese Navy ship from a distance, hardly visible to the human eye, concealed by the deep blue waters of the Atlantic ocean. The system is the Greyshark from Germany’s EuroAtlas, an autonomous underwater vehicle measuring 6.5 meters in length and weighing as much as a delivery van. It is one of the naval drones the German N
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 11: Stockholm Arlanda - Drone Disruption
+------------------------------------------------------------
+ORIGINAL (141 chars):
+Stockholm Arlanda Airport experienced drone-related disruptions as part of wider pattern affecting major European airports in September 2025.
+
+CLEANED (141 chars):
+Stockholm Arlanda Airport experienced drone-related disruptions as part of wider pattern affecting major European airports in September 2025.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 12: Ukraine navy, a battle-tested force, plays enemy in NATO drone drill
+------------------------------------------------------------
+ORIGINAL (500 chars):
+TROIA, Portugal — Representatives from the Ukrainian navy participated in NATO’s largest unmanned maritime systems exercise this month, simulating the opposing force to test the capabilities of two dozen allied countries in scenarios inspired by frontline action. Ukraine was one of 24 countries that took part in the Portugal-led military exercise, REPMUS 2025, from Sept. 1-26, dedicated to testing hundreds of autonomous systems for naval applications. Captain Valter de Bulha Almeida of the Portu
+
+CLEANED (455 chars):
+TROIA, Portugal — Representatives from the Ukrainian navy participated in NATO’s largest unmanned maritime systems exercise this month, simulating the opposing force to test the capabilities of two dozen allied countries in scenarios inspired by frontline action. Ukraine was one of 24 countries that took part in the Portugal-led military exercise, REPMUS 2025, from Sept. 1-26, dedicated to testing hundreds of autonomous systems for naval applications.
+
+IMPROVEMENT: Removed 45 characters
+================================================================================
+
+INCIDENT 13: Billund Airport - Early Morning Drone Closure
+------------------------------------------------------------
+ORIGINAL (185 chars):
+Airport closed for one hour in early morning hours due to drone sightings. Police confirmed drones were gone by 03:00 CEST. Part of coordinated activity across multiple Danish airports.
+
+CLEANED (185 chars):
+Airport closed for one hour in early morning hours due to drone sightings. Police confirmed drones were gone by 03:00 CEST. Part of coordinated activity across multiple Danish airports.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 14: Skrydstrup Air Base - Military Installation Targeted
+------------------------------------------------------------
+ORIGINAL (217 chars):
+Military air base reported drone observations during coordinated incidents. Defense Minister Troels Lund Poulsen stated it appeared a professional actor was behind the systematic flights, calling it a 'hybrid attack'.
+
+CLEANED (217 chars):
+Military air base reported drone observations during coordinated incidents. Defense Minister Troels Lund Poulsen stated it appeared a professional actor was behind the systematic flights, calling it a 'hybrid attack'.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 15: Sønderborg Airport - Multiple Airport Coordination
+------------------------------------------------------------
+ORIGINAL (211 chars):
+Police received reports of drones near Sønderborg Airport as part of coordinated incidents affecting four Danish airports simultaneously. Authorities investigating as potential 'hybrid attack' on infrastructure.
+
+CLEANED (211 chars):
+Police received reports of drones near Sønderborg Airport as part of coordinated incidents affecting four Danish airports simultaneously. Authorities investigating as potential 'hybrid attack' on infrastructure.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 16: Esbjerg Airport - Western Denmark Incident
+------------------------------------------------------------
+ORIGINAL (165 chars):
+Drone activity reported at Esbjerg Airport during multi-airport incident on September 24. Part of what authorities called systematic drone operations across Denmark.
+
+CLEANED (165 chars):
+Drone activity reported at Esbjerg Airport during multi-airport incident on September 24. Part of what authorities called systematic drone operations across Denmark.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 17: Aalborg Airport - Second Danish Airport Closure
+------------------------------------------------------------
+ORIGINAL (309 chars):
+Drones observed over Aalborg Airport in northern Denmark forcing temporary closure. Part of wider systematic drone activity across multiple Danish airports within 48 hours of Copenhagen incident. Defense Minister Troels Lund Poulsen said it appeared a 'professional actor' was behind the 'systematic' flights.
+
+CLEANED (309 chars):
+Drones observed over Aalborg Airport in northern Denmark forcing temporary closure. Part of wider systematic drone activity across multiple Danish airports within 48 hours of Copenhagen incident. Defense Minister Troels Lund Poulsen said it appeared a 'professional actor' was behind the 'systematic' flights.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 18: F-15Es Tried To Shoot Down Iranian Kamikaze Drones With Laser Guided Bombs
+------------------------------------------------------------
+ORIGINAL (500 chars):
+F-15 Depicted Launching LongShot Air-To-Air Missile Carrier Drone In New Renderings General Atomics has told us that LongShot, which can be launched by bombers and cargo planes, too, is not intended to be reusable operationally. By Joseph Trevithick Published Sep 24, 2025 5:20 PM EDT 0 General Atomics The TWZ Newsletter Weekly insights and analysis on the latest developments in military technology, strategy, and foreign policy. Email address Sign Up Thank you! Terms of Service and Privacy Policy
+
+CLEANED (284 chars):
+F-15 Depicted Launching LongShot Air-To-Air Missile Carrier Drone In New Renderings
+General Atomics has told us that LongShot, which can be launched by bombers and cargo planes, too, is not intended to be reusable operationally.
+By Joseph Trevithick
+Published Sep 24, 2025 5:20 PM EDT
+
+IMPROVEMENT: Removed 216 characters
+================================================================================
+
+INCIDENT 19: Denmark Says Drone Incursions Were A Deliberate “Attack”
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Denmark Says Drone Incursions Were A Deliberate “Attack” The Danish prime minister has described the incident as the most serious attack on the country’s critical infrastructure to date. By Thomas Newdick Published Sep 23, 2025 11:58 AM EDT 0 Photo by STEVEN KNAP/Ritzau Scanpix/AFP via Getty Images The TWZ Newsletter Weekly insights and analysis on the latest developments in military technology, strategy, and foreign policy. Email address Sign Up Thank you! Terms of Service and Privacy Policy De
+
+CLEANED (240 chars):
+Denmark Says Drone Incursions Were A Deliberate “Attack”
+The Danish prime minister has described the incident as the most serious attack on the country’s critical infrastructure to date.
+By Thomas Newdick Published Sep 23, 2025 11:58 AM EDT
+
+IMPROVEMENT: Removed 260 characters
+================================================================================
+
+INCIDENT 20: Oslo Airport - Coordinated with Copenhagen
+------------------------------------------------------------
+ORIGINAL (219 chars):
+Oslo Airport experienced drone sightings on the same evening as Copenhagen, forcing temporary closure. Authorities believe this was part of coordinated activity across Nordic countries targeting critical infrastructure.
+
+CLEANED (219 chars):
+Oslo Airport experienced drone sightings on the same evening as Copenhagen, forcing temporary closure. Authorities believe this was part of coordinated activity across Nordic countries targeting critical infrastructure.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 21: Copenhagen Airport - Major Drone Disruption
+------------------------------------------------------------
+ORIGINAL (415 chars):
+2-3 large drones observed in controlled airspace forcing nearly 4-hour suspension of flights from 8:46 PM to 12:30 AM. Police confirmed these were not hobby drones but large professional-grade UAVs. About 15 flights were diverted to Gothenburg, Malmö, and other airports. PM Frederiksen called it the 'most serious attack on Danish critical infrastructure to date'. NATO responded by increasing Baltic Sea presence.
+
+CLEANED (415 chars):
+2-3 large drones observed in controlled airspace forcing nearly 4-hour suspension of flights from 8:46 PM to 12:30 AM. Police confirmed these were not hobby drones but large professional-grade UAVs. About 15 flights were diverted to Gothenburg, Malmö, and other airports. PM Frederiksen called it the 'most serious attack on Danish critical infrastructure to date'. NATO responded by increasing Baltic Sea presence.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 22: Ukrainian Drones Strike Russia’s Rare Be-12 Flying Boats
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Anduril’s Fury Will Take Off For The First Time At The Touch Of A Button A semi-autonomous YFQ-44A Collaborative Combat Drone's maiden flight is part of Anduril's strategy to get to an operational capability faster. By Joseph Trevithick Updated Sep 22, 2025 6:53 PM EDT 0 Courtesy photo via USAF The TWZ Newsletter Weekly insights and analysis on the latest developments in military technology, strategy, and foreign policy. Email address Sign Up Thank you! Terms of Service and Privacy Policy When A
+
+CLEANED (277 chars):
+Anduril’s Fury Will Take Off For The First Time At The Touch Of A Button
+A semi-autonomous YFQ-44A Collaborative Combat Drone's maiden flight is part of Anduril's strategy to get to an operational capability faster.
+By Joseph Trevithick Updated Sep 22, 2025 6:53 PM EDT
+
+When A
+
+IMPROVEMENT: Removed 223 characters
+================================================================================
+
+INCIDENT 23: Skunk Works Unveils Vectis Air Combat Drone That Puts A Premium On Stealth
+------------------------------------------------------------
+ORIGINAL (500 chars):
+Skunk Works Unveils Vectis Air Combat Drone That Puts A Premium On Stealth Lockheed's new Collaborative Combat Aircraft, targeted to fly in two years, reflects a higher-end approach compared to types the USAF has selected so far. By Joseph Trevithick Published Sep 21, 2025 12:01 AM EDT 0 Lockheed Martin The TWZ Newsletter Weekly insights and analysis on the latest developments in military technology, strategy, and foreign policy. Email address Sign Up Thank you! Terms of Service and Privacy Poli
+
+CLEANED (286 chars):
+Skunk Works Unveils Vectis Air Combat Drone That Puts A Premium On Stealth
+Lockheed's new Collaborative Combat Aircraft, targeted to fly in two years, reflects a higher-end approach compared to types the USAF has selected so far.
+By Joseph Trevithick
+Published Sep 21, 2025 12:01 AM EDT
+
+IMPROVEMENT: Removed 214 characters
+================================================================================
+
+INCIDENT 24: Warsaw Chopin Airport - Russian Drone Fleet Incursion
+------------------------------------------------------------
+ORIGINAL (312 chars):
+At least 19 military drones entered Polish airspace from Russia and Belarus at 11:30 PM CEST. Warsaw Chopin Airport closed for 2 hours. Polish and NATO forces scrambled jets, shooting down at least 8 drones. First time NATO engaged Russian assets since Ukraine war began. Poland invoked Article 4 of NATO treaty.
+
+CLEANED (312 chars):
+At least 19 military drones entered Polish airspace from Russia and Belarus at 11:30 PM CEST. Warsaw Chopin Airport closed for 2 hours. Polish and NATO forces scrambled jets, shooting down at least 8 drones. First time NATO engaged Russian assets since Ukraine war began. Poland invoked Article 4 of NATO treaty.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 25: Warsaw Modlin Airport - Russian Drone Closure
+------------------------------------------------------------
+ORIGINAL (157 chars):
+Airport closed simultaneously with Warsaw Chopin during Russian drone incursion. Part of coordinated response to 19 military drones entering Polish airspace.
+
+CLEANED (157 chars):
+Airport closed simultaneously with Warsaw Chopin during Russian drone incursion. Part of coordinated response to 19 military drones entering Polish airspace.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 26: Rzeszów-Jasionka Airport - Eastern Poland Closure
+------------------------------------------------------------
+ORIGINAL (127 chars):
+Airport near Ukrainian border closed during Russian drone incursion. Strategic location for NATO operations supporting Ukraine.
+
+CLEANED (127 chars):
+Airport near Ukrainian border closed during Russian drone incursion. Strategic location for NATO operations supporting Ukraine.
+
+IMPROVEMENT: No change  characters
+================================================================================
+
+INCIDENT 27: Lublin Airport - Airspace Protection Closure
+------------------------------------------------------------
+ORIGINAL (168 chars):
+Airport closed as part of coordinated Polish response to Russian drone fleet entering airspace. Quick Reaction Alert triggered with multiple NATO air forces responding.
+
+CLEANED (168 chars):
+Airport closed as part of coordinated Polish response to Russian drone fleet entering airspace. Quick Reaction Alert triggered with multiple NATO air forces responding.
+
+IMPROVEMENT: No change  characters
+================================================================================
+

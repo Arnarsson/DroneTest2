@@ -3,6 +3,7 @@ import './globals.css'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.dronemap.cc'),
   title: 'DroneWatch - Real-time Drone Incident Tracking',
   description: 'Live tracking and verification of drone incidents across the Nordics with evidence-based reporting',
   keywords: 'drone, incidents, tracking, nordics, denmark, security, airports',
@@ -19,7 +20,12 @@ export const metadata: Metadata = {
     title: 'DroneWatch',
     description: 'Live tracking of drone incidents across the Nordics',
   },
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 }
 
 export default function RootLayout({
