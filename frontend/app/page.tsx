@@ -1,6 +1,7 @@
 "use client";
 
 import { Analytics } from "@/components/Analytics";
+import { AtlasBadge } from "@/components/AtlasBadge";
 import { EvidenceLegend } from "@/components/EvidenceLegend";
 import { FilterPanel } from "@/components/FilterPanel";
 import { Header } from "@/components/Header";
@@ -159,6 +160,9 @@ export default function Home() {
             />
           )}
         </AnimatePresence> */}
+
+        {/* Atlas AI Badge */}
+        <AtlasBadge />
       </div>
     </>
   );
