@@ -11,7 +11,7 @@ export function AtlasAIBadge() {
       transition={{ delay: 1.5, duration: 0.6, ease: 'easeOut' }}
     >
       <motion.a
-        href="https://atlas-ai.com"
+        href="https://atlasconsulting.dk/"
         target="_blank"
         rel="noopener noreferrer"
         className="group flex items-center bg-black/95 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-lg border border-gray-700/30 px-2 py-1.5 md:px-3 md:py-2 hover:border-gray-600/50 transition-all duration-300"
@@ -23,7 +23,7 @@ export function AtlasAIBadge() {
             Powered by
           </span>
           <span className="text-[11px] md:text-sm font-bold text-white leading-tight tracking-tight">
-            Atlas AI
+            Atlas
           </span>
         </div>
       </motion.a>
