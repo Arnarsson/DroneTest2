@@ -132,21 +132,32 @@ def extract_quote(text: str) -> Optional[str]:
 def is_drone_incident(title: str, content: str) -> bool:
     """
     Check if article is actually about drone incidents
+    Uses word boundary matching to avoid false positives (e.g., "dronning" = queen)
     """
     full_text = (title + " " + content).lower()
 
-    # Must contain drone-related keywords
-    has_drone = any(word in full_text for word in [
+    # Must contain drone-related keywords (word boundary to avoid "dronning"/queen false positive)
+    has_drone = any(re.search(rf'\b{re.escape(word)}\b', full_text) for word in [
         "drone", "dron", "uav", "uas", "luftfartøj"
     ])
 
-    # Should not be about drone deliveries or commercial use
-    is_commercial = any(word in full_text for word in [
-        "levering", "delivery", "amazon", "pakke", "package",
-        "tilladelse", "permission", "godkendt", "approved"
+    # Must contain incident indicators (not just mentions of drones)
+    has_incident = any(word in full_text for word in [
+        "observation", "spotted", "set", "opdaget", "mistænk", "suspect",
+        "politi", "police", "investigation", "undersøg", "rapport", "report",
+        "closure", "lukket", "closed", "airspace", "luftrum",
+        "alert", "alarm", "warning", "advarsel", "forbidden", "forbudt"
     ])
 
-    return has_drone and not is_commercial
+    # Should not be about drone deliveries, commercial use, or royalty
+    is_excluded = any(word in full_text for word in [
+        "levering", "delivery", "amazon", "pakke", "package",
+        "tilladelse", "permission", "godkendt", "approved",
+        "dronning", "kronprins", "royal", "kongelig",  # Exclude royalty articles
+        "bryllup", "wedding", "parforhold", "relationship"  # Exclude personal news
+    ])
+
+    return has_drone and has_incident and not is_excluded
 
 def clean_html(html_text: str) -> str:
     """

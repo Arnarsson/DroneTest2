@@ -11,6 +11,75 @@
 
 ---
 
+## 🧠 Context Engineering Principles
+
+**Reference**: See `CONTEXT_ENGINEERING.md` for full methodology
+
+### Core Approach: Lightweight Identifiers + Progressive Disclosure
+
+**Don't do this** ❌:
+- Read all 873 source files
+- Load entire codebase into context
+- Broad, unfocused exploration
+
+**Do this instead** ✅:
+- Map architecture first (directory structure)
+- Use file paths as references
+- Load content just-in-time (only when needed)
+- Progressive disclosure (start high-level, drill down based on evidence)
+
+### Practical Workflow
+
+**Step 1: Map Structure** (don't load everything)
+```bash
+tree -L 2 -I 'node_modules|__pycache__|.next|venv'
+```
+
+**Step 2: Define Questions** (progressive disclosure)
+```markdown
+Q1: What's the issue? → Evidence: [API output] → Investigate: [3 specific files]
+Q2: Next concern? → Status: PENDING
+```
+
+**Step 3: Focused Investigation** (just-in-time context)
+```python
+# Launch sub-agent for specific task
+Task(description="Analyze scraper filtering", prompt="""
+Read ONLY these files: [utils.py, news_scraper.py, config.py]
+Find: Root cause of content filtering issue
+Deliver: file:line reference + concrete fix
+""")
+```
+
+**Step 4: Document Findings** (persistent memory)
+- Update `INVESTIGATION_FINDINGS.md`
+- File:line references
+- Concrete fixes with effort estimates
+- Decision log (why you did what)
+
+### Key Documents
+
+- **CONTEXT_ENGINEERING.md** - Full methodology reference
+- **INVESTIGATION_FINDINGS.md** - Current investigation state
+- **SESSION_SUMMARY_*.md** - Historical findings
+- **CLAUDE.md** - This file (project instructions)
+
+### Success Metrics
+
+**Good investigation**:
+- ✅ 15-30 min to find root cause
+- ✅ Read 3-5 files (not 100+)
+- ✅ Specific findings: "utils.py:139 - substring matching bug"
+- ✅ Concrete fix with code example
+
+**Poor investigation**:
+- ❌ 2-3 hours wandering
+- ❌ Read 100+ files
+- ❌ Vague findings: "I think maybe..."
+- ❌ No actionable recommendations
+
+---
+
 ## 📊 Current Status
 
 ### What's Working ✅
