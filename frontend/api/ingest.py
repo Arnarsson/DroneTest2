@@ -123,11 +123,11 @@ async def insert_incident(incident_data):
                     domain = urlparse(source.get('source_url', '')).netloc or 'unknown'
 
                     # First, get or create source in sources table
-                    # Schema: UNIQUE (domain, source_type)
+                    # Schema: UNIQUE (domain, source_type, homepage_url)
                     source_id = await conn.fetchval("""
-                        INSERT INTO public.sources (name, domain, source_type, trust_weight)
-                        VALUES ($1, $2, $3, $4)
-                        ON CONFLICT (domain, source_type)
+                        INSERT INTO public.sources (name, domain, source_type, homepage_url, trust_weight)
+                        VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT (domain, source_type, homepage_url)
                         DO UPDATE SET
                             name = EXCLUDED.name,
                             trust_weight = GREATEST(sources.trust_weight, EXCLUDED.trust_weight)
@@ -136,6 +136,7 @@ async def insert_incident(incident_data):
                         source.get('source_name', 'Unknown'),  # name field
                         domain,  # domain field
                         source.get('source_type', 'other'),  # source_type (required)
+                        source.get('source_url', ''),  # homepage_url (use source_url)
                         source.get('trust_weight', 1)  # trust_weight
                     )
 
