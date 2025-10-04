@@ -3,7 +3,7 @@ import './globals.css'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.dronemap.cc'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.dronemap.cc'),
   title: 'DroneWatch - Real-time Drone Incident Tracking',
   description: 'Live tracking and verification of drone incidents across the Nordics with evidence-based reporting',
   keywords: 'drone, incidents, tracking, nordics, denmark, security, airports',

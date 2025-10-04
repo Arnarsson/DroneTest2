@@ -52,7 +52,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
       {/* Mobile: Floating Filter Button */}
       <motion.button
         onClick={onToggle}
-        className="lg:hidden fixed bottom-24 right-6 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all"
+        className="lg:hidden fixed bottom-12 right-6 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all"
         whileHover={{ scale: 1.08, rotate: 5 }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, scale: 0 }}
@@ -66,7 +66,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
           {activeFilterCount > 0 && (
             <motion.span
               className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
-              initial={{ scale: 0 }}
+              initial={{ scale: 0 }} 
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.6 }}
             >

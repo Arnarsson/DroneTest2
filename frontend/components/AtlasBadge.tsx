@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 
-export function AtlasAIBadge() {
+export function AtlasBadge() {
   return (
     <motion.div
       className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[100] pointer-events-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.5, duration: 0.6, ease: 'easeOut' }}
+      transition={{ delay: 1.5, duration: 0.6, ease: "easeOut" }}
     >
       <motion.a
         href="https://atlasconsulting.dk/"
@@ -28,5 +28,5 @@ export function AtlasAIBadge() {
         </div>
       </motion.a>
     </motion.div>
-  )
+  );
 }
