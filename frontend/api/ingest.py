@@ -56,7 +56,7 @@ async def insert_incident(incident_data):
                 ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                 1100  -- 1.1km radius
             )
-            AND occurred_at BETWEEN $3 - INTERVAL '6 hours' AND $3 + INTERVAL '6 hours'
+            AND occurred_at BETWEEN ($3::timestamp - INTERVAL '6 hours') AND ($3::timestamp + INTERVAL '6 hours')
             ORDER BY occurred_at DESC
             LIMIT 1
         """, lon, lat, occurred_at)
