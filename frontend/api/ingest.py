@@ -156,7 +156,13 @@ async def insert_incident(incident_data):
                     logger.error(f"Failed to insert source: {source_error}")
                     continue
 
-        await conn.close()
+        # Close connection gracefully (with timeout for serverless)
+        try:
+            await asyncio.wait_for(conn.close(), timeout=2.0)
+        except asyncio.TimeoutError:
+            logger.warning("Connection close timed out (normal for serverless)")
+        except Exception as e:
+            logger.warning(f"Error closing connection: {e}")
 
         return {"id": str(incident_id), "status": "created"}
 
