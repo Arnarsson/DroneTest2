@@ -16,14 +16,22 @@ logger = logging.getLogger(__name__)
 
 def parse_datetime(dt_string):
     """Parse ISO datetime string to datetime object"""
+    from datetime import timezone
     if not dt_string:
         return None
     if isinstance(dt_string, datetime):
+        # Ensure timezone-aware
+        if dt_string.tzinfo is None:
+            return dt_string.replace(tzinfo=timezone.utc)
         return dt_string
     # Handle ISO format with 'Z' or timezone
     if dt_string.endswith('Z'):
         dt_string = dt_string[:-1] + '+00:00'
-    return datetime.fromisoformat(dt_string)
+    dt = datetime.fromisoformat(dt_string)
+    # Ensure timezone-aware
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
 
 async def insert_incident(incident_data):
     """
