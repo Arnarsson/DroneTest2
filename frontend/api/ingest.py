@@ -39,9 +39,10 @@ async def insert_incident(incident_data):
     Insert incident or add as source to existing incident.
 
     Deduplication strategy:
-    - Check for existing incident at same location (±1km) and time (±6 hours)
-    - If exists: Add as source, update evidence score
+    - Check for existing incident at same location (±1km)
+    - If exists: Add as source, update evidence score, extend time range
     - If new: Create new incident
+    - Result: One incident per location regardless of when events occurred
     """
     try:
         # Use shared database connection utility
@@ -55,12 +56,9 @@ async def insert_incident(incident_data):
         lat = incident_data.get('lat')
         lon = incident_data.get('lon')
 
-        # Check for existing incident at same location and time
-        # Location: ±0.01° (≈1.1km), Time: ±6 hours
-        from datetime import timedelta
-        time_start = occurred_at - timedelta(hours=6)
-        time_end = occurred_at + timedelta(hours=6)
-
+        # Check for existing incident at same location
+        # Location: ±0.01° (≈1.1km)
+        # Strategy: One incident per location regardless of time
         existing_incident = await conn.fetchrow("""
             SELECT id, evidence_score, title
             FROM public.incidents
@@ -69,10 +67,9 @@ async def insert_incident(incident_data):
                 ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                 1100  -- 1.1km radius
             )
-            AND occurred_at BETWEEN $3 AND $4
-            ORDER BY occurred_at DESC
+            ORDER BY occurred_at ASC
             LIMIT 1
-        """, lon, lat, time_start, time_end)
+        """, lon, lat)
 
         if existing_incident:
             # Incident already exists - add this as a source instead
@@ -80,12 +77,15 @@ async def insert_incident(incident_data):
             logger.info(f"Found existing incident: {existing_incident['title'][:50]}")
             logger.info(f"Adding new article as source: {incident_data['title'][:50]}")
 
-            # Update last_seen_at to show it's still being reported
+            # Update time range to encompass all events at this location
             await conn.execute("""
                 UPDATE public.incidents
-                SET last_seen_at = GREATEST(last_seen_at, $1)
-                WHERE id = $2
-            """, last_seen_at, incident_id)
+                SET
+                    first_seen_at = LEAST(first_seen_at, $1),
+                    last_seen_at = GREATEST(last_seen_at, $2),
+                    occurred_at = LEAST(occurred_at, $3)
+                WHERE id = $4
+            """, first_seen_at, last_seen_at, occurred_at, incident_id)
 
         else:
             # New incident - create it
