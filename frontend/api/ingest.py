@@ -56,6 +56,10 @@ async def insert_incident(incident_data):
 
         # Check for existing incident at same location and time
         # Location: ±0.01° (≈1.1km), Time: ±6 hours
+        from datetime import timedelta
+        time_start = occurred_at - timedelta(hours=6)
+        time_end = occurred_at + timedelta(hours=6)
+
         existing_incident = await conn.fetchrow("""
             SELECT id, evidence_score, title
             FROM public.incidents
@@ -64,10 +68,10 @@ async def insert_incident(incident_data):
                 ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                 1100  -- 1.1km radius
             )
-            AND occurred_at BETWEEN ($3::timestamp - INTERVAL '6 hours') AND ($3::timestamp + INTERVAL '6 hours')
+            AND occurred_at BETWEEN $3 AND $4
             ORDER BY occurred_at DESC
             LIMIT 1
-        """, lon, lat, occurred_at)
+        """, lon, lat, time_start, time_end)
 
         if existing_incident:
             # Incident already exists - add this as a source instead
