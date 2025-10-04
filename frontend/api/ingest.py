@@ -56,20 +56,34 @@ async def insert_incident(incident_data):
         lat = incident_data.get('lat')
         lon = incident_data.get('lon')
 
-        # Check for existing incident at same location
-        # Location: ±0.01° (≈1.1km)
-        # Strategy: One incident per location regardless of time
+        # Check for existing incident at same facility
+        # Strategy: One incident per facility (smart radius based on asset type)
+        # Airports/Military: 3km (large facilities)
+        # Harbors: 1.5km (medium facilities)
+        # Other: 500m (specific locations)
+
+        asset_type = incident_data.get('asset_type', 'other')
+        search_radius = {
+            'airport': 3000,    # 3km - airports are large
+            'military': 3000,   # 3km - military bases are large
+            'harbor': 1500,     # 1.5km - harbors are medium
+            'powerplant': 1000, # 1km - power plants
+            'bridge': 500,      # 500m - bridges are specific
+            'other': 500        # 500m - default for unknown
+        }.get(asset_type, 500)
+
         existing_incident = await conn.fetchrow("""
-            SELECT id, evidence_score, title
+            SELECT id, evidence_score, title, asset_type
             FROM public.incidents
             WHERE ST_DWithin(
                 location::geography,
                 ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
-                1100  -- 1.1km radius
+                $3  -- Dynamic radius based on asset type
             )
+            AND asset_type = $4  -- Must be same asset type
             ORDER BY occurred_at ASC
             LIMIT 1
-        """, lon, lat)
+        """, lon, lat, search_radius, asset_type)
 
         if existing_incident:
             # Incident already exists - add this as a source instead
