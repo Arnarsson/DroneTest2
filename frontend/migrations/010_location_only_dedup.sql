@@ -7,6 +7,9 @@ ALTER TABLE public.incidents DROP CONSTRAINT IF EXISTS incidents_unique_location
 
 BEGIN;
 
+-- Drop temp table if it exists from previous run
+DROP TABLE IF EXISTS location_duplicates;
+
 -- Create temp table to identify all incidents at same location
 CREATE TEMP TABLE location_duplicates AS
 WITH numbered_incidents AS (
