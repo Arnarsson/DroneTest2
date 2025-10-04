@@ -157,7 +157,21 @@ def is_drone_incident(title: str, content: str) -> bool:
         "bryllup", "wedding", "parforhold", "relationship"  # Exclude personal news
     ])
 
-    return has_drone and has_incident and not is_excluded
+    # Exclude policy/announcement articles (not actual incidents)
+    is_policy = any(phrase in full_text for phrase in [
+        "announced", "announcement", "annonceret",
+        "proposed", "proposal", "forslag",
+        "will be called", "vil blive kaldt",
+        "plans to", "planer om",
+        "vows to", "lover at",
+        "development of", "udvikling af",
+        "jump-started", "iværksat",
+        "proposed measures", "foreslåede foranstaltninger",
+        "eastern flank watch",
+        "drone wall"  # Specific to policy articles about drone defense systems
+    ])
+
+    return has_drone and has_incident and not is_excluded and not is_policy
 
 def clean_html(html_text: str) -> str:
     """
