@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { format, startOfDay, eachDayOfInterval, isWithinInterval, differenceInDays } from 'date-fns'
 import type { Incident } from '@/types'
+import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'
 
 interface AnalyticsProps {
   incidents: Incident[]
@@ -496,21 +497,19 @@ function formatAssetType(type: string): string {
 }
 
 function getEvidenceLabel(level: number): string {
-  const labels: Record<number, string> = {
-    1: 'Level 1 - Unverified Report',
-    2: 'Level 2 - OSINT Confirmed',
-    3: 'Level 3 - Official Verified',
-    4: 'Level 4 - Multiple Official Sources',
-  }
-  return labels[level] || `Level ${level}`
+  const config = getEvidenceConfig(level as EvidenceScore)
+  return `Level ${level} - ${config.shortLabel}`
 }
 
-function getEvidenceColor(level: number): 'gray' | 'amber' | 'orange' | 'red' {
-  const colors: Record<number, 'gray' | 'amber' | 'orange' | 'red'> = {
-    1: 'gray',
-    2: 'amber',
-    3: 'orange',
-    4: 'red',
+function getEvidenceColor(level: number): 'gray' | 'amber' | 'orange' | 'red' | 'emerald' {
+  // Map evidence levels to bar colors using EVIDENCE_SYSTEM
+  // Level 4 (Official) = emerald, Level 3 (Verified) = amber
+  // Level 2 (Reported) = orange, Level 1 (Unconfirmed) = red
+  const colorMap: Record<number, 'gray' | 'amber' | 'orange' | 'red' | 'emerald'> = {
+    4: 'emerald',  // Official - emerald (matches badge)
+    3: 'amber',    // Verified - amber (matches badge)
+    2: 'orange',   // Reported - orange (matches badge)
+    1: 'red',      // Unconfirmed - red (matches badge)
   }
-  return colors[level] || 'gray'
+  return colorMap[level] || 'gray'
 }

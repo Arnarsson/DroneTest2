@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { FilterState } from '@/types'
+import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'
 
 interface FilterPanelProps {
   filters: FilterState
@@ -192,34 +193,31 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
             onToggle={() => toggleSection('evidence')}
           >
             <div className="space-y-2">
-              {[1, 2, 3, 4].map((level) => (
-                <motion.button
-                  key={level}
-                  onClick={() => handleChange('minEvidence', level)}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    filters.minEvidence === level
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      {level === 1 && '1 - All Levels'}
-                      {level === 2 && '2+ OSINT'}
-                      {level === 3 && '3+ Verified'}
-                      {level === 4 && '4 Official Only'}
-                    </span>
-                    <div className={`w-3 h-3 rounded-full ${
-                      filters.minEvidence === level ? 'bg-white' :
-                      level === 1 ? 'bg-gray-400' :
-                      level === 2 ? 'bg-yellow-400' :
-                      level === 3 ? 'bg-orange-500' : 'bg-red-600'
-                    }`} />
-                  </div>
-                </motion.button>
-              ))}
+              {[1, 2, 3, 4].map((level) => {
+                const config = getEvidenceConfig(level as EvidenceScore)
+                return (
+                  <motion.button
+                    key={level}
+                    onClick={() => handleChange('minEvidence', level)}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                      filters.minEvidence === level
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        {level === 1 ? '1 - All Levels' : `${level}+ ${config.shortLabel}`}
+                      </span>
+                      <div className={`w-3 h-3 rounded-full ${
+                        filters.minEvidence === level ? 'bg-white' : config.bgClass
+                      }`} />
+                    </div>
+                  </motion.button>
+                )
+              })}
             </div>
           </FilterSection>
 
