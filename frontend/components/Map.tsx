@@ -218,8 +218,44 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 
     const isDark = resolvedTheme === 'dark'
 
-    // Add new markers
+    // Pre-process incidents to group by facility
+    // Group key: location_name + asset_type (if both exist)
+    const facilityGroups = new Map<string, Incident[]>()
+    const singleIncidents: Incident[] = []
+
     incidents.forEach((incident) => {
+      // Only group if incident has both location_name AND asset_type
+      if (incident.location_name && incident.asset_type) {
+        const facilityKey = `${incident.location_name}-${incident.asset_type}`
+        if (!facilityGroups.has(facilityKey)) {
+          facilityGroups.set(facilityKey, [])
+        }
+        facilityGroups.get(facilityKey)!.push(incident)
+      } else {
+        singleIncidents.push(incident)
+      }
+    })
+
+    // Add facility group markers (2+ incidents at same facility)
+    facilityGroups.forEach((groupIncidents, facilityKey) => {
+      if (groupIncidents.length >= 2) {
+        // Create facility cluster marker
+        const firstIncident = groupIncidents[0]
+        const facilityMarker = createFacilityMarker(
+          groupIncidents,
+          firstIncident.lat,
+          firstIncident.lon,
+          isDark
+        )
+        clusterRef.current!.addLayer(facilityMarker)
+      } else {
+        // Single incident at this facility - treat as regular marker
+        singleIncidents.push(groupIncidents[0])
+      }
+    })
+
+    // Add single incident markers
+    singleIncidents.forEach((incident) => {
       const icon = createIncidentIcon(incident.evidence_score, isDark)
       const marker = L.marker([incident.lat, incident.lon], { icon })
 
@@ -281,6 +317,71 @@ function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.D
     iconSize: [38, 38],
     iconAnchor: [19, 19],
   })
+}
+
+function createFacilityMarker(
+  incidents: Incident[],
+  lat: number,
+  lon: number,
+  isDark: boolean = false
+): L.Marker {
+  const count = incidents.length
+  const assetType = incidents[0].asset_type
+  const locationName = incidents[0].location_name
+
+  // Facility emoji mapping
+  const facilityEmoji: Record<string, string> = {
+    'airport': '✈️',
+    'military': '🛡️',
+    'harbor': '⚓',
+    'powerplant': '⚡',
+    'bridge': '🌉',
+    'other': '📍'
+  }
+
+  const emoji = facilityEmoji[assetType || 'other'] || '📍'
+  const gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+  const borderColor = isDark ? '#1f2937' : 'white'
+
+  const icon = L.divIcon({
+    html: `
+      <div style="
+        width: 50px;
+        height: 50px;
+        background: ${gradient};
+        border: 3px solid ${borderColor};
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: transform 0.2s;
+      ">
+        <div style="font-size: 18px; line-height: 1;">${emoji}</div>
+        <div style="font-size: 13px; margin-top: -2px;">${count}</div>
+      </div>
+    `,
+    className: 'marker-cluster-facility',
+    iconSize: [50, 50],
+    iconAnchor: [25, 25],
+  })
+
+  const marker = L.marker([lat, lon], { icon })
+
+  // Create popup with all incidents at this facility
+  const popupContent = createFacilityPopup(incidents, locationName || assetType || 'Facility', emoji, isDark)
+  marker.bindPopup(popupContent, {
+    maxWidth: 400,
+    className: 'incident-popup',
+  })
+
+  return marker
 }
 
 function createPopupContent(incident: Incident, isDark: boolean = false): string {
@@ -393,6 +494,80 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
           </div>
         </div>
       ` : ''}
+    </div>
+  `
+}
+
+function createFacilityPopup(
+  incidents: Incident[],
+  facilityName: string,
+  emoji: string,
+  isDark: boolean = false
+): string {
+  const textPrimary = isDark ? '#f3f4f6' : '#111827'
+  const textSecondary = isDark ? '#9ca3af' : '#4b5563'
+  const borderColor = isDark ? 'rgba(55, 65, 81, 0.5)' : 'rgba(229, 231, 235, 0.5)'
+
+  // Sort incidents by date (newest first)
+  const sortedIncidents = [...incidents].sort((a, b) =>
+    new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
+  )
+
+  return `
+    <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
+      <h3 style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: ${textPrimary}; line-height: 1.3;">
+        ${emoji} ${facilityName}
+      </h3>
+
+      <div style="margin-bottom: 12px; padding: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px;">
+        <div style="color: white; font-size: 13px; font-weight: 600; text-align: center;">
+          ${incidents.length} incident${incidents.length !== 1 ? 's' : ''} at this location
+        </div>
+      </div>
+
+      <div style="max-height: 300px; overflow-y: auto;">
+        ${sortedIncidents.map((incident, idx) => {
+          const config = EVIDENCE_SYSTEM[incident.evidence_score as 1 | 2 | 3 | 4]
+          const timeAgo = formatDistance(new Date(incident.occurred_at), new Date(), { addSuffix: true })
+
+          return `
+            <div style="
+              padding: 10px;
+              margin-bottom: 8px;
+              border: 1px solid ${borderColor};
+              border-radius: 8px;
+              background: ${isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(243, 244, 246, 0.5)'};
+            ">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                <span style="
+                  background: ${config.gradient};
+                  color: white;
+                  padding: 4px 10px;
+                  border-radius: 14px;
+                  font-size: 11px;
+                  font-weight: 700;
+                  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                ">
+                  ${config.label}
+                </span>
+                <span style="color: ${textSecondary}; font-size: 11px; font-weight: 500;">
+                  ${timeAgo}
+                </span>
+              </div>
+
+              <div style="font-size: 13px; color: ${textPrimary}; font-weight: 600; margin-bottom: 4px;">
+                ${incident.title}
+              </div>
+
+              ${incident.narrative ? `
+                <div style="font-size: 12px; color: ${textSecondary}; line-height: 1.4;">
+                  ${incident.narrative.substring(0, 120)}${incident.narrative.length > 120 ? '...' : ''}
+                </div>
+              ` : ''}
+            </div>
+          `
+        }).join('')}
+      </div>
     </div>
   `
 }
