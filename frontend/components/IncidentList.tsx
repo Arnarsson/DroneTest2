@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { useState, useMemo } from 'react'
 import type { Incident } from '@/types'
 import { EvidenceBadge } from './EvidenceBadge'

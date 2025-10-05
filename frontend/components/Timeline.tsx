@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns'
+import { format } from 'date-fns/format'
+import { startOfDay } from 'date-fns/startOfDay'
+import { endOfDay } from 'date-fns/endOfDay'
+import { isWithinInterval } from 'date-fns/isWithinInterval'
 import type { Incident } from '@/types'
 
 interface TimelineProps {

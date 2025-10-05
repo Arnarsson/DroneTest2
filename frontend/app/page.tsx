@@ -8,7 +8,7 @@ import { Header } from "@/components/Header";
 import { IncidentList } from "@/components/IncidentList";
 import { useIncidents } from "@/hooks/useIncidents";
 import type { FilterState, Incident } from "@/types";
-import { isWithinInterval } from "date-fns";
+import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";

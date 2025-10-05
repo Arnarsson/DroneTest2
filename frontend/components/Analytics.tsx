@@ -1,7 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { format, startOfDay, eachDayOfInterval, isWithinInterval, differenceInDays } from 'date-fns'
+import { format } from 'date-fns/format'
+import { startOfDay } from 'date-fns/startOfDay'
+import { eachDayOfInterval } from 'date-fns/eachDayOfInterval'
+import { isWithinInterval } from 'date-fns/isWithinInterval'
+import { differenceInDays } from 'date-fns/differenceInDays'
 import type { Incident } from '@/types'
 import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'
 
