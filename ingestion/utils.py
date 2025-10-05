@@ -65,15 +65,26 @@ def extract_datetime(text: str, fallback: datetime = None) -> datetime:
     except:
         return fallback
 
-def calculate_evidence_score(source_type: str, has_quote: bool, has_official: bool) -> int:
+def calculate_evidence_score(trust_weight: int, has_official: bool = False) -> int:
     """
-    Calculate evidence score based on source and content
+    Calculate evidence score based on source trust weight and official quotes
+
+    Args:
+        trust_weight: Source trust level (1-4)
+        has_official: Whether content contains official quotes
+
+    Returns:
+        Evidence score (1-4):
+        - 4: Official sources (trust_weight=4)
+        - 3: Credible source (trust_weight=3) with official quote
+        - 2: Credible source (trust_weight>=2)
+        - 1: Low trust source (trust_weight=1)
     """
-    if source_type == "police" or source_type == "notam":
+    if trust_weight == 4:
         return 4
-    elif source_type == "media" and has_official:
+    elif trust_weight == 3 and has_official:
         return 3
-    elif source_type == "media":
+    elif trust_weight >= 2:
         return 2
     else:
         return 1
