@@ -68,10 +68,71 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
         const count = cluster.getChildCount()
         const isDark = document.documentElement.classList.contains('dark')
 
-        // Color code clusters by size for better UX
+        // Analyze cluster for facility context
+        const markers = cluster.getAllChildMarkers()
+        const incidentData = markers.map((m: any) => m.incidentData).filter(Boolean)
+
+        // Check if all incidents are at the same facility
+        const facilityTypes = new Set(incidentData.map((inc: any) => inc.asset_type))
+        const facilityNames = new Set(incidentData.map((inc: any) => inc.location_name || inc.title).filter(Boolean))
+        const isSameFacility = facilityTypes.size === 1 && incidentData.length > 0
+
+        const facilityType = isSameFacility ? Array.from(facilityTypes)[0] : null
+        const facilityName = isSameFacility && facilityNames.size === 1 ? Array.from(facilityNames)[0] : null
+
+        // Facility emoji mapping
+        const facilityEmoji: Record<string, string> = {
+          'airport': '✈️',
+          'military': '🛡️',
+          'harbor': '⚓',
+          'powerplant': '⚡',
+          'bridge': '🌉',
+          'other': '📍'
+        }
+
+        // Color code clusters
         let clusterClass = 'marker-cluster-small'
         let gradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
+        let tooltip = `${count} incidents at this location - click to expand`
 
+        if (isSameFacility && facilityType) {
+          // Same facility cluster - use emerald/green gradient
+          gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+          const emoji = facilityEmoji[facilityType] || '📍'
+          const label = count > 1 ? `${count} events` : 'event'
+          const name = facilityName || facilityType.charAt(0).toUpperCase() + facilityType.slice(1)
+          tooltip = `${emoji} ${name} - ${label}`
+
+          return L.divIcon({
+            html: `
+              <div style="
+                width: 50px;
+                height: 50px;
+                background: ${gradient};
+                border: 3px solid ${isDark ? '#1f2937' : 'white'};
+                border-radius: 50%;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                cursor: pointer;
+                transition: transform 0.2s;
+              " title="${tooltip}">
+                <div style="font-size: 18px; line-height: 1;">${emoji}</div>
+                <div style="font-size: 13px; margin-top: -2px;">${count}</div>
+              </div>
+            `,
+            className: 'marker-cluster-facility',
+            iconSize: [50, 50],
+          })
+        }
+
+        // Mixed/nearby incidents - original behavior
         if (count > 10) {
           clusterClass = 'marker-cluster-large'
           gradient = 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)'
@@ -98,7 +159,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
               text-shadow: 0 1px 2px rgba(0,0,0,0.3);
               cursor: pointer;
               transition: transform 0.2s;
-            " title="${count} incidents at this location - click to expand">
+            " title="${tooltip}">
               ${count}
             </div>
           `,
@@ -155,6 +216,9 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
     incidents.forEach((incident) => {
       const icon = createIncidentIcon(incident.evidence_score, isDark)
       const marker = L.marker([incident.lat, incident.lon], { icon })
+
+      // Attach incident data to marker for cluster analysis
+      ;(marker as any).incidentData = incident
 
       // Create popup content
       const popupContent = createPopupContent(incident, isDark)
