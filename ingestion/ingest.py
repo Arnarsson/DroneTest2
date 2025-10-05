@@ -60,6 +60,13 @@ class DroneWatchIngester:
         """Send incident to API with verification and improved error handling"""
         try:
             incident = self._cleanup_incident(incident)
+
+            # Block test incidents
+            title_lower = incident['title'].lower()
+            if any(test_word in title_lower for test_word in ['dronetest', 'test incident', 'testing drone']):
+                logger.warning(f"🚫 Blocking test incident: {incident['title'][:50]}")
+                return False
+
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(
                 incident['title'],

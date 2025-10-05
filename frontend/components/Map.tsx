@@ -219,14 +219,18 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
     const isDark = resolvedTheme === 'dark'
 
     // Pre-process incidents to group by facility
-    // Group key: location_name + asset_type (if both exist)
+    // Group key: coordinates (rounded to 3 decimals ~110m) + asset_type
     const facilityGroups: { [key: string]: Incident[] } = {}
     const singleIncidents: Incident[] = []
 
     incidents.forEach((incident) => {
-      // Only group if incident has both location_name AND asset_type
-      if (incident.location_name && incident.asset_type) {
-        const facilityKey = `${incident.location_name}-${incident.asset_type}`
+      // Group by coordinates + asset_type (if asset_type exists)
+      if (incident.asset_type) {
+        // Round coordinates to 3 decimals (~110m precision) to group nearby incidents
+        const roundedLat = incident.lat.toFixed(3)
+        const roundedLon = incident.lon.toFixed(3)
+        const facilityKey = `${roundedLat},${roundedLon}-${incident.asset_type}`
+
         if (!facilityGroups[facilityKey]) {
           facilityGroups[facilityKey] = []
         }
