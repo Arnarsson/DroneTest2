@@ -48,10 +48,10 @@ CHECK (
 -- This allows same location with different times or different titles
 CREATE UNIQUE INDEX IF NOT EXISTS idx_incidents_unique_combo
 ON incidents (
-  ROUND(lat::numeric, 4),      -- Same location (within ~10m)
-  ROUND(lon::numeric, 4),
-  DATE_TRUNC('hour', occurred_at),  -- Same hour
-  title                         -- Same title
+  ROUND(ST_Y(location::geometry)::numeric, 4),  -- Latitude from PostGIS geometry
+  ROUND(ST_X(location::geometry)::numeric, 4),  -- Longitude from PostGIS geometry
+  DATE_TRUNC('hour', occurred_at),              -- Same hour
+  title                                         -- Same title
 );
 
 -- Report final state
