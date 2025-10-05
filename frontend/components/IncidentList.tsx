@@ -1,7 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
+import { useState, useMemo } from 'react'
 import type { Incident } from '@/types'
 import { EvidenceBadge } from './EvidenceBadge'
 import { SourceBadge } from './SourceBadge'
@@ -12,6 +13,8 @@ interface IncidentListProps {
 }
 
 export function IncidentList({ incidents, isLoading }: IncidentListProps) {
+  const [groupByFacility, setGroupByFacility] = useState(false)
+  const [expandedFacilities, setExpandedFacilities] = useState<Set<string>>(new Set())
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
@@ -32,6 +35,33 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
     )
   }
 
+  // Group incidents by facility
+  const facilitiesMap = useMemo(() => {
+    if (!groupByFacility) return null
+
+    const map = new Map<string, Incident[]>()
+
+    incidents.forEach(incident => {
+      const facilityKey = `${incident.asset_type || 'other'}-${incident.location_name || incident.title.substring(0, 30)}`
+      if (!map.has(facilityKey)) {
+        map.set(facilityKey, [])
+      }
+      map.get(facilityKey)!.push(incident)
+    })
+
+    return map
+  }, [incidents, groupByFacility])
+
+  const toggleFacility = (key: string) => {
+    const newSet = new Set(expandedFacilities)
+    if (newSet.has(key)) {
+      newSet.delete(key)
+    } else {
+      newSet.add(key)
+    }
+    setExpandedFacilities(newSet)
+  }
+
   if (incidents.length === 0) {
     return (
       <motion.div
@@ -50,20 +80,139 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 min-h-full">
+      {/* Group by Facility Toggle */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Showing <span className="font-bold text-gray-900 dark:text-white">{incidents.length}</span> incident{incidents.length !== 1 ? 's' : ''}
+        </div>
+        <button
+          onClick={() => setGroupByFacility(!groupByFacility)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+            groupByFacility
+              ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          Group by Facility
+        </button>
+      </div>
+
       <motion.div
         className="space-y-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        {incidents.map((incident, index) => (
-          <IncidentCard key={incident.id} incident={incident} index={index} />
-        ))}
+        {groupByFacility && facilitiesMap ? (
+          // Grouped view
+          Array.from(facilitiesMap.entries()).map(([facilityKey, facilityIncidents]) => (
+            <FacilityGroup
+              key={facilityKey}
+              facilityKey={facilityKey}
+              incidents={facilityIncidents}
+              isExpanded={expandedFacilities.has(facilityKey)}
+              onToggle={() => toggleFacility(facilityKey)}
+            />
+          ))
+        ) : (
+          // Flat view
+          incidents.map((incident, index) => (
+            <IncidentCard key={incident.id} incident={incident} index={index} />
+          ))
+        )}
       </motion.div>
     </div>
   )
 }
 
-function IncidentCard({ incident, index }: { incident: Incident; index: number }) {
+function FacilityGroup({ facilityKey, incidents, isExpanded, onToggle }: {
+  facilityKey: string
+  incidents: Incident[]
+  isExpanded: boolean
+  onToggle: () => void
+}) {
+  const firstIncident = incidents[0]
+  const assetType = firstIncident.asset_type || 'other'
+  const facilityName = firstIncident.location_name || firstIncident.title.substring(0, 40)
+
+  // Calculate date range
+  const dates = incidents.map(inc => new Date(inc.occurred_at))
+  const minDate = new Date(Math.min(...dates.map(d => d.getTime())))
+  const maxDate = new Date(Math.max(...dates.map(d => d.getTime())))
+  const dateRange = minDate.getTime() === maxDate.getTime()
+    ? format(minDate, 'MMM d, yyyy')
+    : `${format(minDate, 'MMM d')} - ${format(maxDate, 'MMM d, yyyy')}`
+
+  // Facility emoji mapping
+  const facilityEmoji: Record<string, string> = {
+    'airport': '✈️',
+    'military': '🛡️',
+    'harbor': '⚓',
+    'powerplant': '⚡',
+    'bridge': '🌉',
+    'other': '📍'
+  }
+
+  const emoji = facilityEmoji[assetType] || '📍'
+
+  return (
+    <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+      {/* Facility Header */}
+      <button
+        onClick={onToggle}
+        className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all border-b border-gray-200 dark:border-gray-800"
+      >
+        <div className="flex items-center gap-3 flex-1 text-left">
+          <div className="text-2xl">{emoji}</div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              {facilityName}
+            </h3>
+            <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <span className="font-medium">{incidents.length} {incidents.length === 1 ? 'event' : 'events'}</span>
+              <span>•</span>
+              <span>{dateRange}</span>
+            </div>
+          </div>
+        </div>
+
+        <motion.svg
+          className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </motion.svg>
+      </button>
+
+      {/* Facility Incidents */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="divide-y divide-gray-100 dark:divide-gray-800"
+          >
+            {incidents.map((incident, index) => (
+              <div key={incident.id} className="p-6">
+                <IncidentCard incident={incident} index={index} isInGroup />
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function IncidentCard({ incident, index, isInGroup = false }: { incident: Incident; index: number; isInGroup?: boolean }) {
   const getTimeAgo = (date: string) => {
     const now = new Date()
     const then = new Date(date)
@@ -82,7 +231,11 @@ function IncidentCard({ incident, index }: { incident: Incident; index: number }
 
   return (
     <motion.div
-      className="bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-8 border border-gray-200 dark:border-gray-800"
+      className={`${
+        isInGroup
+          ? 'bg-transparent'
+          : 'bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-8 border border-gray-200 dark:border-gray-800'
+      }`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
