@@ -220,24 +220,24 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 
     // Pre-process incidents to group by facility
     // Group key: location_name + asset_type (if both exist)
-    const facilityGroups = new Map<string, Incident[]>()
+    const facilityGroups: { [key: string]: Incident[] } = {}
     const singleIncidents: Incident[] = []
 
     incidents.forEach((incident) => {
       // Only group if incident has both location_name AND asset_type
       if (incident.location_name && incident.asset_type) {
         const facilityKey = `${incident.location_name}-${incident.asset_type}`
-        if (!facilityGroups.has(facilityKey)) {
-          facilityGroups.set(facilityKey, [])
+        if (!facilityGroups[facilityKey]) {
+          facilityGroups[facilityKey] = []
         }
-        facilityGroups.get(facilityKey)!.push(incident)
+        facilityGroups[facilityKey].push(incident)
       } else {
         singleIncidents.push(incident)
       }
     })
 
     // Add facility group markers (2+ incidents at same facility)
-    facilityGroups.forEach((groupIncidents, facilityKey) => {
+    Object.entries(facilityGroups).forEach(([facilityKey, groupIncidents]) => {
       if (groupIncidents.length >= 2) {
         // Create facility cluster marker
         const firstIncident = groupIncidents[0]
