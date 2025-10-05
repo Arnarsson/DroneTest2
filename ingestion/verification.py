@@ -108,6 +108,49 @@ def has_official_quote(incident: Dict) -> bool:
 
 
 # =====================================================
+# Evidence Score Calculation
+# =====================================================
+
+def calculate_evidence_score_from_sources(sources: List[Dict], has_official_quote: bool = False) -> int:
+    """
+    Calculate evidence score (1-4) based on source trust weights and quotes
+
+    Args:
+        sources: List of source dictionaries with trust_weight
+        has_official_quote: Whether incident narrative contains official quotes
+
+    Returns:
+        Evidence score (1-4):
+        - 4: Official sources (max_trust=4)
+        - 3: Multiple credible sources (count>=2, max_trust>=3) OR single credible with quote
+        - 2: Single credible source (max_trust>=2)
+        - 1: Low trust source or no sources
+    """
+    if not sources:
+        return 1
+
+    max_trust = max([s.get('trust_weight', 1) for s in sources])
+    source_count = len(sources)
+
+    # Tier 4: Official sources (police, military, NOTAM)
+    if max_trust == 4:
+        return 4
+
+    # Tier 3: Multiple credible sources OR single with official quote
+    if source_count >= 2 and max_trust >= 3:
+        return 3
+    elif max_trust == 3 and has_official_quote:
+        return 3
+
+    # Tier 2: Single credible source
+    if max_trust >= 2:
+        return 2
+
+    # Tier 1: Low trust or unverified
+    return 1
+
+
+# =====================================================
 # Confidence Score Calculation
 # =====================================================
 

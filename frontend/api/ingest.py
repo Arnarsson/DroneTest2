@@ -129,6 +129,8 @@ async def insert_incident(incident_data):
             )
 
         # Insert sources if provided
+        # NOTE: After sources are inserted, the database trigger 'trigger_update_evidence_score'
+        # will automatically recalculate the incident's evidence_score based on source trust_weights
         if incident_data.get('sources'):
             for source in incident_data['sources']:
                 try:
@@ -155,6 +157,7 @@ async def insert_incident(incident_data):
                     )
 
                     # Then insert into incident_sources junction table
+                    # This INSERT triggers automatic evidence_score recalculation
                     await conn.execute("""
                         INSERT INTO public.incident_sources
                         (incident_id, source_id, source_url, source_title, source_quote)
