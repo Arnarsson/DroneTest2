@@ -1,5 +1,6 @@
 # DroneWatch Investigation Findings
 **Generated**: 2025-10-03
+**Updated**: 2025-10-05 (URL Validation Phase)
 **Method**: Progressive disclosure + context engineering
 
 ## Architecture Map (Lightweight Identifiers)
@@ -22,6 +23,38 @@ dronewatch-2/
 - 873 source files total
 - Stack: Next.js 14 + Python 3.11 + Supabase (PostGIS)
 - Deployment: Vercel (frontend) + GitHub Actions (scraper)
+
+---
+
+## Latest Investigation: Phase 0 - URL Validation (2025-10-05)
+
+### 🚨 CRITICAL FINDING: 34 Broken URLs in config.py
+
+**Evidence**: Ran `validate_sources.py` on all 40 sources
+**Result**:
+- ✅ **20 working URLs** (50%)
+- ❌ **34 broken URLs** (85% failure rate!)
+
+**Major Issues**:
+1. **ALL 12 Danish police RSS feeds DON'T EXIST** (404 errors)
+   - `https://politi.dk/koebenhavns-politi/nyhedsliste/rss.xml` → 404
+   - Pattern repeated for all districts
+
+2. **Multiple news RSS feeds malformed** (invalid XML)
+   - Berlingske, Jyllands-Posten, Politiken - all broken
+
+3. **Norwegian/Swedish/Finnish police feeds broken**
+   - Must use HTML scraping instead
+
+**Fix Applied**:
+- Created `config_verified.py` with ONLY working sources
+- Documented which sources need HTML scraping
+- Added social media sources (Nitter for Twitter)
+
+**Files**:
+- `/root/repo/ingestion/validate_sources.py` - Validation script ✅
+- `/root/repo/ingestion/config_verified.py` - Clean config ✅
+- `/root/repo/ingestion/source_validation_report.json` - Full report ✅
 
 ---
 

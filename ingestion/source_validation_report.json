@@ -1,0 +1,573 @@
+{
+  "timestamp": "2025-10-05T20:15:34.525092",
+  "total_sources": 40,
+  "working_count": 20,
+  "broken_count": 34,
+  "results": {
+    "working": [
+      {
+        "key": "dr_news",
+        "name": "DR Nyheder",
+        "type": "rss",
+        "url": "https://www.dr.dk/nyheder/service/feeds/allenyheder",
+        "message": "RSS OK: 20 entries",
+        "details": {
+          "entries": 20,
+          "title": "Kort nyt | DR"
+        }
+      },
+      {
+        "key": "tv2_lorry",
+        "name": "TV2 Lorry (Copenhagen Region)",
+        "type": "rss",
+        "url": "https://www.tv2lorry.dk/rss",
+        "message": "RSS OK: 10 entries",
+        "details": {
+          "entries": 10,
+          "title": "Artikler"
+        }
+      },
+      {
+        "key": "tv2_nord",
+        "name": "TV2 Nord (North Jutland)",
+        "type": "rss",
+        "url": "https://www.tv2nord.dk/rss",
+        "message": "RSS OK: 10 entries",
+        "details": {
+          "entries": 10,
+          "title": "Artikler"
+        }
+      },
+      {
+        "key": "tv2_\u00f8stjylland",
+        "name": "TV2 \u00d8stjylland (Aarhus Region)",
+        "type": "rss",
+        "url": "https://www.tv2ostjylland.dk/rss",
+        "message": "RSS OK: 10 entries",
+        "details": {
+          "entries": 10,
+          "title": "Artikler"
+        }
+      },
+      {
+        "key": "politiet_no",
+        "name": "Politiet (Norwegian National Police)",
+        "type": "url",
+        "url": "https://www.politiet.no/aktuelt-tall-og-fakta/aktuelt/",
+        "message": "HTML OK (200)",
+        "details": {
+          "status": 200,
+          "content_length": 71449
+        }
+      },
+      {
+        "key": "nrk_news",
+        "name": "NRK Nyheter",
+        "type": "rss",
+        "url": "https://www.nrk.no/toppsaker.rss",
+        "message": "RSS OK: 100 entries",
+        "details": {
+          "entries": 100,
+          "title": "NRK"
+        }
+      },
+      {
+        "key": "aftenposten",
+        "name": "Aftenposten",
+        "type": "rss",
+        "url": "https://www.aftenposten.no/rss",
+        "message": "RSS OK: 25 entries",
+        "details": {
+          "entries": 25,
+          "title": "Aftenposten Title"
+        }
+      },
+      {
+        "key": "vg_no",
+        "name": "VG (Verdens Gang)",
+        "type": "rss",
+        "url": "https://www.vg.no/rss/feed/",
+        "message": "RSS OK: 10 entries",
+        "details": {
+          "entries": 10,
+          "title": "Siste nytt fra VG"
+        }
+      },
+      {
+        "key": "svt_nyheter",
+        "name": "SVT Nyheter",
+        "type": "rss",
+        "url": "https://www.svt.se/nyheter/rss.xml",
+        "message": "RSS OK: 20 entries",
+        "details": {
+          "entries": 20,
+          "title": "SVT Nyheter"
+        }
+      },
+      {
+        "key": "dagens_nyheter",
+        "name": "Dagens Nyheter",
+        "type": "rss",
+        "url": "https://www.dn.se/rss/",
+        "message": "RSS OK: 117 entries",
+        "details": {
+          "entries": 117,
+          "title": "DN.se - Dagens Nyheter"
+        }
+      },
+      {
+        "key": "aftonbladet",
+        "name": "Aftonbladet",
+        "type": "rss",
+        "url": "https://rss.aftonbladet.se/rss2/small/pages/sections/senastenytt/",
+        "message": "RSS OK: 34 entries",
+        "details": {
+          "entries": 34,
+          "title": "Senaste nytt \u2013 nyheter fr\u00e5n Aftonbladet"
+        }
+      },
+      {
+        "key": "expressen",
+        "name": "Expressen",
+        "type": "rss",
+        "url": "https://feeds.expressen.se/nyheter/",
+        "message": "RSS OK: 20 entries",
+        "details": {
+          "entries": 20,
+          "title": "Expressen: Nyheter"
+        }
+      },
+      {
+        "key": "yle_uutiset",
+        "name": "YLE Uutiset",
+        "type": "rss",
+        "url": "https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET",
+        "message": "RSS OK: 30 entries",
+        "details": {
+          "entries": 30,
+          "title": "Yle Uutiset | Tuoreimmat uutiset"
+        }
+      },
+      {
+        "key": "helsingin_sanomat",
+        "name": "Helsingin Sanomat",
+        "type": "rss",
+        "url": "https://www.hs.fi/rss/tuoreimmat.xml",
+        "message": "RSS OK: 98 entries",
+        "details": {
+          "entries": 98,
+          "title": "Uutiset - Helsingin Sanomat"
+        }
+      },
+      {
+        "key": "ilta_sanomat",
+        "name": "Ilta-Sanomat",
+        "type": "rss",
+        "url": "https://www.is.fi/rss/tuoreimmat.xml",
+        "message": "RSS OK: 100 entries",
+        "details": {
+          "entries": 100,
+          "title": "Uutiset - Ilta-Sanomat"
+        }
+      },
+      {
+        "key": "aviation_week",
+        "name": "Aviation Week",
+        "type": "rss",
+        "url": "https://aviationweek.com/rss.xml",
+        "message": "RSS OK: 10 entries",
+        "details": {
+          "entries": 10,
+          "title": "Aviation Week Network"
+        }
+      },
+      {
+        "key": "defense_news",
+        "name": "Defense News",
+        "type": "rss",
+        "url": "https://www.defensenews.com/arc/outboundfeeds/rss/",
+        "message": "RSS OK: 25 entries",
+        "details": {
+          "entries": 25,
+          "title": "Defense News"
+        }
+      },
+      {
+        "key": "janes_defense",
+        "name": "Jane's Defence",
+        "type": "url",
+        "url": "https://www.janes.com/",
+        "message": "HTML OK (200)",
+        "details": {
+          "status": 200,
+          "content_length": 79178
+        }
+      },
+      {
+        "key": "the_drive_warzone",
+        "name": "The Drive - The War Zone",
+        "type": "rss",
+        "url": "https://www.thedrive.com/the-war-zone/rss",
+        "message": "RSS OK: 31 entries",
+        "details": {
+          "entries": 31,
+          "title": "The War Zone"
+        }
+      },
+      {
+        "key": "breaking_defense",
+        "name": "Breaking Defense",
+        "type": "rss",
+        "url": "https://breakingdefense.com/feed/",
+        "message": "RSS OK: 15 entries",
+        "details": {
+          "entries": 15,
+          "title": "Breaking Defense"
+        }
+      }
+    ],
+    "broken": [
+      {
+        "key": "nordjyllands_police",
+        "name": "Nordjyllands Politi",
+        "type": "url",
+        "url": "https://politi.dk/nordjyllands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "nordjyllands_police",
+        "name": "Nordjyllands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/nordjyllands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "copenhagen_police",
+        "name": "K\u00f8benhavns Politi",
+        "type": "url",
+        "url": "https://politi.dk/koebenhavns-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "copenhagen_police",
+        "name": "K\u00f8benhavns Politi",
+        "type": "rss",
+        "url": "https://politi.dk/koebenhavns-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "vestsj\u00e6llands_police",
+        "name": "Midt- og Vestsj\u00e6llands Politi",
+        "type": "url",
+        "url": "https://politi.dk/midt-og-vestsjaellands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "vestsj\u00e6llands_police",
+        "name": "Midt- og Vestsj\u00e6llands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/midt-og-vestsjaellands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "sydsj\u00e6llands_police",
+        "name": "Sydsj\u00e6llands og Lolland-Falsters Politi",
+        "type": "url",
+        "url": "https://politi.dk/sydsjaellands-og-lolland-falsters-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "sydsj\u00e6llands_police",
+        "name": "Sydsj\u00e6llands og Lolland-Falsters Politi",
+        "type": "rss",
+        "url": "https://politi.dk/sydsjaellands-og-lolland-falsters-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "fyn_police",
+        "name": "Fyns Politi",
+        "type": "url",
+        "url": "https://politi.dk/fyns-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "fyn_police",
+        "name": "Fyns Politi",
+        "type": "rss",
+        "url": "https://politi.dk/fyns-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "syddanmark_police",
+        "name": "Syd- og S\u00f8nderjyllands Politi",
+        "type": "url",
+        "url": "https://politi.dk/syd-og-soenderjyllands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "syddanmark_police",
+        "name": "Syd- og S\u00f8nderjyllands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/syd-og-soenderjyllands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "syd\u00f8stjyllands_police",
+        "name": "Syd\u00f8stjyllands Politi",
+        "type": "url",
+        "url": "https://politi.dk/sydoestjyllands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "syd\u00f8stjyllands_police",
+        "name": "Syd\u00f8stjyllands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/sydoestjyllands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "\u00f8stjyllands_police",
+        "name": "\u00d8stjyllands Politi",
+        "type": "url",
+        "url": "https://politi.dk/oestjyllands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "\u00f8stjyllands_police",
+        "name": "\u00d8stjyllands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/oestjyllands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "midtjyllands_police",
+        "name": "Midt- og Vestjyllands Politi",
+        "type": "url",
+        "url": "https://politi.dk/midt-og-vestjyllands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "midtjyllands_police",
+        "name": "Midt- og Vestjyllands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/midt-og-vestjyllands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "nordsj\u00e6llands_police",
+        "name": "Nordsj\u00e6llands Politi",
+        "type": "url",
+        "url": "https://politi.dk/nordsjaellands-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "nordsj\u00e6llands_police",
+        "name": "Nordsj\u00e6llands Politi",
+        "type": "rss",
+        "url": "https://politi.dk/nordsjaellands-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "bornholms_police",
+        "name": "Bornholms Politi",
+        "type": "url",
+        "url": "https://politi.dk/bornholms-politi/nyhedsliste",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "bornholms_police",
+        "name": "Bornholms Politi",
+        "type": "rss",
+        "url": "https://politi.dk/bornholms-politi/nyhedsliste/rss.xml",
+        "error": "Invalid RSS: text/html is not an XML media type",
+        "details": {
+          "error": "text/html is not an XML media type"
+        }
+      },
+      {
+        "key": "tv2_news",
+        "name": "TV2 News",
+        "type": "rss",
+        "url": "https://feeds.tv2.dk/nyheder/rss",
+        "error": "Invalid RSS: <urlopen error [Errno -5] No address associated with hostname>",
+        "details": {
+          "error": "<urlopen error [Errno -5] No address associated with hostname>"
+        }
+      },
+      {
+        "key": "berlingske",
+        "name": "Berlingske",
+        "type": "rss",
+        "url": "https://www.berlingske.dk/rss",
+        "error": "Invalid RSS: <unknown>:79:78: not well-formed (invalid token)",
+        "details": {
+          "error": "<unknown>:79:78: not well-formed (invalid token)"
+        }
+      },
+      {
+        "key": "jyllands_posten",
+        "name": "Jyllands-Posten",
+        "type": "rss",
+        "url": "https://jyllands-posten.dk/rss",
+        "error": "Invalid RSS: <unknown>:2:59302: not well-formed (invalid token)",
+        "details": {
+          "error": "<unknown>:2:59302: not well-formed (invalid token)"
+        }
+      },
+      {
+        "key": "politiken",
+        "name": "Politiken",
+        "type": "rss",
+        "url": "https://politiken.dk/rss/",
+        "error": "Invalid RSS: <unknown>:105:4: mismatched tag",
+        "details": {
+          "error": "<unknown>:105:4: mismatched tag"
+        }
+      },
+      {
+        "key": "politiet_no",
+        "name": "Politiet (Norwegian National Police)",
+        "type": "rss",
+        "url": "https://www.politiet.no/aktuelt-tall-og-fakta/aktuelt/rss/",
+        "error": "Invalid RSS: text/html; charset=utf-8 is not an XML media type",
+        "details": {
+          "error": "text/html; charset=utf-8 is not an XML media type"
+        }
+      },
+      {
+        "key": "dagbladet_no",
+        "name": "Dagbladet",
+        "type": "rss",
+        "url": "https://www.dagbladet.no/rss",
+        "error": "Invalid RSS: <unknown>:14:69: not well-formed (invalid token)",
+        "details": {
+          "error": "<unknown>:14:69: not well-formed (invalid token)"
+        }
+      },
+      {
+        "key": "polisen_se",
+        "name": "Polisen (Swedish National Police)",
+        "type": "url",
+        "url": "https://polisen.se/aktuellt/nyheter/",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "polisen_se",
+        "name": "Polisen (Swedish National Police)",
+        "type": "rss",
+        "url": "https://polisen.se/aktuellt/rss/",
+        "error": "Invalid RSS: <unknown>:72:2: mismatched tag",
+        "details": {
+          "error": "<unknown>:72:2: mismatched tag"
+        }
+      },
+      {
+        "key": "svenska_dagbladet",
+        "name": "Svenska Dagbladet",
+        "type": "rss",
+        "url": "https://www.svd.se/rss.xml",
+        "error": "Invalid RSS: <unknown>:97:119: not well-formed (invalid token)",
+        "details": {
+          "error": "<unknown>:97:119: not well-formed (invalid token)"
+        }
+      },
+      {
+        "key": "poliisi_fi",
+        "name": "Poliisi (Finnish National Police)",
+        "type": "url",
+        "url": "https://poliisi.fi/tietoa-poliisista/tiedotteet",
+        "error": "404 Not Found",
+        "details": {
+          "status": 404
+        }
+      },
+      {
+        "key": "poliisi_fi",
+        "name": "Poliisi (Finnish National Police)",
+        "type": "rss",
+        "url": "https://poliisi.fi/rss/tiedotteet",
+        "error": "Invalid RSS: <unknown>:2:0: syntax error",
+        "details": {
+          "error": "<unknown>:2:0: syntax error"
+        }
+      },
+      {
+        "key": "flightglobal",
+        "name": "FlightGlobal",
+        "type": "rss",
+        "url": "https://www.flightglobal.com/rss/articles/all/feed.xml",
+        "error": "Invalid RSS: <unknown>:2:356: mismatched tag",
+        "details": {
+          "error": "<unknown>:2:356: mismatched tag"
+        }
+      }
+    ],
+    "needs_manual_check": []
+  }
+}
