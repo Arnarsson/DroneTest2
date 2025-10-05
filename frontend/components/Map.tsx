@@ -98,7 +98,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
         if (isSameFacility && facilityType) {
           // Same facility cluster - use emerald/green gradient
           gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-          const emoji = facilityEmoji[facilityType] || '📍'
+          const emoji = facilityEmoji[facilityType as string] || '📍'
           const label = count > 1 ? `${count} events` : 'event'
           const name = facilityName || facilityType.charAt(0).toUpperCase() + facilityType.slice(1)
           tooltip = `${emoji} ${name} - ${label}`
