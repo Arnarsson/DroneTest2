@@ -54,16 +54,17 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       }
     ).addTo(mapInstanceRef.current)
 
-    // Initialize marker cluster group with improved clustering for overlapping incidents
+    // Initialize marker cluster group - ONLY cluster same-facility incidents
+    // Mixed locations will spiderfy instead of clustering to avoid confusing count numbers
     clusterRef.current = (L as any).markerClusterGroup({
       chunkedLoading: true,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      spiderfyOnEveryZoom: true, // Spiderfy even at intermediate zoom levels
-      spiderfyDistanceMultiplier: 2, // Spread markers further apart
-      maxClusterRadius: 30, // Reduced from 50 to show nearby incidents separately
-      disableClusteringAtZoom: 13, // Show individual markers earlier (was 16)
+      spiderfyOnEveryZoom: true,
+      spiderfyDistanceMultiplier: 2,
+      maxClusterRadius: 30,
+      disableClusteringAtZoom: 13,
       iconCreateFunction: function (cluster: any) {
         const count = cluster.getChildCount()
         const isDark = document.documentElement.classList.contains('dark')
@@ -75,7 +76,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
         // Check if all incidents are at the same facility
         const facilityTypes = new Set(incidentData.map((inc: any) => inc.asset_type))
         const facilityNames = new Set(incidentData.map((inc: any) => inc.location_name || inc.title).filter(Boolean))
-        const isSameFacility = facilityTypes.size === 1 && incidentData.length > 0
+        const isSameFacility = facilityTypes.size === 1 && incidentData.length > 0 && incidentData[0].asset_type
 
         const facilityType = isSameFacility ? Array.from(facilityTypes)[0] : null
         const facilityName = isSameFacility && facilityNames.size === 1 ? Array.from(facilityNames)[0] : null
@@ -90,18 +91,14 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
           'other': '📍'
         }
 
-        // Color code clusters
-        let clusterClass = 'marker-cluster-small'
-        let gradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
-        let tooltip = `${count} incidents at this location - click to expand`
-
+        // ONLY cluster same-facility incidents - force spiderfy for mixed locations
         if (isSameFacility && facilityType) {
-          // Same facility cluster - use emerald/green gradient
-          gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+          // Same facility cluster - use emerald/green gradient with emoji
+          const gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
           const emoji = facilityEmoji[facilityType as string] || '📍'
           const label = count > 1 ? `${count} events` : 'event'
           const name = facilityName || (facilityType as string).charAt(0).toUpperCase() + (facilityType as string).slice(1)
-          tooltip = `${emoji} ${name} - ${label}`
+          const tooltip = `${emoji} ${name} - ${label}`
 
           return L.divIcon({
             html: `
@@ -132,40 +129,9 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
           })
         }
 
-        // Mixed/nearby incidents - original behavior
-        if (count > 10) {
-          clusterClass = 'marker-cluster-large'
-          gradient = 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)'
-        } else if (count > 5) {
-          clusterClass = 'marker-cluster-medium'
-          gradient = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
-        }
-
-        return L.divIcon({
-          html: `
-            <div style="
-              width: 46px;
-              height: 46px;
-              background: ${gradient};
-              border: 3px solid ${isDark ? '#1f2937' : 'white'};
-              border-radius: 50%;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: bold;
-              font-size: 16px;
-              text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-              cursor: pointer;
-              transition: transform 0.2s;
-            " title="${tooltip}">
-              ${count}
-            </div>
-          `,
-          className: clusterClass,
-          iconSize: [46, 46],
-        })
+        // Mixed/nearby incidents - return null to force spiderfy instead of clustering
+        // This prevents confusing cluster numbers (7, 8, etc.) that look like evidence scores
+        return null as any
       },
     })
 
