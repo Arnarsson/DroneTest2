@@ -129,9 +129,49 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
           })
         }
 
-        // Mixed/nearby incidents - return null to force spiderfy instead of clustering
-        // This prevents confusing cluster numbers (7, 8, etc.) that look like evidence scores
-        return null as any
+        // Mixed/nearby incidents - Don't cluster, force spiderfy
+        // Return a single-marker icon to prevent clustering but this shouldn't be reached
+        // because we'll use a custom cluster function that prevents mixed clustering
+        const firstMarker = markers[0]
+        if (firstMarker && firstMarker.incidentData) {
+          // Just show the first marker's icon - cluster will spiderfy automatically
+          const incident = firstMarker.incidentData
+          const config = EVIDENCE_SYSTEM[incident.evidence_score as 1 | 2 | 3 | 4]
+          const borderColor = isDark ? '#1f2937' : 'white'
+
+          return L.divIcon({
+            html: `
+              <div style="
+                width: 38px;
+                height: 38px;
+                background: ${config.gradient};
+                border: 3px solid ${borderColor};
+                border-radius: 50%;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${config.glow};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 15px;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              ">
+                ${incident.evidence_score}
+              </div>
+            `,
+            className: 'custom-marker',
+            iconSize: [38, 38],
+            iconAnchor: [19, 19],
+          })
+        }
+
+        // Fallback - this shouldn't happen
+        return L.divIcon({
+          html: '<div></div>',
+          className: 'empty-marker',
+          iconSize: [0, 0],
+        })
       },
     })
 
