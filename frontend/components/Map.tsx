@@ -100,7 +100,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
           gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
           const emoji = facilityEmoji[facilityType as string] || '📍'
           const label = count > 1 ? `${count} events` : 'event'
-          const name = facilityName || facilityType.charAt(0).toUpperCase() + facilityType.slice(1)
+          const name = facilityName || (facilityType as string).charAt(0).toUpperCase() + (facilityType as string).slice(1)
           tooltip = `${emoji} ${name} - ${label}`
 
           return L.divIcon({
