@@ -44,14 +44,13 @@ CHECK (
 -- PART 3: Add unique constraint to prevent exact duplicates
 -- ============================================================================
 
--- Create unique index on key fields to prevent exact duplicates
--- This allows same location with different times or different titles
+-- Create composite unique index to prevent exact duplicates
+-- Uses title + occurred_at hour + location (PostGIS geometry supports direct indexing)
 CREATE UNIQUE INDEX IF NOT EXISTS idx_incidents_unique_combo
 ON incidents (
-  ROUND(ST_Y(location::geometry)::numeric, 4),  -- Latitude from PostGIS geometry
-  ROUND(ST_X(location::geometry)::numeric, 4),  -- Longitude from PostGIS geometry
-  DATE_TRUNC('hour', occurred_at),              -- Same hour
-  title                                         -- Same title
+  title,
+  DATE_TRUNC('hour', occurred_at),
+  location
 );
 
 -- Report final state
