@@ -35,6 +35,8 @@ OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx  # Your OpenAI API key
 
 ## ❌ Test Results
 
+### PostgreSQL Direct Connection: FAILED ❌
+
 Tested 4 different PostgreSQL connection configurations:
 
 | Configuration | Port | Result | Issue |
@@ -48,6 +50,28 @@ Tested 4 different PostgreSQL connection configurations:
 ```bash
 python3 test_all_connections.py
 ```
+
+### ✅ REST API: WORKING!
+
+**Good news:** The Supabase REST API (PostgREST) via Kong gateway **IS accessible**:
+
+```bash
+# Test successful:
+curl "http://supabasekong-gsow04o4kw04w88kw0ckwkgg.135.181.101.70.sslip.io/rest/v1/"
+# Returns: OpenAPI schema with incidents, sources, incident_sources tables ✅
+
+# Data query works:
+curl "http://supabasekong-gsow04o4kw04w88kw0ckwkgg.135.181.101.70.sslip.io/rest/v1/incidents" \
+  -H "apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+# Returns: [] (empty database, but accessible) ✅
+```
+
+**Confirmed:**
+- ✅ Kong gateway responding at port 8000
+- ✅ PostgREST API accessible at `/rest/v1/`
+- ✅ Database schema exists (incidents, sources, incident_sources tables)
+- ✅ PostGIS installed and working
+- ✅ Authentication working with ANON_KEY
 
 ---
 
