@@ -23,7 +23,7 @@ from verification import (calculate_confidence_score, get_verification_status,
                           requires_manual_review)
 
 # Scraper version for tracking deployments
-SCRAPER_VERSION = "2.1.0"  # Updated with multi-layer defense system
+SCRAPER_VERSION = "2.2.0"  # Updated with AI verification layer (OpenRouter integration)
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -93,6 +93,35 @@ class DroneWatchIngester:
             incident['scraper_version'] = SCRAPER_VERSION
             incident['ingested_at'] = datetime.now(timezone.utc).isoformat()
             logger.info(f"✓ Geographic validation passed: {incident['title'][:50]} (confidence: {geo_analysis['confidence']}, version: {SCRAPER_VERSION})")
+
+            # === AI VERIFICATION (Layer 3 - Intelligent Classification) ===
+            # Use AI to verify if this is an actual incident (not policy/defense/discussion)
+            if os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"):
+                try:
+                    ai_verification = self._get_openai_client().verify_incident(
+                        incident['title'],
+                        incident.get('narrative', ''),
+                        incident.get('location_name', '')
+                    )
+
+                    if not ai_verification['is_incident']:
+                        logger.warning(f"🚫 BLOCKED (AI Verification): {incident['title'][:60]}")
+                        logger.warning(f"   Category: {ai_verification['category']}")
+                        logger.warning(f"   Reasoning: {ai_verification['reasoning']}")
+                        logger.warning(f"   Confidence: {ai_verification['confidence']}")
+                        return False
+
+                    # Add AI verification metadata
+                    incident['ai_category'] = ai_verification['category']
+                    incident['ai_confidence'] = ai_verification['confidence']
+                    incident['ai_reasoning'] = ai_verification['reasoning']
+                    logger.info(f"✓ AI verification passed: {ai_verification['category']} (confidence: {ai_verification['confidence']})")
+
+                except OpenAIClientError as e:
+                    logger.warning(f"AI verification failed, continuing with Python filters: {e}")
+                    # Fallback: Continue without AI verification (Python filters already passed)
+            else:
+                logger.debug("AI verification disabled (no API key configured)")
 
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(

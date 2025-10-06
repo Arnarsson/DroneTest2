@@ -226,12 +226,26 @@ def is_drone_incident(title: str, content: str) -> bool:
     ])
 
     # Must contain incident indicators (not just mentions of drones)
-    has_incident = any(word in full_text for word in [
-        "observation", "spotted", "set", "opdaget", "mistænk", "suspect",
-        "politi", "police", "investigation", "undersøg", "rapport", "report",
-        "closure", "lukket", "closed", "airspace", "luftrum",
-        "alert", "alarm", "warning", "advarsel", "forbidden", "forbudt"
+    # Require ACTUAL observation, action, or response to an incident
+    has_observation = any(word in full_text for word in [
+        "observed", "spotted", "sighted", "set", "opdaget", "filmed", "recorded",
+        "detected", "detekteret", "mistænk", "suspect"
     ])
+
+    has_action = any(word in full_text for word in [
+        "closed", "closure", "lukket", "lukning",
+        "diverted", "omdirigeret",
+        "suspended", "suspenderet", "grounded",
+        "evacuated", "evacuated"
+    ])
+
+    has_response = any(word in full_text for word in [
+        "investigating", "undersøger", "investigation", "undersøgelse",
+        "searching", "søger", "responding", "reagerer",
+        "politi", "police", "authorities", "myndigheder"
+    ])
+
+    has_incident = has_observation or has_action or has_response
 
     # Should not be about drone deliveries, commercial use, or royalty
     is_excluded = any(word in full_text for word in [
@@ -264,10 +278,30 @@ def is_drone_incident(title: str, content: str) -> bool:
         "jump-started", "iværksat",
         "proposed measures", "foreslåede foranstaltninger",
         "eastern flank watch",
-        "drone wall"  # Specific to policy articles about drone defense systems
+        "drone wall",  # Specific to policy articles about drone defense systems
+        # NEW: Enhanced patterns for policy/announcement detection
+        "drone ban", "droneforbud", "forbud",
+        "new regulation", "ny regulering", "nye regler",
+        "will impose", "vil indføre",
+        "in connection with", "i forbindelse med",  # catches "i forbindelse med EU-formandskab"
+        "eu-formandskab", "eu presidency", "summit",
+        "giver nyt", "giver nye",  # "gives new" (ban/regulation)
+        "kommer til byen"  # "coming to the city" (officials/ministers)
     ])
 
-    return has_drone and has_incident and not is_excluded and not is_policy and not is_international
+    # Exclude defense/security deployment articles (not actual incidents)
+    is_defense = any(phrase in full_text for phrase in [
+        "rushed to", "sent to", "deployed to",
+        "defend against", "forsvare mod", "forsvare imod",
+        "military assets", "militære aktiver",
+        "frigate", "fregat", "troops", "tropper", "styrker",
+        "radars", "radar", "increased security",
+        "bolster defense", "styrke forsvar", "øge sikkerheden",
+        "navy ship", "naval vessel", "warship",
+        "military equipment", "militært udstyr"
+    ])
+
+    return has_drone and has_incident and not is_excluded and not is_policy and not is_international and not is_defense
 
 def clean_html(html_text: str) -> str:
     """
