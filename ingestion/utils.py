@@ -137,42 +137,39 @@ def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Opti
     merely reported by Nordic news sources but didn't occur in the Nordic region.
 
     Returns True if:
-    - Coordinates are in Nordic region, OR
+    - Coordinates are in Nordic region AND text doesn't mention foreign locations
     - No coordinates but text doesn't mention non-Nordic locations
-    """
-    # If we have coordinates, check if they're in Nordic region
-    # Nordic region: roughly 54-71°N, 4-31°E
-    if lat is not None and lon is not None:
-        if 54 <= lat <= 71 and 4 <= lon <= 31:
-            return True
-        else:
-            # Coordinates outside Nordic region
-            return False
 
-    # No coordinates - check text for non-Nordic location mentions
+    Returns False if:
+    - Coordinates outside Nordic region, OR
+    - Text mentions foreign locations (even if coords are Nordic - e.g., context mentions)
+    """
     full_text = (title + " " + content).lower()
+
+    # Check text for foreign location mentions FIRST (applies to all incidents)
+    # This catches cases where Nordic coords are extracted from context mentions
 
     # Non-Nordic country/location keywords
     foreign_locations = [
-        # Eastern Europe
-        "ukraina", "ukraine", "kiev", "kyiv", "odesa", "kharkiv", "lviv",
-        "russia", "rusland", "moscow", "moskva", "st. petersburg",
-        "belarus", "hviderusland", "minsk",
-        "poland", "polen", "warsaw", "warszawa", "krakow",
+        # Eastern Europe (including adjective forms in Nordic languages)
+        "ukraina", "ukraine", "ukrainsk", "ukrainian", "kiev", "kyiv", "odesa", "kharkiv", "lviv",
+        "russia", "rusland", "russisk", "russian", "moscow", "moskva", "st. petersburg",
+        "belarus", "hviderusland", "hviderussisk", "belarusian", "minsk",
+        "poland", "polen", "polsk", "polish", "warsaw", "warszawa", "krakow",
 
-        # Central/Western Europe (non-Nordic)
-        "germany", "tyskland", "berlin", "münchen", "munich", "hamburg", "frankfurt",
-        "france", "frankrig", "paris", "lyon", "marseille",
-        "netherlands", "holland", "amsterdam", "rotterdam",
-        "belgium", "belgien", "brussels", "bruxelles",
-        "uk", "england", "britain", "london", "manchester",
-        "spain", "spanien", "madrid", "barcelona",
-        "italy", "italien", "rome", "milano", "milan",
+        # Central/Western Europe (non-Nordic, including adjective forms)
+        "germany", "tyskland", "tysk", "german", "berlin", "münchen", "munich", "hamburg", "frankfurt",
+        "france", "frankrig", "fransk", "french", "paris", "lyon", "marseille",
+        "netherlands", "holland", "nederlandsk", "dutch", "amsterdam", "rotterdam",
+        "belgium", "belgien", "belgisk", "belgian", "brussels", "bruxelles",
+        "uk", "england", "britain", "britisk", "british", "london", "manchester",
+        "spain", "spanien", "spansk", "spanish", "madrid", "barcelona",
+        "italy", "italien", "italiensk", "italian", "rome", "milano", "milan",
 
-        # Baltic states (included in detection as non-Nordic)
-        "estonia", "estland", "tallinn",
-        "latvia", "letland", "riga",
-        "lithuania", "litauen", "vilnius",
+        # Baltic states (included in detection as non-Nordic, with adjective forms)
+        "estonia", "estland", "estisk", "estonian", "tallinn",
+        "latvia", "letland", "lettisk", "latvian", "riga",
+        "lithuania", "litauen", "litauisk", "lithuanian", "vilnius",
 
         # Middle East
         "israel", "gaza", "tel aviv", "jerusalem",
@@ -193,7 +190,16 @@ def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Opti
         if re.search(rf'\b{re.escape(location)}\b', full_text):
             return False
 
-    # If no foreign locations mentioned and we have no coords, assume Nordic
+    # No foreign locations in text - now check coordinates if available
+    if lat is not None and lon is not None:
+        # Nordic region: roughly 54-71°N, 4-31°E
+        if 54 <= lat <= 71 and 4 <= lon <= 31:
+            return True
+        else:
+            # Coordinates outside Nordic region
+            return False
+
+    # No foreign locations in text and no coordinates - assume Nordic
     return True
 
 def is_drone_incident(title: str, content: str) -> bool:

@@ -265,6 +265,14 @@ git push origin main    # Main repository → triggers Vercel deploy
 ❌ Using title in hash → Same incident with different headlines treated as duplicates
 ✅ Using location + time only → Properly merges sources for same incident
 
+### 7. Geographic Scope Filtering
+❌ OLD: Check coords first → return True if Nordic (ignores foreign text)
+✅ NEW: Check text for foreign keywords FIRST → then check coords
+
+**Why?** Foreign incidents (e.g., "Russian drone attack over Ukraine") can have Nordic coordinates from context mentions (e.g., "Danish officials in Copenhagen comment"). The filter must check BOTH text AND coordinates.
+
+**Fixed in:** October 2025 - `is_nordic_incident()` now checks text before coordinates + added adjective forms ("russisk", "ukrainsk", "tysk")
+
 ---
 
 ## Data Quality Principles
@@ -295,7 +303,7 @@ python3 test_fake_detection.py        # 6 detection layers
 python3 test_evidence_scoring.py      # Single & multi-source
 
 # Test geographic scope filtering
-python3 test_geographic_filter.py     # 8 test cases (Nordic vs foreign)
+python3 test_geographic_filter.py     # 9 test cases (Nordic vs foreign, including context mentions)
 
 # Test geographic database
 python3 test_geographic_database_simple.py  # 5 validation tests

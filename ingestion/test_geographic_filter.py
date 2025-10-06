@@ -74,6 +74,14 @@ test_cases = [
         "lat": None,
         "lon": None,
         "expected": False  # Mentions Berlin/Munich
+    },
+    {
+        "name": "Ukrainian incident with Nordic coords (context mention)",
+        "title": "Massivt russisk droneangrep over hele Ukraina: – Det er farlig å gå ute i gatene",
+        "content": "Multiple drone attacks across Ukraine. Danish officials comment on the situation from Copenhagen",
+        "lat": 55.618,
+        "lon": 12.6476,
+        "expected": False  # Foreign incident despite Nordic coords from context
     }
 ]
 
