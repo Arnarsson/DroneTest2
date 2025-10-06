@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { ThemeToggle } from './ThemeToggle'
 import { DroneWatchLogo } from './DroneWatchLogo'
+import { AboutModal, useAboutModal } from './AboutModal'
 
 interface HeaderProps {
   incidentCount: number
@@ -12,8 +13,12 @@ interface HeaderProps {
 }
 
 export function Header({ incidentCount, isLoading, currentView, onViewChange }: HeaderProps) {
+  const { isOpen, openModal, closeModal } = useAboutModal()
+
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-2xl border-b border-gray-200/70 dark:border-gray-800/70 shadow-soft transition-all">
+    <div>
+      <AboutModal isOpen={isOpen} onClose={closeModal} />
+      <header className="sticky top-0 z-50 bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-2xl border-b border-gray-200/70 dark:border-gray-800/70 shadow-soft transition-all">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
           {/* Logo and Title */}
@@ -74,9 +79,9 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             {/* Theme toggle */}
             <ThemeToggle />
 
-            {/* Info button */}
+            {/* About button */}
             <button
-              onClick={() => window.open('/about', '_blank')}
+              onClick={openModal}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all"
               title="About DroneWatch"
             >
@@ -110,6 +115,7 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
         </div>
       </div>
     </header>
+    </div>
   )
 }
 
