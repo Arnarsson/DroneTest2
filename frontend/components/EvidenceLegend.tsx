@@ -8,10 +8,12 @@ export function EvidenceLegend() {
   const [isOpen, setIsOpen] = useState(false)
   const [hasSeenLegend, setHasSeenLegend] = useState(false)
 
-  // Auto-open legend on first visit
+  // Auto-open legend on first visit (desktop only)
   useEffect(() => {
     const seen = localStorage.getItem('dronewatch_legend_seen')
-    if (!seen) {
+    const isLargeScreen = window.innerWidth >= 1024 // lg breakpoint
+
+    if (!seen && isLargeScreen) {
       setIsOpen(true)
       setHasSeenLegend(false)
     } else {
@@ -28,7 +30,7 @@ export function EvidenceLegend() {
   }
 
   return (
-    <div className="absolute bottom-24 left-4 z-[500]">
+    <div className="hidden lg:block absolute bottom-24 left-4 z-[500]">
       <AnimatePresence mode="wait">
         {!isOpen ? (
           <motion.button
