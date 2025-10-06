@@ -157,8 +157,22 @@ class NewsScraper:
                     # Extract quote
                     quote = extract_quote(content_to_analyze)
 
-                    # Calculate evidence score
-                    evidence_score = 3 if has_official else 2
+                    # Calculate evidence score based on source trust_weight
+                    trust_weight = source.get('trust_weight', 2)
+
+                    # Evidence scoring rules:
+                    # 4: Official sources (trust_weight=4)
+                    # 3: Credible source (trust_weight=3) with official quote
+                    # 2: Credible source (trust_weight>=2) without quote
+                    # 1: Low trust source (trust_weight=1)
+                    if trust_weight == 4:
+                        evidence_score = 4
+                    elif trust_weight == 3 and has_official:
+                        evidence_score = 3
+                    elif trust_weight >= 2:
+                        evidence_score = 2
+                    else:
+                        evidence_score = 1
 
                     # Build incident
                     incident = {

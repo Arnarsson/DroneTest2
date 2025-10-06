@@ -65,15 +65,26 @@ def extract_datetime(text: str, fallback: datetime = None) -> datetime:
     except:
         return fallback
 
-def calculate_evidence_score(source_type: str, has_quote: bool, has_official: bool) -> int:
+def calculate_evidence_score(trust_weight: int, has_official: bool = False) -> int:
     """
-    Calculate evidence score based on source and content
+    Calculate evidence score based on source trust weight and official quotes
+
+    Args:
+        trust_weight: Source trust level (1-4)
+        has_official: Whether content contains official quotes
+
+    Returns:
+        Evidence score (1-4):
+        - 4: Official sources (trust_weight=4)
+        - 3: Credible source (trust_weight=3) with official quote
+        - 2: Credible source (trust_weight>=2)
+        - 1: Low trust source (trust_weight=1)
     """
-    if source_type == "police" or source_type == "notam":
+    if trust_weight == 4:
         return 4
-    elif source_type == "media" and has_official:
+    elif trust_weight == 3 and has_official:
         return 3
-    elif source_type == "media":
+    elif trust_weight >= 2:
         return 2
     else:
         return 1
@@ -230,6 +241,18 @@ def is_drone_incident(title: str, content: str) -> bool:
         "bryllup", "wedding", "parforhold", "relationship"  # Exclude personal news
     ])
 
+    # CRITICAL: Exclude non-Nordic international incidents
+    # These are often reported by Nordic news but happened elsewhere
+    is_international = any(location in full_text for location in [
+        "ukraina", "ukraine", "kiev", "kyiv", "odesa",  # Ukraine
+        "russia", "rusland", "moscow", "moskva",  # Russia
+        "münchen", "munich", "berlin", "germany", "tyskland",  # Germany
+        "poland", "polen", "warsaw", "warszawa",  # Poland (unless Nordic-specific)
+        "middle east", "mellemøsten", "israel", "gaza",  # Middle East
+        "china", "kina", "beijing",  # China
+        "united states", "usa", "washington", "new york"  # USA
+    ])
+
     # Exclude policy/announcement articles (not actual incidents)
     is_policy = any(phrase in full_text for phrase in [
         "announced", "announcement", "annonceret",
@@ -244,7 +267,7 @@ def is_drone_incident(title: str, content: str) -> bool:
         "drone wall"  # Specific to policy articles about drone defense systems
     ])
 
-    return has_drone and has_incident and not is_excluded and not is_policy
+    return has_drone and has_incident and not is_excluded and not is_policy and not is_international
 
 def clean_html(html_text: str) -> str:
     """

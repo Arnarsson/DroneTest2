@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1 { color: #4ade80; }
+        .test-section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success { background: #065f46; border-left: 4px solid #10b981; }
+        .error { background: #7f1d1d; border-left: 4px solid #ef4444; }
+        .info { background: #1e3a8a; border-left: 4px solid #3b82f6; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #2563eb; }
+        pre {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #444;
+        }
+        code { color: #fbbf24; }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #444;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Supabase Self-Hosted Connection Test</h1>
+    <p>Testing connection to: <code>http://supabasekong-gsow04o4kw04w88kw0ckwkgg.135.181.101.70.sslip.io</code></p>
+
+    <div class="test-section">
+        <h2>Test 1: Kong Gateway Health Check</h2>
+        <button onclick="testKongHealth()">Run Test</button>
+        <div id="kong-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: PostgREST API Schema</h2>
+        <button onclick="testPostgRESTSchema()">Run Test</button>
+        <div id="schema-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Query Incidents Table</h2>
+        <button onclick="testIncidentsQuery()">Run Test</button>
+        <div id="incidents-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Query Sources Table</h2>
+        <button onclick="testSourcesQuery()">Run Test</button>
+        <div id="sources-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Insert Test Incident</h2>
+        <button onclick="testInsertIncident()">Run Test</button>
+        <div id="insert-result"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'http://supabasekong-gsow04o4kw04w88kw0ckwkgg.135.181.101.70.sslip.io';
+        const ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc1OTY5NDE2MCwiZXhwIjo0OTE1MzY3NzYwLCJyb2xlIjoiYW5vbiJ9.imh4Gy2AbNyD8fE3ymN3WjrXofgT1vFp6zhFk5_-CHw';
+        const SERVICE_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc1OTY5NDE2MCwiZXhwIjo0OTE1MzY3NzYwLCJyb2xlIjoic2VydmljZV9yb2xlIn0.hRzUV1kpd9fChE_rcgjJ3JnAj3QDUQaUPBfxho_WA7U';
+
+        function showResult(elementId, content) {
+            document.getElementById(elementId).innerHTML = content;
+        }
+
+        function showLoading(elementId) {
+            showResult(elementId, '<div class="result info"><span class="loading"></span> Testing...</div>');
+        }
+
+        async function testKongHealth() {
+            showLoading('kong-result');
+            try {
+                const response = await fetch(`${SUPABASE_URL}/`, { method: 'HEAD' });
+                if (response.ok || response.status === 401) {
+                    showResult('kong-result', `
+                        <div class="result success">
+                            ✅ Kong Gateway is responding<br>
+                            Status: ${response.status} ${response.statusText}<br>
+                            Server: ${response.headers.get('Server') || 'Unknown'}
+                        </div>
+                    `);
+                } else {
+                    throw new Error(`Unexpected status: ${response.status}`);
+                }
+            } catch (err) {
+                showResult('kong-result', `
+                    <div class="result error">
+                        ❌ Kong Gateway connection failed<br>
+                        Error: ${err.message}
+                    </div>
+                `);
+            }
+        }
+
+        async function testPostgRESTSchema() {
+            showLoading('schema-result');
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                    headers: {
+                        'apikey': ANON_KEY,
+                        'Authorization': `Bearer ${ANON_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const tables = Object.keys(data.definitions || {});
+                    showResult('schema-result', `
+                        <div class="result success">
+                            ✅ PostgREST API is accessible<br>
+                            Tables found: ${tables.length}<br>
+                            <details>
+                                <summary>View tables</summary>
+                                <pre>${tables.join('\n')}</pre>
+                            </details>
+                        </div>
+                    `);
+                } else {
+                    throw new Error(`Status: ${response.status}`);
+                }
+            } catch (err) {
+                showResult('schema-result', `
+                    <div class="result error">
+                        ❌ PostgREST API test failed<br>
+                        Error: ${err.message}
+                    </div>
+                `);
+            }
+        }
+
+        async function testIncidentsQuery() {
+            showLoading('incidents-result');
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/incidents?select=id,title,country,evidence_score&limit=10`, {
+                    headers: {
+                        'apikey': ANON_KEY,
+                        'Authorization': `Bearer ${ANON_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('incidents-result', `
+                        <div class="result success">
+                            ✅ Incidents query successful<br>
+                            Records found: ${data.length}<br>
+                            <details>
+                                <summary>View data</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `);
+                } else {
+                    throw new Error(`Status: ${response.status}`);
+                }
+            } catch (err) {
+                showResult('incidents-result', `
+                    <div class="result error">
+                        ❌ Incidents query failed<br>
+                        Error: ${err.message}
+                    </div>
+                `);
+            }
+        }
+
+        async function testSourcesQuery() {
+            showLoading('sources-result');
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/sources?select=id,name,source_type,is_active&limit=10`, {
+                    headers: {
+                        'apikey': ANON_KEY,
+                        'Authorization': `Bearer ${ANON_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('sources-result', `
+                        <div class="result success">
+                            ✅ Sources query successful<br>
+                            Records found: ${data.length}<br>
+                            <details>
+                                <summary>View data</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `);
+                } else {
+                    throw new Error(`Status: ${response.status}`);
+                }
+            } catch (err) {
+                showResult('sources-result', `
+                    <div class="result error">
+                        ❌ Sources query failed<br>
+                        Error: ${err.message}
+                    </div>
+                `);
+            }
+        }
+
+        async function testInsertIncident() {
+            showLoading('insert-result');
+            try {
+                const testIncident = {
+                    title: 'Test Incident - Browser Test',
+                    narrative: 'This is a test incident created from the browser test page',
+                    occurred_at: new Date().toISOString(),
+                    location: 'POINT(12.5683 55.6761)', // Copenhagen
+                    country: 'Denmark',
+                    status: 'pending',
+                    evidence_score: 1
+                };
+
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/incidents`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SERVICE_KEY,
+                        'Authorization': `Bearer ${SERVICE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(testIncident)
+                });
+
+                if (response.ok || response.status === 201) {
+                    const data = await response.json();
+                    showResult('insert-result', `
+                        <div class="result success">
+                            ✅ Test incident created successfully<br>
+                            <details>
+                                <summary>View created record</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `);
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`Status: ${response.status} - ${errorText}`);
+                }
+            } catch (err) {
+                showResult('insert-result', `
+                    <div class="result error">
+                        ❌ Insert test failed<br>
+                        Error: ${err.message}<br>
+                        Note: Check RLS policies and permissions
+                    </div>
+                `);
+            }
+        }
+
+        // Auto-run first test on load
+        window.addEventListener('load', () => {
+            testKongHealth();
+        });
+    </script>
+</body>
+</html>

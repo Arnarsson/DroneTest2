@@ -1,5 +1,6 @@
 # DroneWatch Investigation Findings
 **Generated**: 2025-10-03
+**Updated**: 2025-10-05 (URL Validation Phase)
 **Method**: Progressive disclosure + context engineering
 
 ## Architecture Map (Lightweight Identifiers)
@@ -22,6 +23,84 @@ dronewatch-2/
 - 873 source files total
 - Stack: Next.js 14 + Python 3.11 + Supabase (PostGIS)
 - Deployment: Vercel (frontend) + GitHub Actions (scraper)
+
+---
+
+## Latest Investigation: Phase 1 - Evidence Scoring System (2025-10-05)
+
+### ✅ COMPLETED: 4-Tier Evidence Scoring Implementation
+
+**Goal**: Enforce rigorous evidence scoring based on source reliability with zero tolerance for hallucinations
+
+**Implementation**:
+1. **Database Migration** (`migrations/010_evidence_scoring_system.sql`)
+   - Created `calculate_evidence_score(incident_id)` function
+   - Automatic trigger `trigger_update_evidence_score` on source changes
+   - Recalculates all existing incident scores
+
+2. **Scraper Updates**
+   - `news_scraper.py`: Now uses `trust_weight` from config (not hardcoded)
+   - `utils.py`: Updated `calculate_evidence_score()` to use trust_weight
+   - Evidence rules:
+     - **4 (OFFICIAL)**: trust_weight=4 (police, military, NOTAM)
+     - **3 (VERIFIED)**: Multiple sources (trust≥3) OR single with official quote
+     - **2 (REPORTED)**: Single credible source (trust≥2)
+     - **1 (UNCONFIRMED)**: Low trust or no sources
+
+3. **Verification Module**
+   - Added `calculate_evidence_score_from_sources()` in `verification.py`
+   - Supports multi-source scoring logic
+   - Official quote detection for tier 3 promotion
+
+4. **API Updates**
+   - `ingest.py`: Added comments documenting automatic recalculation
+   - Sources inserted → trigger fires → evidence_score updated
+
+5. **Testing** (`test_evidence_scoring.py`)
+   - ✅ 7/7 evidence scoring tests passed
+   - ✅ 5/5 official quote detection tests passed
+   - ✅ 6/6 utils function tests passed
+   - **Total: 18/18 tests PASSED**
+
+**Files Modified**:
+- `/root/repo/migrations/010_evidence_scoring_system.sql` - NEW ✅
+- `/root/repo/ingestion/scrapers/news_scraper.py` - UPDATED ✅
+- `/root/repo/ingestion/utils.py` - UPDATED ✅
+- `/root/repo/ingestion/verification.py` - UPDATED ✅
+- `/root/repo/frontend/api/ingest.py` - UPDATED ✅
+- `/root/repo/ingestion/test_evidence_scoring.py` - NEW ✅
+
+---
+
+## Previous Investigation: Phase 0 - URL Validation (2025-10-05)
+
+### 🚨 CRITICAL FINDING: 34 Broken URLs in config.py
+
+**Evidence**: Ran `validate_sources.py` on all 40 sources
+**Result**:
+- ✅ **20 working URLs** (50%)
+- ❌ **34 broken URLs** (85% failure rate!)
+
+**Major Issues**:
+1. **ALL 12 Danish police RSS feeds DON'T EXIST** (404 errors)
+   - `https://politi.dk/koebenhavns-politi/nyhedsliste/rss.xml` → 404
+   - Pattern repeated for all districts
+
+2. **Multiple news RSS feeds malformed** (invalid XML)
+   - Berlingske, Jyllands-Posten, Politiken - all broken
+
+3. **Norwegian/Swedish/Finnish police feeds broken**
+   - Must use HTML scraping instead
+
+**Fix Applied**:
+- Created `config_verified.py` with ONLY working sources
+- Documented which sources need HTML scraping
+- Added social media sources (Nitter for Twitter)
+
+**Files**:
+- `/root/repo/ingestion/validate_sources.py` - Validation script ✅
+- `/root/repo/ingestion/config_verified.py` - Clean config ✅
+- `/root/repo/ingestion/source_validation_report.json` - Full report ✅
 
 ---
 
