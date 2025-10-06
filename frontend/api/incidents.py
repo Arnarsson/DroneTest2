@@ -7,7 +7,11 @@ from urllib.parse import parse_qs, urlparse
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db import fetch_incidents, run_async
+# Use REST API if SUPABASE_URL is set, otherwise fall back to direct PostgreSQL
+if os.getenv("SUPABASE_URL"):
+    from db_rest import fetch_incidents, run_async
+else:
+    from db import fetch_incidents, run_async
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
