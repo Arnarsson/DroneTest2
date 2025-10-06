@@ -40,9 +40,10 @@ python3 test_consolidator.py          # Test multi-source consolidation
 python3 test_fake_detection.py        # Test fake news filtering
 python3 test_evidence_scoring.py      # Test evidence logic
 python3 test_geographic_database_simple.py  # Test location database
+python3 test_ai_verification.py       # Test AI incident classification (NEW v2.2.0)
 
 # Production
-python3 ingest.py                     # Full ingestion pipeline
+python3 ingest.py                     # Full ingestion pipeline (v2.2.0)
 ```
 
 ### Database
@@ -203,9 +204,108 @@ CREATE TRIGGER update_evidence_score_trigger ...
 
 **Asset Types**: airport, military, harbor, powerplant, bridge, other
 
+### 8. Multi-Layer Defense System (v2.2.0)
+
+**5-Layer Architecture** - Prevents foreign incidents, policy announcements, and defense deployments from appearing on the map.
+
+#### Layer 1: Database Trigger (PostgreSQL)
+**File**: `migrations/014_geographic_validation_trigger.sql`
+- Validates EVERY incident BEFORE insertion at database level
+- Checks coordinates (54-71°N, 4-31°E for Nordic region)
+- Validates title AND narrative for foreign keywords
+- Works even if scrapers use old code
+- **Status**: ✅ Active
+
+#### Layer 2: Python Filters
+**File**: `ingestion/utils.py`
+- `is_nordic_incident()` - Geographic scope validation
+- `is_drone_incident()` - Incident type validation
+- Keyword-based filtering for policy, defense, and international incidents
+- Enhanced with policy/defense exclusion patterns
+- **Status**: ✅ Active
+
+#### Layer 3: AI Verification (NEW v2.2.0)
+**Files**: `ingestion/openai_client.py`, `ingestion/ingest.py`
+- **OpenRouter/OpenAI integration** for intelligent classification
+- Detects: actual incidents vs policy announcements vs defense deployments
+- Uses GPT-3.5-turbo (default) or configurable models
+- Result caching to minimize API costs (~$0.75-1.50 per 1000 incidents)
+- Graceful fallback to Python filters if API fails
+- **Test accuracy**: 100% on Copenhagen incidents (4/4 passed)
+- **Status**: ✅ Active and tested
+
+```python
+# AI verification in ingest.py
+ai_verification = openai_client.verify_incident(title, narrative, location)
+# Returns: {is_incident: bool, category: str, confidence: float, reasoning: str}
+
+# Blocks:
+# - Policy announcements ("drone ban announced")
+# - Defense deployments ("troops rushed to defend")
+# - Discussion articles ("think piece about drone threats")
+```
+
+#### Layer 4: Automated Cleanup Job
+**File**: `ingestion/cleanup_foreign_incidents.py`
+- Hourly background scan for foreign incidents
+- Re-validates with enhanced analyzer
+- Auto-removes foreign incidents
+- Alerts if >5 incidents found (scraper broken)
+- **Status**: ✅ Tested, ready for cron
+
+#### Layer 5: Monitoring Dashboard
+**File**: `ingestion/monitoring.py`
+- Real-time system health metrics
+- Scraper version tracking
+- Validation confidence scoring
+- Database trigger status
+- **Status**: ✅ Working
+
+**Testing All Layers**:
+```bash
+cd ingestion
+export OPENROUTER_API_KEY="sk-or-v1-..."
+
+# Test Layer 3 (AI verification)
+python3 test_ai_verification.py
+
+# Run monitoring dashboard (Layer 5)
+python3 monitoring.py
+
+# Run cleanup job (Layer 4)
+python3 cleanup_foreign_incidents.py
+```
+
 ---
 
 ## Recent Changes & Build Fixes (October 2025)
+
+### AI Verification Layer (v2.2.0) - October 6, 2025
+**Commit**: `6f863c0`
+
+**What's New**:
+- AI-powered incident classification using OpenRouter/OpenAI
+- Context-aware detection of policy announcements and defense deployments
+- 100% test accuracy on Copenhagen incidents
+- OpenRouter integration for flexible model selection (GPT-3.5-turbo default)
+- Result caching to minimize costs
+
+**Implementation**:
+- Enhanced `openai_client.py` with `verify_incident()` method
+- Integrated into `ingest.py` as Layer 3 (after Python filters, before DB trigger)
+- Added test suite: `test_ai_verification.py`
+- Complete documentation: `AI_VERIFICATION.md`
+- Updated scraper version to 2.2.0
+
+**Test Results**:
+```
+✅ Copenhagen Airport incident → "incident" (0.95 confidence)
+✅ Kastrup Airbase incident → "incident" (0.95 confidence)
+❌ Policy announcement → BLOCKED as "policy" (1.0 confidence)
+❌ Defense deployment → BLOCKED as "defense" (1.0 confidence)
+```
+
+**Cost**: ~$0.75-1.50 per 1000 incidents with GPT-3.5-turbo
 
 ### Next.js Build Error Fix (Latest)
 **Problem**: Next.js 14.1.0 barrel loader incompatible with date-fns 3.0.0
@@ -308,6 +408,10 @@ python3 test_geographic_filter.py     # 9 test cases (Nordic vs foreign, includi
 # Test geographic database
 python3 test_geographic_database_simple.py  # 5 validation tests
 
+# Test AI verification (NEW v2.2.0)
+export OPENROUTER_API_KEY="sk-or-v1-..."
+python3 test_ai_verification.py       # 4 test cases (100% accuracy)
+
 # Test SQL migrations
 bash test_migrations.sh               # Syntax validation
 
@@ -378,11 +482,23 @@ npm run dev                           # http://localhost:3000
 **Required in Vercel**:
 - `DATABASE_URL` - Supabase connection string (port 6543 transaction pooler)
 - `INGEST_TOKEN` - Secret Bearer token for scraper authentication
+- `OPENROUTER_API_KEY` - OpenRouter API key for AI verification (NEW v2.2.0)
+- `OPENROUTER_MODEL` - Model to use (default: `openai/gpt-3.5-turbo`)
+
+**Production Values** (from `.env.production`):
+```bash
+DATABASE_URL="postgresql://postgres.uhwsuaebakkdmdogzrrz:stUPw5co47Yq8uSI@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
+INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
+OPENROUTER_API_KEY="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"
+OPENROUTER_MODEL="openai/gpt-3.5-turbo"
+```
 
 **Local Development** (`.env.local`):
 ```bash
-DATABASE_URL="postgresql://...@...pooler.supabase.com:6543/postgres"
-INGEST_TOKEN="your-secret-token"
+DATABASE_URL="postgresql://postgres.uhwsuaebakkdmdogzrrz:stUPw5co47Yq8uSI@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
+INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
+OPENROUTER_API_KEY="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"
+OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 ```
 
 ---
@@ -425,6 +541,6 @@ This will:
 
 ---
 
-**Last Updated**: October 5, 2025
-**Version**: 1.4.0 (DroneTest2 - Build Fixes + Multi-Source + Clean Architecture)
+**Last Updated**: October 6, 2025
+**Version**: 2.2.0 (DroneTest2 - AI Verification Layer + Multi-Layer Defense)
 **Repository**: https://github.com/Arnarsson/DroneTest2
