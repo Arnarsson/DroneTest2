@@ -63,14 +63,21 @@ BEGIN
             USING HINT = 'Nordic region: 54-71°N, 4-31°E';
     END IF;
 
-    -- VALIDATION 2: Title must not contain foreign location keywords
+    -- VALIDATION 2: Title AND narrative must not contain foreign location keywords
     -- This catches incidents like "Massive Russian drone attack over Ukraine"
     -- that have Nordic coords from context mentions (e.g., "Danish officials comment")
     FOREACH keyword IN ARRAY foreign_keywords
     LOOP
+        -- Check title
         IF LOWER(NEW.title) LIKE '%' || keyword || '%' THEN
             RAISE EXCEPTION 'Geographic validation failed: Foreign incident detected in title (keyword: "%")', keyword
                 USING HINT = 'Title: ' || NEW.title;
+        END IF;
+
+        -- Check narrative (if present)
+        IF NEW.narrative IS NOT NULL AND LOWER(NEW.narrative) LIKE '%' || keyword || '%' THEN
+            RAISE EXCEPTION 'Geographic validation failed: Foreign incident detected in narrative (keyword: "%")', keyword
+                USING HINT = 'Title: ' || NEW.title || ', Narrative contains: ' || keyword;
         END IF;
     END LOOP;
 
