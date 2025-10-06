@@ -39,13 +39,21 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   }
 
   const url = `${API_URL}/incidents?${params}`
+  console.log('[useIncidents] Fetching from:', url)
+  console.log('[useIncidents] API_URL:', API_URL)
+  console.log('[useIncidents] Filters:', filters)
+
   const response = await fetch(url)
+  console.log('[useIncidents] Response status:', response.status, response.statusText)
 
   if (!response.ok) {
+    console.error('[useIncidents] API error:', response.status, response.statusText)
     throw new Error(`API error: ${response.status}`)
   }
 
-  return response.json()
+  const data = await response.json()
+  console.log('[useIncidents] Received incidents:', data.length)
+  return data
 }
 
 export function useIncidents(filters: FilterState) {
@@ -54,5 +62,11 @@ export function useIncidents(filters: FilterState) {
     queryFn: () => fetchIncidents(filters),
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    onError: (error) => {
+      console.error('[useIncidents] Query error:', error)
+    },
+    onSuccess: (data) => {
+      console.log('[useIncidents] Query success:', data.length, 'incidents')
+    }
   })
 }
