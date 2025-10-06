@@ -15,8 +15,16 @@
 -- - Test incidents (handled by separate migration)
 -- - Incidents with unique/specific coordinates
 
+-- Verify table exists (will error if not - which is good, don't run on wrong DB!)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'incidents') THEN
+        RAISE EXCEPTION 'Table public.incidents does not exist! Check your database connection.';
+    END IF;
+END $$;
+
 -- Delete incidents with Ukrainian keywords at Copenhagen coordinates
-DELETE FROM incidents
+DELETE FROM public.incidents
 WHERE
     -- Ukrainian incidents
     (title ILIKE '%ukraina%' OR title ILIKE '%ukraine%' OR title ILIKE '%kiev%' OR title ILIKE '%kyiv%')
@@ -28,7 +36,7 @@ WHERE
     );
 
 -- Delete incidents with German location keywords at any Nordic coordinates
-DELETE FROM incidents
+DELETE FROM public.incidents
 WHERE
     -- German locations
     (title ILIKE '%münchen%' OR title ILIKE '%munich%' OR title ILIKE '%berlin%' OR title ILIKE '%germany%' OR title ILIKE '%tyskland%')
@@ -40,7 +48,7 @@ WHERE
     );
 
 -- Delete incidents with Russian location keywords
-DELETE FROM incidents
+DELETE FROM public.incidents
 WHERE
     (title ILIKE '%russia%' OR title ILIKE '%rusland%' OR title ILIKE '%moscow%' OR title ILIKE '%moskva%')
     AND
@@ -50,7 +58,7 @@ WHERE
     );
 
 -- Delete incidents with other Eastern European keywords
-DELETE FROM incidents
+DELETE FROM public.incidents
 WHERE
     (title ILIKE '%belarus%' OR title ILIKE '%hviderusland%' OR title ILIKE '%poland%' OR title ILIKE '%polen%')
     AND
@@ -65,6 +73,6 @@ WHERE
 -- VERIFICATION:
 -- After running this migration, verify no foreign incidents remain:
 -- SELECT title, ST_Y(location::geometry) as lat, ST_X(location::geometry) as lon
--- FROM incidents
+-- FROM public.incidents
 -- WHERE title ILIKE '%ukraina%' OR title ILIKE '%ukraine%'
 --    OR title ILIKE '%münchen%' OR title ILIKE '%berlin%';
