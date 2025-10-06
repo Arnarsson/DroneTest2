@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useIncidents } from "@/hooks/useIncidents";
+import type { Incident } from "@/types";
 
 const Map = dynamic(() => import("@/components/Map"), {
   ssr: false,
@@ -23,11 +24,12 @@ function EmbedContent() {
   };
 
   const { data: incidents, isLoading } = useIncidents(filters);
+  const safeIncidents: Incident[] = incidents ?? [];
 
   return (
     <div className="w-full h-screen relative">
       <Map
-        incidents={incidents ?? []}
+        incidents={safeIncidents}
         isLoading={isLoading}
         center={[56.0, 10.5]}
         zoom={6}

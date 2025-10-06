@@ -57,16 +57,10 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
 }
 
 export function useIncidents(filters: FilterState) {
-  return useQuery({
+  return useQuery<Incident[]>({
     queryKey: ['incidents', filters],
     queryFn: () => fetchIncidents(filters),
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    onError: (error) => {
-      console.error('[useIncidents] Query error:', error)
-    },
-    onSuccess: (data) => {
-      console.log('[useIncidents] Query success:', data.length, 'incidents')
-    }
   })
 }
