@@ -8,18 +8,22 @@ import logging
 import os
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 import requests
 from config import API_BASE_URL, INGEST_TOKEN
 from db_cache import ScraperCache
+from geographic_analyzer import analyze_incident_geography
 from openai_client import OpenAIClient, OpenAIClientError
 from scrapers.news_scraper import NewsScraper
 from scrapers.police_scraper import PoliceScraper
 from utils import generate_incident_hash
 from verification import (calculate_confidence_score, get_verification_status,
                           requires_manual_review)
+
+# Scraper version for tracking deployments
+SCRAPER_VERSION = "2.1.0"  # Updated with multi-layer defense system
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -66,6 +70,29 @@ class DroneWatchIngester:
             if any(test_word in title_lower for test_word in ['dronetest', 'test incident', 'testing drone']):
                 logger.warning(f"🚫 Blocking test incident: {incident['title'][:50]}")
                 return False
+
+            # === GEOGRAPHIC VALIDATION (Layer 2 - Python Filter) ===
+            # Analyze incident geography with confidence scoring
+            geo_analysis = analyze_incident_geography(
+                incident['title'],
+                incident.get('narrative', ''),
+                incident.get('lat'),
+                incident.get('lon')
+            )
+
+            if not geo_analysis['is_nordic']:
+                logger.warning(f"🚫 BLOCKED (Geographic): {incident['title'][:60]}")
+                logger.warning(f"   Reason: {geo_analysis['reason']}")
+                logger.warning(f"   Confidence: {geo_analysis['confidence']}")
+                logger.warning(f"   Flags: {', '.join(geo_analysis['flags'])}")
+                return False
+
+            # Add geographic validation metadata + version tracking
+            incident['validation_confidence'] = geo_analysis['confidence']
+            incident['validation_flags'] = geo_analysis['flags']
+            incident['scraper_version'] = SCRAPER_VERSION
+            incident['ingested_at'] = datetime.now(timezone.utc).isoformat()
+            logger.info(f"✓ Geographic validation passed: {incident['title'][:50]} (confidence: {geo_analysis['confidence']}, version: {SCRAPER_VERSION})")
 
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(
