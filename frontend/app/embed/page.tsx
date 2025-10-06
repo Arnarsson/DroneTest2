@@ -27,7 +27,7 @@ function EmbedContent() {
   return (
     <div className="w-full h-screen relative">
       <Map
-        incidents={incidents || []}
+        incidents={incidents ?? []}
         isLoading={isLoading}
         center={[56.0, 10.5]}
         zoom={6}
