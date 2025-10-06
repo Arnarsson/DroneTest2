@@ -168,6 +168,18 @@ def is_drone_incident(title: str, content: str) -> bool:
         "bryllup", "wedding", "parforhold", "relationship"  # Exclude personal news
     ])
 
+    # CRITICAL: Exclude non-Nordic international incidents
+    # These are often reported by Nordic news but happened elsewhere
+    is_international = any(location in full_text for location in [
+        "ukraina", "ukraine", "kiev", "kyiv", "odesa",  # Ukraine
+        "russia", "rusland", "moscow", "moskva",  # Russia
+        "münchen", "munich", "berlin", "germany", "tyskland",  # Germany
+        "poland", "polen", "warsaw", "warszawa",  # Poland (unless Nordic-specific)
+        "middle east", "mellemøsten", "israel", "gaza",  # Middle East
+        "china", "kina", "beijing",  # China
+        "united states", "usa", "washington", "new york"  # USA
+    ])
+
     # Exclude policy/announcement articles (not actual incidents)
     is_policy = any(phrase in full_text for phrase in [
         "announced", "announcement", "annonceret",
@@ -182,7 +194,7 @@ def is_drone_incident(title: str, content: str) -> bool:
         "drone wall"  # Specific to policy articles about drone defense systems
     ])
 
-    return has_drone and has_incident and not is_excluded and not is_policy
+    return has_drone and has_incident and not is_excluded and not is_policy and not is_international
 
 def clean_html(html_text: str) -> str:
     """

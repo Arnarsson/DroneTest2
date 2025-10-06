@@ -136,6 +136,13 @@ class NewsScraper:
                         logger.info(f"⏭️  Skipping (no location): {title[:60]}...")
                         continue
 
+                    # CRITICAL: Skip incidents outside Nordic region
+                    # Nordic bounds: Denmark, Norway, Sweden, Finland, Iceland
+                    # Latitude: 54°N to 72°N, Longitude: 4°E to 32°E
+                    if not (54.0 <= lat <= 72.0 and 4.0 <= lon <= 32.0):
+                        logger.info(f"⏭️  Skipping (non-Nordic location): {title[:60]}... (lat={lat}, lon={lon})")
+                        continue
+
                     # Extract datetime
                     published = entry.get('published_parsed')
                     if published:
