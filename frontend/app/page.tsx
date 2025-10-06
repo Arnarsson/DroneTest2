@@ -106,6 +106,8 @@ export default function Home() {
 
   console.log('[Render] About to render with incidents:', incidents?.length || 0);
   console.log('[Render] incidents variable:', incidents);
+  console.log('[Render] isLoading:', isLoading);
+  console.log('[Render] Passing to Header - incidentCount:', incidents?.length || 0, 'isLoading:', isLoading);
 
   return (
     <>
