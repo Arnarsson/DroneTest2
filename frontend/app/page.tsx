@@ -104,6 +104,9 @@ export default function Home() {
     setFilters(newFilters);
   }, []);
 
+  console.log('[Render] About to render with incidents:', incidents?.length || 0);
+  console.log('[Render] incidents variable:', incidents);
+
   return (
     <>
       <Toaster position="top-right" richColors />
