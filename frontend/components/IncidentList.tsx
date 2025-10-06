@@ -13,6 +13,9 @@ interface IncidentListProps {
 }
 
 export function IncidentList({ incidents, isLoading }: IncidentListProps) {
+  console.log('[IncidentList] Received incidents:', incidents?.length || 0, incidents);
+  console.log('[IncidentList] isLoading:', isLoading);
+
   const [groupByFacility, setGroupByFacility] = useState(false)
   const [expandedFacilities, setExpandedFacilities] = useState<Set<string>>(new Set())
   if (isLoading) {
