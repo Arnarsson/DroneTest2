@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import SOURCES
 from utils import (
     extract_location, extract_datetime, extract_quote,
-    is_drone_incident, clean_html, calculate_evidence_score
+    is_drone_incident, is_nordic_incident, clean_html, calculate_evidence_score
 )
 
 # Configure logging
@@ -99,6 +99,11 @@ class PoliceScraper:
                     # Skip incidents without valid location
                     if lat is None or lon is None:
                         logger.info(f"⏭️  Skipping (no location): {title[:60]}...")
+                        continue
+
+                    # Geographic scope filter: Only ingest Nordic incidents
+                    if not is_nordic_incident(title, full_content, lat, lon):
+                        logger.info(f"⏭️  Skipping (non-Nordic): {title[:60]}...")
                         continue
 
                     # Extract datetime

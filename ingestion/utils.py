@@ -129,6 +129,73 @@ def extract_quote(text: str) -> Optional[str]:
 
     return None
 
+def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Optional[float]) -> bool:
+    """
+    Check if incident occurred in Nordic region (not just covered by Nordic news).
+
+    This prevents ingesting foreign incidents (e.g., Ukrainian drone attacks) that are
+    merely reported by Nordic news sources but didn't occur in the Nordic region.
+
+    Returns True if:
+    - Coordinates are in Nordic region, OR
+    - No coordinates but text doesn't mention non-Nordic locations
+    """
+    # If we have coordinates, check if they're in Nordic region
+    # Nordic region: roughly 54-71°N, 4-31°E
+    if lat is not None and lon is not None:
+        if 54 <= lat <= 71 and 4 <= lon <= 31:
+            return True
+        else:
+            # Coordinates outside Nordic region
+            return False
+
+    # No coordinates - check text for non-Nordic location mentions
+    full_text = (title + " " + content).lower()
+
+    # Non-Nordic country/location keywords
+    foreign_locations = [
+        # Eastern Europe
+        "ukraina", "ukraine", "kiev", "kyiv", "odesa", "kharkiv", "lviv",
+        "russia", "rusland", "moscow", "moskva", "st. petersburg",
+        "belarus", "hviderusland", "minsk",
+        "poland", "polen", "warsaw", "warszawa", "krakow",
+
+        # Central/Western Europe (non-Nordic)
+        "germany", "tyskland", "berlin", "münchen", "munich", "hamburg", "frankfurt",
+        "france", "frankrig", "paris", "lyon", "marseille",
+        "netherlands", "holland", "amsterdam", "rotterdam",
+        "belgium", "belgien", "brussels", "bruxelles",
+        "uk", "england", "britain", "london", "manchester",
+        "spain", "spanien", "madrid", "barcelona",
+        "italy", "italien", "rome", "milano", "milan",
+
+        # Baltic states (included in detection as non-Nordic)
+        "estonia", "estland", "tallinn",
+        "latvia", "letland", "riga",
+        "lithuania", "litauen", "vilnius",
+
+        # Middle East
+        "israel", "gaza", "tel aviv", "jerusalem",
+        "iran", "tehran",
+        "syria", "damascus",
+        "iraq", "baghdad",
+
+        # Asia
+        "china", "beijing", "shanghai",
+        "japan", "tokyo",
+        "korea", "seoul",
+        "india", "delhi", "mumbai"
+    ]
+
+    # Check if any foreign location is mentioned
+    # Use word boundaries to avoid false matches
+    for location in foreign_locations:
+        if re.search(rf'\b{re.escape(location)}\b', full_text):
+            return False
+
+    # If no foreign locations mentioned and we have no coords, assume Nordic
+    return True
+
 def is_drone_incident(title: str, content: str) -> bool:
     """
     Check if article is actually about drone incidents
