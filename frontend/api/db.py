@@ -71,13 +71,30 @@ async def fetch_incidents(
 
             # Build query with proper parameterization
             # IMPORTANT: Only show verified or auto-verified incidents to public
-            # Note: Sources temporarily disabled for performance (correlated subquery was slow)
+            # Sources optimized with LEFT JOIN (migration 015 adds indexes for performance)
             query = """
+            WITH incident_sources_agg AS (
+                SELECT
+                    is2.incident_id,
+                    json_agg(json_build_object(
+                        'source_url', is2.source_url,
+                        'source_type', COALESCE(s.source_type, 'unknown'),
+                        'source_name', COALESCE(s.name, 'Unknown'),
+                        'source_title', is2.source_title,
+                        'source_quote', is2.source_quote,
+                        'published_at', is2.published_at
+                    )) as sources
+                FROM public.incident_sources is2
+                LEFT JOIN public.sources s ON is2.source_id = s.id
+                GROUP BY is2.incident_id
+            )
             SELECT i.id, i.title, i.narrative, i.occurred_at, i.first_seen_at, i.last_seen_at,
                    i.asset_type, i.status, i.evidence_score, i.country,
                    ST_Y(i.location::geometry) as lat,
-                   ST_X(i.location::geometry) as lon
+                   ST_X(i.location::geometry) as lon,
+                   COALESCE(isa.sources, '[]'::json) as sources
             FROM public.incidents i
+            LEFT JOIN incident_sources_agg isa ON i.id = isa.incident_id
             WHERE i.evidence_score >= $1
               AND (i.verification_status IN ('verified', 'auto_verified', 'pending')
                    OR i.verification_status IS NULL)
@@ -130,7 +147,7 @@ async def fetch_incidents(
                     "country": row["country"],
                     "lat": float(row["lat"]) if row["lat"] else None,
                     "lon": float(row["lon"]) if row["lon"] else None,
-                    "sources": []  # Temporarily disabled for performance
+                    "sources": row["sources"] if row["sources"] and row["sources"] != "[]" else []
                 })
 
             return incidents
