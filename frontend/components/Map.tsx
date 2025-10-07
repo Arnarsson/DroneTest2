@@ -462,7 +462,26 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
 
       ${incident.sources && incident.sources.length > 0 ? `
         <div style="border-top: 1px solid ${borderColor}; padding-top: 10px; margin-top: 8px;">
-          <div style="font-size: 11px; color: ${textMuted}; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sources</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="font-size: 11px; color: ${textMuted}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+              Sources ${incident.sources.length > 1 ? `(${incident.sources.length})` : ''}
+            </div>
+            ${incident.sources.length >= 2 ? `
+              <div style="
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 10px;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+              ">
+                ✓ Multi-source verified
+              </div>
+            ` : ''}
+          </div>
           <div style="display: flex; flex-direction: column; gap: 4px;">
             ${incident.sources.map(source => {
               const favicon = getFavicon(source.source_url)
@@ -475,26 +494,48 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
                 'other': '🔗'
               }
               const emoji = typeEmojis[source.source_type?.toLowerCase() || 'other'] || '🔗'
+              // Trust weight color (0-100 scale for display)
+              const trustWeight = source.trust_weight || 0
+              const trustColor = trustWeight >= 0.8 ? '#10b981' : trustWeight >= 0.6 ? '#f59e0b' : '#6b7280'
               return `
                 <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 6px;
-                  padding: 4px 8px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                  padding: 6px 10px;
                   background: ${linkBg};
-                  border-radius: 8px;
+                  border-radius: 10px;
                   color: ${linkColor};
-                  font-size: 12px;
                   text-decoration: none;
-                  font-weight: 500;
                   transition: all 0.2s;
                   border: 1px solid ${borderColor};
+                  margin-bottom: 4px;
                 ">
-                  ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
-                  <span>${source.source_type || 'Unknown'}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
-                  </svg>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
+                    <span style="font-size: 13px; font-weight: 600;">${source.source_name || source.source_type || 'Unknown'}</span>
+                    ${trustWeight > 0 ? `
+                      <span style="
+                        background: ${trustColor};
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 8px;
+                        font-size: 9px;
+                        font-weight: 700;
+                        margin-left: auto;
+                      ">
+                        ${Math.round(trustWeight * 100)}%
+                      </span>
+                    ` : ''}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: ${trustWeight > 0 ? '2px' : 'auto'};">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                    </svg>
+                  </div>
+                  ${source.source_type && source.source_type !== (source.source_name || '').toLowerCase() ? `
+                    <span style="font-size: 10px; color: ${textMuted}; padding-left: 20px; text-transform: capitalize;">
+                      ${source.source_type}
+                    </span>
+                  ` : ''}
                 </a>
               `
             }).join('')}

@@ -265,6 +265,9 @@ SOURCES_HTML_SCRAPING = {
     },
 }
 
+# Merge HTML scraping sources into main SOURCES dict
+SOURCES.update(SOURCES_HTML_SCRAPING)
+
 # ============================================================================
 # SOCIAL MEDIA SOURCES (Tier 1 - Requires Verification)
 # ============================================================================

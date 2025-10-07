@@ -220,10 +220,11 @@ def is_drone_incident(title: str, content: str) -> bool:
     """
     full_text = (title + " " + content).lower()
 
-    # Must contain drone-related keywords (word boundary to avoid "dronning"/queen false positive)
-    has_drone = any(re.search(rf'\b{re.escape(word)}\b', full_text) for word in [
-        "drone", "dron", "uav", "uas", "luftfartøj"
-    ])
+    # Must contain drone-related keywords
+    # Use "drone" OR "dron" (but NOT "dronning" which is queen in Danish)
+    has_drone = (
+        ("drone" in full_text or "dron" in full_text) and "dronning" not in full_text
+    ) or any(word in full_text for word in ["uav", "uas", "luftfartøj", "ubemannet luftfartøy"])
 
     # Must contain incident indicators (not just mentions of drones)
     # Require ACTUAL observation, action, or response to an incident
@@ -240,7 +241,7 @@ def is_drone_incident(title: str, content: str) -> bool:
     ])
 
     has_response = any(word in full_text for word in [
-        "investigating", "undersøger", "investigation", "undersøgelse",
+        "investigating", "undersøger", "investigation", "undersøgelse", "efterforskning",  # Added "efterforskning"
         "searching", "søger", "responding", "reagerer",
         "politi", "police", "authorities", "myndigheder"
     ])
