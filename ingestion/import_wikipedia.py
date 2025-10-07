@@ -17,7 +17,7 @@ import uuid
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from scrapers.wikipedia_scraper import WikipediaIncidentScraper
-from config import DANISH_AIRPORTS, DANISH_HARBORS
+from config import DANISH_AIRPORTS, DANISH_HARBORS, EUROPEAN_LOCATIONS
 
 # Trust weights for sources
 TRUST_WEIGHTS = {
@@ -52,21 +52,23 @@ for name, data in DANISH_HARBORS.items():
         'aliases': [name]
     })
 
-# Add known Nordic/European locations from existing incidents
+# Add Danish military bases
 MONITORED_LOCATIONS.extend([
-    # Norway
-    {'name': 'Oslo Airport', 'lat': 60.1939, 'lon': 11.1004, 'country': 'NO', 'type': 'airport', 'aliases': ['gardermoen', 'oslo']},
-    # Sweden
-    {'name': 'Stockholm Arlanda', 'lat': 59.6519, 'lon': 17.9186, 'country': 'SE', 'type': 'airport', 'aliases': ['arlanda', 'stockholm']},
-    # Netherlands
-    {'name': 'Amsterdam Schiphol', 'lat': 52.3105, 'lon': 4.7683, 'country': 'NL', 'type': 'airport', 'aliases': ['schiphol', 'amsterdam']},
-    # Poland
-    {'name': 'Lublin Airport', 'lat': 51.2403, 'lon': 22.7136, 'country': 'PL', 'type': 'airport', 'aliases': ['lublin']},
-    # Denmark military
     {'name': 'Karup Air Base', 'lat': 56.2975, 'lon': 9.1247, 'country': 'DK', 'type': 'military', 'aliases': ['karup']},
     {'name': 'Skrydstrup Air Base', 'lat': 55.2214, 'lon': 9.2631, 'country': 'DK', 'type': 'military', 'aliases': ['skrydstrup']},
     {'name': 'Kastrup Airbase', 'lat': 55.63, 'lon': 12.65, 'country': 'DK', 'type': 'military', 'aliases': ['kastrup base']},
 ])
+
+# Add all European locations (68 locations across 13 countries)
+for name, data in EUROPEAN_LOCATIONS.items():
+    MONITORED_LOCATIONS.append({
+        'name': name,
+        'lat': data['lat'],
+        'lon': data['lon'],
+        'country': data.get('country', '??'),
+        'type': data.get('type', 'airport'),
+        'aliases': [name]
+    })
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
