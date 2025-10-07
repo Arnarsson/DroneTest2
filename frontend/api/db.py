@@ -78,8 +78,8 @@ async def fetch_incidents(
                     is2.incident_id,
                     json_agg(json_build_object(
                         'source_url', is2.source_url,
-                        'source_type', COALESCE(s.source_type, is2.source_type, 'unknown'),
-                        'source_name', COALESCE(s.name, is2.source_name,
+                        'source_type', COALESCE(s.source_type, 'unknown'),
+                        'source_name', COALESCE(s.name,
                             CASE
                                 WHEN is2.source_url LIKE '%politi.dk%' THEN 'Politiets Nyhedsliste'
                                 WHEN is2.source_url LIKE '%dr.dk%' THEN 'DR Nyheder'
@@ -92,7 +92,7 @@ async def fetch_incidents(
                         'source_title', is2.source_title,
                         'source_quote', is2.source_quote,
                         'published_at', is2.published_at,
-                        'trust_weight', COALESCE(s.trust_weight, is2.trust_weight, 0)
+                        'trust_weight', COALESCE(s.trust_weight, 0)
                     )) as sources
                 FROM public.incident_sources is2
                 LEFT JOIN public.sources s ON is2.source_id = s.id
