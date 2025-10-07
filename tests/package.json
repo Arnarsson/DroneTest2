@@ -1,0 +1,25 @@
+{
+  "name": "dronewatch-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for DroneWatch 2.0 production site",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project='Mobile Chrome' --project='Mobile Safari'",
+    "test:all": "playwright test --project=chromium --project=firefox --project=webkit --project='Mobile Chrome' --project='Mobile Safari'",
+    "report": "playwright show-report ../test-results/html",
+    "codegen": "playwright codegen https://www.dronemap.cc"
+  },
+  "keywords": ["e2e", "testing", "playwright", "dronewatch"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0"
+  }
+}
