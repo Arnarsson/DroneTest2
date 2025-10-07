@@ -1,8 +1,9 @@
-# 🚁 DroneWatch - Real-time Drone Incident Tracking
+# 🚁 DroneWatch 2.0 - Real-time Drone Incident Tracking
 
-Live map of verified drone incidents across Europe with evidence-based reporting.
+Live map of verified drone incidents across Europe with evidence-based reporting and multi-source verification.
 
-**Live Site**: https://www.dronemap.cc
+**Live Site**: https://dronewatch.cc → https://www.dronemap.cc
+**Repository**: https://github.com/Arnarsson/DroneWatch2.0
 
 ---
 
@@ -169,7 +170,7 @@ curl https://www.dronemap.cc/api/healthz
 ```
 
 ### Scraper Status
-Check GitHub Actions: https://github.com/Arnarsson/2/actions
+Check GitHub Actions: https://github.com/Arnarsson/DroneWatch2.0/actions
 
 ---
 
@@ -181,5 +182,5 @@ GitHub: [@Arnarsson](https://github.com/Arnarsson)
 
 ---
 
-**Last Updated**: 2025-09-30
-**Version**: 1.0.0
+**Last Updated**: 2025-10-07
+**Version**: 2.2.0 (DroneWatch 2.0 - AI Verification + Multi-Layer Defense)

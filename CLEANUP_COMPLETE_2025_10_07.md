@@ -1,7 +1,9 @@
 # Codebase Cleanup Complete - October 7, 2025
 
+**Repository**: https://github.com/Arnarsson/DroneWatch2.0
+
 ## Summary
-Removed all redundant, duplicate, and obsolete code from DroneTest2 project to improve maintainability and reduce confusion.
+Removed all redundant, duplicate, and obsolete code from DroneWatch 2.0 project to improve maintainability and reduce confusion.
 
 ---
 

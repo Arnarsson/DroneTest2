@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository
 
-**Main Repository**: https://github.com/Arnarsson/DroneTest2
-**Live Site**: https://www.dronemap.cc (production), https://dronetest-h3w7bsly4-arnarssons-projects.vercel.app (staging)
+**Main Repository**: https://github.com/Arnarsson/DroneWatch2.0
+**Live Site**: https://dronewatch.cc (redirects to www.dronemap.cc)
+**Production**: https://www.dronemap.cc
 **Platform**: Vercel (auto-deploys from `main` branch)
 
 Real-time drone incident tracking for Europe with evidence-based reporting and multi-source verification.
@@ -541,6 +542,6 @@ This will:
 
 ---
 
-**Last Updated**: October 6, 2025
-**Version**: 2.2.0 (DroneTest2 - AI Verification Layer + Multi-Layer Defense)
-**Repository**: https://github.com/Arnarsson/DroneTest2
+**Last Updated**: October 7, 2025
+**Version**: 2.2.0 (DroneWatch 2.0 - AI Verification Layer + Multi-Layer Defense)
+**Repository**: https://github.com/Arnarsson/DroneWatch2.0

@@ -1,8 +1,9 @@
-# DroneTest2 Comprehensive Testing Report
+# DroneWatch 2.0 Comprehensive Testing Report
 **Date**: October 7, 2025
 **Version**: 2.2.0
+**Repository**: https://github.com/Arnarsson/DroneWatch2.0
 **Tester**: Claude Code + Chrome DevTools MCP
-**Environment**: Production (https://www.dronemap.cc)
+**Environment**: Production (https://dronewatch.cc → https://www.dronemap.cc)
 
 ---
 
