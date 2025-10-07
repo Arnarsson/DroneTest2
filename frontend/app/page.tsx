@@ -132,7 +132,7 @@ export default function Home() {
                   center={[56.0, 10.5]}
                   zoom={6}
                 />
-                <EvidenceLegend />
+                <EvidenceLegend incidents={incidents || []} />
               </>
             ) : view === "list" ? (
               <IncidentList incidents={incidents || []} isLoading={isLoading} />

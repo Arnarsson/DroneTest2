@@ -1,12 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EVIDENCE_SYSTEM } from '@/constants/evidence'
+import type { Incident } from '@/types'
 
-export function EvidenceLegend() {
+interface EvidenceLegendProps {
+  incidents?: Incident[]
+}
+
+export function EvidenceLegend({ incidents = [] }: EvidenceLegendProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [hasSeenLegend, setHasSeenLegend] = useState(false)
+
+  // Calculate counts per evidence level
+  const evidenceCounts = useMemo(() => {
+    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
+    incidents.forEach(incident => {
+      const score = incident.evidence_score as 1 | 2 | 3 | 4
+      if (score >= 1 && score <= 4) {
+        counts[score]++
+      }
+    })
+    return counts
+  }, [incidents])
 
   // Auto-open legend on first visit (desktop only)
   useEffect(() => {
@@ -77,6 +94,7 @@ export function EvidenceLegend() {
             <div className="space-y-3">
               {[4, 3, 2, 1].map((level, idx) => {
                 const config = EVIDENCE_SYSTEM[level as 1 | 2 | 3 | 4]
+                const count = evidenceCounts[level] || 0
                 return (
                   <LegendItem
                     key={level}
@@ -84,6 +102,7 @@ export function EvidenceLegend() {
                     color={config.bgClass}
                     title={config.label}
                     description={config.description}
+                    count={count}
                     delay={idx * 0.05}
                   />
                 )
@@ -114,10 +133,11 @@ interface LegendItemProps {
   color: string
   title: string
   description: string
+  count: number
   delay: number
 }
 
-function LegendItem({ level, color, title, description, delay }: LegendItemProps) {
+function LegendItem({ level, color, title, description, count, delay }: LegendItemProps) {
   return (
     <motion.div
       className="flex items-start gap-3 group"
@@ -133,10 +153,23 @@ function LegendItem({ level, color, title, description, delay }: LegendItemProps
         {level}
       </motion.div>
       <div className="flex-1">
-        <div className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-          {title}
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {title}
+          </div>
+          <motion.div
+            key={count}
+            className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full"
+            initial={{ scale: 1.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', bounce: 0.5 }}
+          >
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+              {count}
+            </span>
+          </motion.div>
         </div>
-        <div className="text-xs text-gray-600 dark:text-gray-400 leading-snug">
+        <div className="text-xs text-gray-600 dark:text-gray-400 leading-snug mt-1">
           {description}
         </div>
       </div>
