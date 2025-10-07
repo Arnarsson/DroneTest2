@@ -9,6 +9,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import type { Incident } from '@/types'
 import { formatDistance } from 'date-fns/formatDistance'
+import { format } from 'date-fns/format'
 import { EVIDENCE_SYSTEM } from '@/constants/evidence'
 
 // Fix Leaflet icon issue
@@ -419,7 +420,16 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
 
   return `
     <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
-      <h3 style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: ${textPrimary}; line-height: 1.3;">
+      <h3 style="
+        margin: 0 0 10px 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: ${textPrimary};
+        line-height: 1.3;
+        max-width: 100%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      ">
         ${incident.title}
       </h3>
 
@@ -452,14 +462,19 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
           </span>
         ` : ''}
         <span style="color: ${textMuted}; font-size: 11px; font-weight: 500;">
-          ${timeAgo}
+          ${timeAgo} · ${format(new Date(incident.occurred_at), 'dd MMM yyyy HH:mm')}
         </span>
       </div>
+
+      <!-- Visual divider after metadata -->
+      <hr style="border: 0; border-top: 1px solid ${borderColor}; margin: 12px 0;" />
 
       ${incident.narrative ? `
         <p style="margin: 0 0 14px 0; color: ${textSecondary}; font-size: 13px; line-height: 1.6;">
           ${incident.narrative}
         </p>
+        <!-- Visual divider after narrative -->
+        <hr style="border: 0; border-top: 1px solid ${borderColor}; margin: 12px 0;" />
       ` : ''}
 
       ${incident.sources && incident.sources.length > 0 ? `
@@ -496,57 +511,156 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
                 'other': '🔗'
               }
               const emoji = typeEmojis[source.source_type?.toLowerCase() || 'other'] || '🔗'
-              // Trust weight color (0-100 scale for display)
+
+              // FIX: Normalize trust weight to 0-1 scale (handles both 0-1 and 1-4 scales)
               const trustWeight = source.trust_weight || 0
-              const trustColor = trustWeight >= 0.8 ? '#10b981' : trustWeight >= 0.6 ? '#f59e0b' : '#6b7280'
+              const normalizedTrust = trustWeight > 1 ? trustWeight / 4 : trustWeight
+              const trustPercentage = Math.round(normalizedTrust * 100)
+              const trustColor = normalizedTrust >= 0.8 ? '#10b981' : normalizedTrust >= 0.6 ? '#f59e0b' : '#6b7280'
+
               const sourceName = source.source_title || source.source_name || source.source_type || 'Unknown'
-              const showType = source.source_type && source.source_type.toLowerCase() !== sourceName.toLowerCase()
+              const sourceQuote = (source as any).source_quote || null
+              const domain = new URL(source.source_url).hostname.replace('www.', '')
 
               return `
-                <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 2px;
-                  padding: 6px 10px;
-                  background: ${linkBg};
-                  border-radius: 10px;
-                  color: ${linkColor};
-                  text-decoration: none;
-                  transition: all 0.2s;
+                <div style="
+                  padding: 12px;
+                  background: ${isDark ? 'rgba(31, 41, 55, 0.5)' : 'rgba(249, 250, 251, 0.8)'};
                   border: 1px solid ${borderColor};
-                  margin-bottom: 4px;
+                  border-radius: 10px;
+                  margin-bottom: 8px;
                 ">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
-                    <span style="font-size: 13px; font-weight: 600;">${sourceName}</span>
+                  ${sourceQuote ? `
+                    <!-- 1. SOURCE QUOTE FIRST (blockquoted, primary element) -->
+                    <blockquote style="
+                      border-left: 4px solid #3b82f6;
+                      padding-left: 12px;
+                      margin: 0 0 10px 0;
+                      font-style: italic;
+                      color: ${textSecondary};
+                      font-size: 13px;
+                      line-height: 1.5;
+                      font-weight: 500;
+                    ">
+                      "${sourceQuote.length > 150 ? sourceQuote.substring(0, 150) + '...' : sourceQuote}"
+                    </blockquote>
+                  ` : ''}
+
+                  <!-- 2. SOURCE NAME + TRUST BADGE (secondary info) -->
+                  <div style="display: flex; align-items: center; justify-between; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
+                      <span style="font-size: 13px; font-weight: 600; color: ${textPrimary};">
+                        ${sourceName}
+                      </span>
+                      <span style="
+                        font-size: 10px;
+                        color: ${textMuted};
+                        cursor: help;
+                      " title="Domain: ${domain} | Type: ${source.source_type || 'unknown'}">
+                        ℹ️
+                      </span>
+                    </div>
                     ${trustWeight > 0 ? `
                       <span style="
                         background: ${trustColor};
                         color: white;
-                        padding: 2px 6px;
-                        border-radius: 8px;
-                        font-size: 9px;
+                        padding: 3px 8px;
+                        border-radius: 12px;
+                        font-size: 10px;
                         font-weight: 700;
-                        margin-left: auto;
                       ">
-                        ${Math.round(trustWeight * 100)}%
+                        ${trustPercentage}%
                       </span>
                     ` : ''}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: ${trustWeight > 0 ? '2px' : 'auto'};">
+                  </div>
+
+                  <!-- 3. "VIEW SOURCE" BUTTON (prominent CTA) -->
+                  <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" aria-label="View source: ${sourceName}" style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 8px 14px;
+                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+                  " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(37, 99, 235, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(37, 99, 235, 0.2)'">
+                    View Source
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
                     </svg>
-                  </div>
-                  ${showType ? `
-                    <span style="font-size: 10px; color: ${textMuted}; padding-left: 20px; text-transform: capitalize;">
-                      ${source.source_type}
-                    </span>
-                  ` : ''}
-                </a>
+                  </a>
+                </div>
               `
             }).join('')}
           </div>
         </div>
       ` : ''}
+
+      <!-- Action buttons -->
+      <div style="
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid ${borderColor};
+      ">
+        <button
+          onclick="navigator.clipboard.writeText('https://dronewatch.cc/embed?incident=${incident.id}'); alert('Embed code copied to clipboard!');"
+          style="
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: ${isDark ? 'rgba(55, 65, 81, 0.8)' : 'rgba(243, 244, 246, 0.8)'};
+            color: ${textPrimary};
+            border: 1px solid ${borderColor};
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: system-ui, -apple-system, sans-serif;
+          "
+          onmouseover="this.style.background='${isDark ? 'rgba(75, 85, 99, 0.9)' : 'rgba(229, 231, 235, 0.9)'}'"
+          onmouseout="this.style.background='${isDark ? 'rgba(55, 65, 81, 0.8)' : 'rgba(243, 244, 246, 0.8)'}'"
+          aria-label="Copy embed code for this incident"
+        >
+          📋 Copy Embed
+        </button>
+        <button
+          onclick="window.open('https://github.com/Arnarsson/DroneWatch2.0/issues/new?title=Report%20Incident%20${incident.id}&body=Incident%20ID:%20${incident.id}%0ATitle:%20${encodeURIComponent(incident.title)}', '_blank');"
+          style="
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: ${isDark ? 'rgba(55, 65, 81, 0.8)' : 'rgba(243, 244, 246, 0.8)'};
+            color: ${textPrimary};
+            border: 1px solid ${borderColor};
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: system-ui, -apple-system, sans-serif;
+          "
+          onmouseover="this.style.background='${isDark ? 'rgba(75, 85, 99, 0.9)' : 'rgba(229, 231, 235, 0.9)'}'"
+          onmouseout="this.style.background='${isDark ? 'rgba(55, 65, 81, 0.8)' : 'rgba(243, 244, 246, 0.8)'}'"
+          aria-label="Report an issue with this incident"
+        >
+          ⚠️ Report
+        </button>
+      </div>
     </div>
   `
 }
@@ -584,28 +698,52 @@ function createFacilityPopup(
           const timeAgo = formatDistance(new Date(incident.occurred_at), new Date(), { addSuffix: true })
 
           return `
-            <div style="
-              padding: 10px;
-              margin-bottom: 8px;
-              border: 1px solid ${borderColor};
-              border-radius: 8px;
-              background: ${isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(243, 244, 246, 0.5)'};
-            ">
-              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                <span style="
-                  background: ${config.gradient};
-                  color: white;
-                  padding: 4px 10px;
-                  border-radius: 14px;
-                  font-size: 11px;
-                  font-weight: 700;
-                  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                ">
-                  ${config.label}
-                </span>
-                <span style="color: ${textSecondary}; font-size: 11px; font-weight: 500;">
-                  ${timeAgo}
-                </span>
+            <div
+              onclick="event.stopPropagation();"
+              style="
+                padding: 10px;
+                margin-bottom: 8px;
+                border: 1px solid ${borderColor};
+                border-radius: 8px;
+                background: ${isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(243, 244, 246, 0.5)'};
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+              "
+              onmouseover="this.style.background='${isDark ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.7)'}'; this.style.borderColor='${config.color}';"
+              onmouseout="this.style.background='${isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(243, 244, 246, 0.5)'}'; this.style.borderColor='${borderColor}';"
+            >
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="
+                    background: ${config.gradient};
+                    color: white;
+                    padding: 4px 10px;
+                    border-radius: 14px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                  ">
+                    ${config.label}
+                  </span>
+                  <span style="color: ${textSecondary}; font-size: 11px; font-weight: 500;">
+                    ${timeAgo}
+                  </span>
+                </div>
+                <!-- Chevron indicator -->
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="${textSecondary}"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex-shrink: 0;"
+                >
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
               </div>
 
               <div style="font-size: 13px; color: ${textPrimary}; font-weight: 600; margin-bottom: 4px;">
