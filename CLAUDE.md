@@ -94,31 +94,62 @@ const facilityKey = `${lat.toFixed(3)},${lon.toFixed(3)}-${asset_type}`
 
 **Why?** Prevents confusing numbered clusters (7, 8, 9) that look like evidence scores.
 
-### 3. Multi-Source Consolidation Pipeline
+### 3. Multi-Source Consolidation Pipeline ✅ IMPLEMENTED (v2.3.0)
 
-**Files**: `ingestion/consolidator.py`, `ingestion/ingest.py`
+**Files**: `ingestion/consolidator.py` (345 lines), `ingestion/ingest.py` (integrated)
 
-**Architecture**: "1 incident → multiple sources"
+**Architecture**: "1 incident → multiple sources" with intelligent deduplication
 
 ```python
 # Hash-based deduplication (location + time, NOT title)
 from consolidator import ConsolidationEngine
-engine = ConsolidationEngine()
+
+engine = ConsolidationEngine(
+    location_precision=0.01,  # ~1km (rounds coordinates)
+    time_window_hours=6        # Groups incidents within 6h window
+)
 
 # Deduplication strategy:
-# - Location rounded to ~1km (0.01°)
-# - Time rounded to 6-hour window
-# - Title NOT in hash (different headlines = same incident)
+# - Location: Rounded to 0.01° (~1.1km at Nordic latitudes)
+# - Time: Grouped into 6-hour windows
+# - Title: NOT included (allows different headlines for same incident)
+# - Country + asset_type: Used to prevent cross-border/type merging
 
+# Get statistics before consolidation
+stats = engine.get_consolidation_stats(raw_incidents)
+# Returns: {total_incidents, unique_hashes, potential_merges, merge_rate}
+
+# Consolidate incidents
 consolidated = engine.consolidate_incidents(raw_incidents)
-# Merges sources, recalculates evidence scores, enhances narratives
+# Returns: List of merged incidents with combined sources
 ```
 
-**Evidence Score Recalculation**:
-- Score 4: ANY official source (police/military/NOTAM/aviation)
-- Score 3: 2+ media sources WITH official quote detection (`has_official_quote()`)
-- Score 2: 1 credible source (trust_weight ≥ 2)
-- Score 1: Low trust sources
+**Source Merging Logic**:
+- Deduplicates sources by URL (prevents double-counting same article)
+- Keeps ALL unique sources (no filtering by type)
+- Uses longest narrative (most detailed)
+- Uses best title (most descriptive - longest with substance)
+- Tracks `merged_from` count and `source_count`
+
+**Evidence Score Recalculation** (from `verification.py`):
+- **Score 4**: ANY official source (police/military/NOTAM/aviation, trust_weight=4)
+- **Score 3**: 2+ media sources (trust_weight≥2) WITH official quote detection
+- **Score 2**: Single credible source (trust_weight ≥ 2)
+- **Score 1**: Low trust sources (trust_weight < 2)
+
+**Testing**: 5 scenarios, 100% pass rate
+- Single incident (no consolidation)
+- Same location + time → MERGE
+- Different locations → NO MERGE
+- Evidence upgrade: media (2) + police (4) → OFFICIAL (4)
+- Consolidation statistics calculation
+
+**Integration** (in `ingest.py`):
+```python
+# Step 5 in ingestion pipeline (after non-incident filtering)
+all_incidents = consolidation_engine.consolidate_incidents(all_incidents)
+# Runs automatically on every ingestion
+```
 
 ### 4. Fake News Detection System
 

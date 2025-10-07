@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from config import API_BASE_URL, INGEST_TOKEN
+from consolidator import ConsolidationEngine
 from db_cache import ScraperCache
 from geographic_analyzer import analyze_incident_geography
 from openai_client import OpenAIClient, OpenAIClientError
@@ -30,7 +31,7 @@ from verification import (calculate_confidence_score, get_verification_status,
 from non_incident_filter import NonIncidentFilter
 
 # Scraper version for tracking deployments
-SCRAPER_VERSION = "2.2.0"  # Updated with AI verification layer (OpenRouter integration)
+SCRAPER_VERSION = "2.3.0"  # Multi-source consolidation engine + Nordic scraping fix
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -283,10 +284,27 @@ class DroneWatchIngester:
 
         all_incidents = actual_incidents
 
-        # 5. Sort by evidence score (highest first)
+        # 5. Consolidate multi-source incidents
+        print(f"\n🔗 Consolidating multi-source incidents...")
+        consolidation_engine = ConsolidationEngine(
+            location_precision=0.01,  # ~1km
+            time_window_hours=6
+        )
+
+        # Get consolidation stats before merging
+        stats = consolidation_engine.get_consolidation_stats(all_incidents)
+        print(f"   Total incidents: {stats['total_incidents']}")
+        print(f"   Unique locations/times: {stats['unique_hashes']}")
+        print(f"   Potential merges: {stats['potential_merges']} ({stats['merge_rate']:.1%})")
+
+        # Consolidate incidents
+        all_incidents = consolidation_engine.consolidate_incidents(all_incidents)
+        print(f"   ✓ Consolidated to {len(all_incidents)} unique incidents")
+
+        # 6. Sort by evidence score (highest first)
         all_incidents.sort(key=lambda x: x['evidence_score'], reverse=True)
 
-        # 6. Send to API
+        # 7. Send to API
         print(f"\n📤 Sending {len(all_incidents)} incidents to API...")
 
         if test_mode and all_incidents:
