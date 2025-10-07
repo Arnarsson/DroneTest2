@@ -12,6 +12,11 @@ from datetime import datetime, timezone
 from typing import Dict, List
 
 import requests
+
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 from config import API_BASE_URL, INGEST_TOKEN
 from db_cache import ScraperCache
 from geographic_analyzer import analyze_incident_geography

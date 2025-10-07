@@ -3,14 +3,23 @@ Utility functions for ingestion
 """
 import re
 import hashlib
+import logging
+import os
 from datetime import datetime, timezone
 from typing import Optional, Tuple, Dict
 import dateutil.parser
 from config import DANISH_AIRPORTS, DANISH_HARBORS, CRITICAL_KEYWORDS
 
-def extract_location(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
+logger = logging.getLogger(__name__)
+
+# Location extraction cache to avoid repeated AI calls
+_location_cache = {}
+
+def extract_location(text: str, use_ai: bool = True) -> Tuple[Optional[float], Optional[float], Optional[str]]:
     """
-    Extract location from text by looking for known places
+    Extract location from text by looking for known places.
+    Falls back to AI extraction if regex patterns fail and use_ai=True.
+
     Returns (lat, lon, asset_type) or (None, None, None) if location cannot be determined
 
     NOTE: We return None instead of default coordinates to avoid clustering
@@ -32,9 +41,110 @@ def extract_location(text: str) -> Tuple[Optional[float], Optional[float], Optio
     # TODO: Add more specific military base coordinates
     # For now, skip incidents without specific location mentions
 
+    # AI fallback if enabled
+    if use_ai:
+        try:
+            return _extract_location_with_ai(text)
+        except Exception as e:
+            logger.warning(f"AI location extraction failed: {e}")
+            return None, None, None
+
     # Return None if no specific location found
     # This prevents clustering unrelated incidents at a default coordinate
     return None, None, None
+
+
+def _extract_location_with_ai(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
+    """
+    Use AI to extract location from text when regex patterns fail.
+    Caches results to minimize API costs.
+
+    Args:
+        text: Text to extract location from
+
+    Returns:
+        (lat, lon, asset_type) tuple or (None, None, None)
+    """
+    # Check cache first
+    cache_key = hashlib.md5(text.encode()).hexdigest()
+    if cache_key in _location_cache:
+        return _location_cache[cache_key]
+
+    try:
+        from openai_client import OpenAIClient, OpenAIClientError
+
+        # Initialize AI client
+        api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            logger.warning("No AI API key available for location extraction")
+            return None, None, None
+
+        client = OpenAIClient(api_key=api_key)
+
+        # Prompt for location extraction
+        prompt = f"""Extract the specific location from this Danish police/news text about a drone incident.
+
+Text: {text[:500]}
+
+Return ONLY a JSON object with these fields:
+- location: The specific place name (e.g., "Copenhagen", "Aalborg", "North Jutland")
+- lat: Latitude (float)
+- lon: Longitude (float)
+- asset_type: One of: airport, harbor, military, powerplant, bridge, other
+
+If you cannot determine a specific location, return {{"location": null, "lat": null, "lon": null, "asset_type": null}}
+
+Known locations:
+- Copenhagen (København): 55.6761, 12.5683
+- Aalborg Airport: 57.0928, 9.8492
+- Billund Airport: 55.7403, 9.1518
+- North Jutland (Nordjylland): 57.0488, 9.9217
+- Western Copenhagen (Vestegnen): 55.6563, 12.3924
+- Zealand (Sjælland): 55.5, 11.5
+
+Return only the JSON object, no other text."""
+
+        # Call AI
+        response = client.client.chat.completions.create(
+            model=client.model_name,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200,
+            temperature=0.1  # Low temperature for consistent results
+        )
+
+        # Parse response
+        result_text = response.choices[0].message.content.strip()
+
+        # Extract JSON from response (may have markdown code blocks)
+        import json
+        if "```" in result_text:
+            # Extract JSON from markdown code block
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', result_text, re.DOTALL)
+            if json_match:
+                result_text = json_match.group(1)
+
+        result = json.loads(result_text)
+
+        # Extract values
+        lat = result.get("lat")
+        lon = result.get("lon")
+        asset_type = result.get("asset_type", "other")
+
+        # Validate
+        if lat is None or lon is None:
+            logger.info(f"AI could not determine location from text: {text[:80]}...")
+            result_tuple = (None, None, None)
+        else:
+            logger.info(f"AI extracted location: {result.get('location')} ({lat}, {lon}) [{asset_type}]")
+            result_tuple = (float(lat), float(lon), asset_type)
+
+        # Cache result
+        _location_cache[cache_key] = result_tuple
+        return result_tuple
+
+    except Exception as e:
+        logger.error(f"AI location extraction error: {e}")
+        return None, None, None
 
 def extract_datetime(text: str, fallback: datetime = None) -> datetime:
     """
