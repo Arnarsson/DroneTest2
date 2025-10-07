@@ -214,9 +214,13 @@ class NewsScraper:
         successful_sources = 0
         failed_sources = []
 
-        news_sources = [k for k, v in SOURCES.items() if v.get('type') == 'media']
+        # Get all media sources (both 'media' and 'verified_media' types)
+        news_sources = [
+            k for k, v in SOURCES.items()
+            if v.get('source_type') in ['media', 'verified_media'] and v.get('working', False)
+        ]
 
-        logger.info(f"Checking {len(news_sources)} news sources...")
+        logger.info(f"Checking {len(news_sources)} news sources (all Nordic countries)...")
 
         for source_key in news_sources:
             try:
