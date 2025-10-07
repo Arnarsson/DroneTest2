@@ -21,6 +21,7 @@ from scrapers.police_scraper import PoliceScraper
 from utils import generate_incident_hash
 from verification import (calculate_confidence_score, get_verification_status,
                           requires_manual_review)
+from non_incident_filter import NonIncidentFilter
 
 # Scraper version for tracking deployments
 SCRAPER_VERSION = "2.2.0"  # Updated with AI verification layer (OpenRouter integration)
@@ -254,10 +255,22 @@ class DroneWatchIngester:
         except Exception as e:
             print(f"Error in news scraper: {e}")
 
-        # 3. Sort by evidence score (highest first)
+        # 3. Filter out non-incidents (regulatory news, bans, advisories)
+        print(f"\n🔍 Filtering non-incidents (regulatory news)...")
+        non_incident_filter = NonIncidentFilter()
+        actual_incidents, filtered_out = non_incident_filter.filter_incidents(all_incidents)
+
+        if filtered_out:
+            print(f"   ❌ Filtered out {len(filtered_out)} non-incidents:")
+            for item in filtered_out:
+                print(f"      - {item['title'][:60]}... (confidence: {item['_filter_confidence']:.2f})")
+
+        all_incidents = actual_incidents
+
+        # 4. Sort by evidence score (highest first)
         all_incidents.sort(key=lambda x: x['evidence_score'], reverse=True)
 
-        # 4. Send to API
+        # 5. Send to API
         print(f"\n📤 Sending {len(all_incidents)} incidents to API...")
 
         if test_mode and all_incidents:
