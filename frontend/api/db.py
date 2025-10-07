@@ -134,6 +134,24 @@ async def fetch_incidents(
             # Format results
             incidents = []
             for row in rows:
+                # Handle sources - could be JSON object, string, or None
+                sources = row.get("sources")
+                if sources:
+                    # If it's a string, parse it as JSON
+                    if isinstance(sources, str):
+                        import json
+                        try:
+                            sources = json.loads(sources) if sources != "[]" else []
+                        except:
+                            sources = []
+                    # If it's already a list, use it
+                    elif isinstance(sources, list):
+                        sources = sources
+                    else:
+                        sources = []
+                else:
+                    sources = []
+
                 incidents.append({
                     "id": str(row["id"]),
                     "title": row["title"],
@@ -147,7 +165,7 @@ async def fetch_incidents(
                     "country": row["country"],
                     "lat": float(row["lat"]) if row["lat"] else None,
                     "lon": float(row["lon"]) if row["lon"] else None,
-                    "sources": row["sources"] if row["sources"] and row["sources"] != "[]" else []
+                    "sources": sources
                 })
 
             return incidents
