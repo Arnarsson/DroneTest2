@@ -44,22 +44,14 @@ export default function Home() {
 
   // Apply client-side date filtering and timeline filtering
   const incidents = useMemo(() => {
-    console.log('[Filtering] Starting filter logic');
-    console.log('[Filtering] allIncidents:', allIncidents?.length || 0);
-    console.log('[Filtering] filters.dateRange:', filters.dateRange);
-    console.log('[Filtering] timelineRange:', timelineRange);
-
     if (!allIncidents) {
-      console.log('[Filtering] No allIncidents, returning empty array');
       return [];
     }
 
     let filtered = allIncidents;
-    console.log('[Filtering] Initial count:', filtered.length);
 
     // Apply date range filter (client-side fallback)
     if (filters.dateRange !== "all") {
-      console.log('[Filtering] Applying date range filter:', filters.dateRange);
       const now = new Date();
       const since = new Date();
 
@@ -75,39 +67,27 @@ export default function Home() {
           break;
       }
 
-      console.log('[Filtering] Filtering from:', since.toISOString());
-      const beforeFilter = filtered.length;
       filtered = filtered.filter(
         (inc: Incident) => new Date(inc.occurred_at) >= since
       );
-      console.log('[Filtering] After date filter:', filtered.length, `(removed ${beforeFilter - filtered.length})`);
     }
 
     // Apply timeline filtering
     if (timelineRange.start && timelineRange.end) {
-      console.log('[Filtering] Applying timeline filter');
-      const beforeFilter = filtered.length;
       filtered = filtered.filter((inc: Incident) =>
         isWithinInterval(new Date(inc.occurred_at), {
           start: timelineRange.start!,
           end: timelineRange.end!,
         })
       );
-      console.log('[Filtering] After timeline filter:', filtered.length, `(removed ${beforeFilter - filtered.length})`);
     }
 
-    console.log('[Filtering] Final count:', filtered.length);
     return filtered;
   }, [allIncidents, timelineRange, filters.dateRange]);
 
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
-
-  console.log('[Render] About to render with incidents:', incidents?.length || 0);
-  console.log('[Render] incidents variable:', incidents);
-  console.log('[Render] isLoading:', isLoading);
-  console.log('[Render] Passing to Header - incidentCount:', incidents?.length || 0, 'isLoading:', isLoading);
 
   return (
     <>

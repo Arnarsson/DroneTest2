@@ -13,9 +13,6 @@ interface IncidentListProps {
 }
 
 export function IncidentList({ incidents, isLoading }: IncidentListProps) {
-  console.log('[IncidentList] Received incidents:', incidents?.length || 0, incidents);
-  console.log('[IncidentList] isLoading:', isLoading);
-
   const [groupByFacility, setGroupByFacility] = useState(false)
   const [expandedFacilities, setExpandedFacilities] = useState<Set<string>>(new Set())
   if (isLoading) {
@@ -65,17 +62,33 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
     setExpandedFacilities(newSet)
   }
 
+  const handleResetFilters = () => {
+    // This would need to be passed from parent, but for now just inform user
+    window.location.reload()
+  }
+
   if (incidents.length === 0) {
     return (
       <motion.div
-        className="flex flex-col items-center justify-center h-full"
+        className="flex flex-col items-center justify-center h-full px-4"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
       >
-        <div className="text-center">
+        <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🔍</div>
-          <p className="text-gray-500 dark:text-gray-400 text-lg font-semibold">No incidents found</p>
-          <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your filters</p>
+          <p className="text-gray-900 dark:text-white text-xl font-bold mb-2">No incidents found</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            No drone incidents match your current filters
+          </p>
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-left border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-900 dark:text-blue-200 font-medium mb-2">💡 Try:</p>
+            <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+              <li>• Lowering the evidence level filter</li>
+              <li>• Expanding the date range</li>
+              <li>• Selecting "All Countries"</li>
+              <li>• Clearing asset type filters</li>
+            </ul>
+          </div>
         </div>
       </motion.div>
     )

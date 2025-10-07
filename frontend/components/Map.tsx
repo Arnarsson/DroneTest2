@@ -27,9 +27,6 @@ interface MapProps {
 }
 
 export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
-  console.log('[Map] Received incidents:', incidents?.length || 0, incidents);
-  console.log('[Map] isLoading:', isLoading);
-
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null)
