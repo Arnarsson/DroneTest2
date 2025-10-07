@@ -18,6 +18,7 @@ from geographic_analyzer import analyze_incident_geography
 from openai_client import OpenAIClient, OpenAIClientError
 from scrapers.news_scraper import NewsScraper
 from scrapers.police_scraper import PoliceScraper
+from scrapers.twitter_scraper import TwitterScraper
 from utils import generate_incident_hash
 from verification import (calculate_confidence_score, get_verification_status,
                           requires_manual_review)
@@ -255,7 +256,17 @@ class DroneWatchIngester:
         except Exception as e:
             print(f"Error in news scraper: {e}")
 
-        # 3. Filter out non-incidents (regulatory news, bans, advisories)
+        # 3. Fetch Twitter incidents (Danish police accounts)
+        print("\n🐦 Fetching Twitter Incidents...")
+        try:
+            twitter_scraper = TwitterScraper()
+            twitter_incidents = twitter_scraper.fetch_all()
+            print(f"   Found {len(twitter_incidents)} incidents from Twitter")
+            all_incidents.extend(twitter_incidents)
+        except Exception as e:
+            print(f"Error in Twitter scraper: {e}")
+
+        # 4. Filter out non-incidents (regulatory news, bans, advisories)
         print(f"\n🔍 Filtering non-incidents (regulatory news)...")
         non_incident_filter = NonIncidentFilter()
         actual_incidents, filtered_out = non_incident_filter.filter_incidents(all_incidents)
@@ -267,10 +278,10 @@ class DroneWatchIngester:
 
         all_incidents = actual_incidents
 
-        # 4. Sort by evidence score (highest first)
+        # 5. Sort by evidence score (highest first)
         all_incidents.sort(key=lambda x: x['evidence_score'], reverse=True)
 
-        # 5. Send to API
+        # 6. Send to API
         print(f"\n📤 Sending {len(all_incidents)} incidents to API...")
 
         if test_mode and all_incidents:

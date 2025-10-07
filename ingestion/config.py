@@ -269,31 +269,271 @@ SOURCES_HTML_SCRAPING = {
 SOURCES.update(SOURCES_HTML_SCRAPING)
 
 # ============================================================================
-# SOCIAL MEDIA SOURCES (Tier 1 - Requires Verification)
+# SOCIAL MEDIA SOURCES - DANISH POLICE TWITTER/X ACCOUNTS
+# ============================================================================
+#
+# CRITICAL: RSS.app setup required! See docs/TWITTER_RSS_SETUP.md
+#
+# STATUS: ⚠️ BLOCKED - Waiting for RSS.app feed URLs
+# ACTION: User must create RSS.app account and provide feed URLs
+#
+# Nitter (discontinued Feb 2024) ❌
+# TwitRSS.me (offline) ❌
+# RSS.app (working Oct 2025) ✅
+#
+# Trust Weight: 4 (Official police sources)
+# Source Type: police
+# Evidence Score: Automatic 4 for police tweets
 # ============================================================================
 
-SOURCES_SOCIAL_MEDIA = {
-    # Twitter via Nitter (FREE - no API key needed)
-    "twitter_copenhagen_police": {
-        "name": "Københavns Politi Twitter",
-        "url": "https://twitter.com/KobenhavnPoliti",
-        "nitter_url": "https://nitter.net/KobenhavnPoliti/rss",
-        "source_type": "official_statement",  # Official account
-        "scrape_type": "nitter_rss",
-        "trust_weight": 3,
-        "keywords": ["drone", "dron", "uav"],
-        "note": "Use Nitter for FREE RSS access"
+TWITTER_POLICE_SOURCES = {
+    # === NATIONAL LEVEL ===
+
+    "twitter_rigspolitiet": {
+        "name": "Rigspolitiet (Danish National Police)",
+        "handle": "@rigspoliti",
+        "twitter_url": "https://twitter.com/rigspoliti",
+        "rss": "https://rss.app/feeds/HvDr7FqcLUua0IcL.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "lufthavn", "forsvar"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "National",
+        "enabled": True,  # ✅ ENABLED
+        "note": "National police coordination - highest priority incidents"
     },
 
-    "twitter_cph_airport": {
-        "name": "Copenhagen Airport Twitter",
+    "twitter_nsk_politi": {
+        "name": "National Special Crime Unit (NSK)",
+        "handle": "@NSK_politi",
+        "twitter_url": "https://twitter.com/NSK_politi",
+        "rss": "https://rss.app/feeds/L4BC1apO60hTYJTl.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "terrorisme"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "National",
+        "enabled": True,  # ✅ ENABLED
+        "note": "Special crime unit - serious/terrorism-related incidents"
+    },
+
+    # === COPENHAGEN REGION (HIGH PRIORITY - Airport) ===
+
+    "twitter_kobenhavns_politi": {
+        "name": "Københavns Politi (Copenhagen Police)",
+        "handle": "@KobenhavnPoliti",
+        "twitter_url": "https://twitter.com/KobenhavnPoliti",
+        "rss": "https://rss.app/feeds/48SBRIsgrBUGgpk1.xml",  # ✅ TESTED & WORKING
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "kastrup", "lufthavn"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Copenhagen",
+        "enabled": True,  # ✅ ENABLED - RSS feed working
+        "note": "Copenhagen Airport coverage - HIGHEST PRIORITY"
+    },
+
+    "twitter_vestegns_politi": {
+        "name": "Københavns Vestegns Politi (Western Copenhagen)",
+        "handle": "@VestegnsPoliti",
+        "twitter_url": "https://twitter.com/VestegnsPoliti",
+        "rss": "https://rss.app/feeds/1pdpD7YWeWZesdPa.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Copenhagen West",
+        "enabled": True,  # ✅ ENABLED
+        "note": "Western Copenhagen suburbs"
+    },
+
+    # === JUTLAND REGION (Airports: Aalborg, Aarhus, Billund) ===
+
+    "twitter_nordjyllands_politi": {
+        "name": "Nordjyllands Politi (North Jutland)",
+        "handle": "@NjylPoliti",
+        "twitter_url": "https://twitter.com/NjylPoliti",
+        "rss": "https://rss.app/feeds/jbxPI8S4vF2Dkpri.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "aalborg", "lufthavn"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "North Jutland",
+        "enabled": True,  # ✅ ENABLED - Aalborg Airport
+        "note": "Aalborg Airport coverage"
+    },
+
+    "twitter_ostjyllands_politi": {
+        "name": "Østjyllands Politi (East Jutland)",
+        "handle": "@OjylPoliti",
+        "twitter_url": "https://twitter.com/OjylPoliti",
+        "rss": "https://rss.app/feeds/zXpKUJARbccC3GUH.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "aarhus", "lufthavn"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "East Jutland",
+        "enabled": True,  # ✅ ENABLED - Aarhus Airport
+        "note": "Aarhus Airport coverage"
+    },
+
+    "twitter_sydostjyllands_politi": {
+        "name": "Sydøstjyllands Politi (Southeast Jutland)",
+        "handle": "@SydOjylPoliti",
+        "twitter_url": "https://twitter.com/SydOjylPoliti",
+        "rss": "https://rss.app/feeds/9ghuITkYM3AXNXIA.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Southeast Jutland",
+        "enabled": True,  # ✅ ENABLED
+        "note": "Southeast Jutland region"
+    },
+
+    "twitter_syd_sonderjyllands_politi": {
+        "name": "Syd- og Sønderjyllands Politi (South Jutland)",
+        "handle": "@SjylPoliti",
+        "twitter_url": "https://twitter.com/SjylPoliti",
+        "rss": "PLACEHOLDER_RSS_APP_URL_HERE",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "South Jutland",
+        "enabled": False,
+        "note": "South Jutland region near German border"
+    },
+
+    "twitter_midt_vestjyllands_politi": {
+        "name": "Midt- og Vestjyllands Politi (Central/West Jutland)",
+        "handle": "@MVJPoliti",
+        "twitter_url": "https://twitter.com/MVJPoliti",
+        "rss": "https://rss.app/feeds/TiRoJ2kblbMJWdbT.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "billund", "lufthavn"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Central/West Jutland",
+        "enabled": True,  # ✅ ENABLED - Billund Airport
+        "note": "Billund Airport coverage"
+    },
+
+    # === ZEALAND REGION ===
+
+    "twitter_nordsjaellands_politi": {
+        "name": "Nordsjællands Politi (North Zealand)",
+        "handle": "@NSJPoliti",
+        "twitter_url": "https://twitter.com/NSJPoliti",
+        "rss": "https://rss.app/feeds/BONVTNXyLMAG2E1t.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "North Zealand",
+        "enabled": True,  # ✅ ENABLED
+        "note": "North Zealand region"
+    },
+
+    "twitter_midt_vestsjaellands_politi": {
+        "name": "Midt- og Vestsjællands Politi (Central/West Zealand)",
+        "handle": "@MVSJPoliti",
+        "twitter_url": "https://twitter.com/MVSJPoliti",
+        "rss": "PLACEHOLDER_RSS_APP_URL_HERE",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Central/West Zealand",
+        "enabled": False,
+        "note": "Central and West Zealand"
+    },
+
+    "twitter_sydsjaellands_lolland_falster_politi": {
+        "name": "Sydsjællands og Lolland-Falsters Politi",
+        "handle": "@SSJ_LFPoliti",
+        "twitter_url": "https://twitter.com/SSJ_LFPoliti",
+        "rss": "PLACEHOLDER_RSS_APP_URL_HERE",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "South Zealand/Lolland-Falster",
+        "enabled": False,
+        "note": "South Zealand and islands"
+    },
+
+    # === FUNEN & BORNHOLM ===
+
+    "twitter_fyns_politi": {
+        "name": "Fyns Politi (Funen)",
+        "handle": "@FynsPoliti",
+        "twitter_url": "https://twitter.com/FynsPoliti",
+        "rss": "https://rss.app/feeds/HgunKFZPzd9tF0Id.xml",  # ✅ ACTIVE
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav", "odense"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Funen",
+        "enabled": True,  # ✅ ENABLED - Odense Airport
+        "note": "Funen island - Odense Airport"
+    },
+
+    "twitter_bornholms_politi": {
+        "name": "Bornholms Politi",
+        "handle": "@BornholmsPoliti",
+        "twitter_url": "https://twitter.com/BornholmsPoliti",
+        "rss": "PLACEHOLDER_RSS_APP_URL_HERE",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "hashtags": ["#politidk", "#kriseinfodk"],
+        "region": "Bornholm",
+        "enabled": False,
+        "note": "Bornholm island - Baltic Sea"
+    },
+
+    # === OTHER ===
+
+    "twitter_politimuseet": {
+        "name": "Politimuseet (Police Museum)",
+        "handle": "@Politimuseet",
+        "twitter_url": "https://twitter.com/Politimuseet",
+        "rss": "PLACEHOLDER_RSS_APP_URL_HERE",
+        "source_type": "education",
+        "trust_weight": 2,
+        "keywords": ["drone", "dron"],
+        "hashtags": ["#politidk"],
+        "region": "National",
+        "enabled": False,
+        "note": "Educational content - low priority for incidents"
+    },
+}
+
+# Legacy Nitter sources (DEPRECATED - Nitter discontinued Feb 2024)
+SOURCES_SOCIAL_MEDIA_DEPRECATED = {
+    "twitter_copenhagen_police_nitter": {
+        "name": "Københavns Politi Twitter (Nitter - DEPRECATED)",
+        "url": "https://twitter.com/KobenhavnPoliti",
+        "nitter_url": "https://nitter.net/KobenhavnPoliti/rss",
+        "source_type": "police",
+        "scrape_type": "nitter_rss",
+        "trust_weight": 4,
+        "keywords": ["drone", "dron", "uav"],
+        "enabled": False,
+        "note": "DEPRECATED - Nitter discontinued Feb 2024"
+    },
+
+    "twitter_cph_airport_nitter": {
+        "name": "Copenhagen Airport Twitter (Nitter - DEPRECATED)",
         "url": "https://twitter.com/CPHAirport",
         "nitter_url": "https://nitter.net/CPHAirport/rss",
         "source_type": "official_statement",
         "scrape_type": "nitter_rss",
         "trust_weight": 3,
         "keywords": ["drone", "closure", "delay"],
-        "note": "Official airport account"
+        "enabled": False,
+        "note": "DEPRECATED - Nitter discontinued Feb 2024"
     },
 }
 
