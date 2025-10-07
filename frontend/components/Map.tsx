@@ -96,10 +96,12 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 
         // ONLY cluster same-facility incidents - force spiderfy for mixed locations
         if (isSameFacility && facilityType) {
-          // Same facility cluster - use emerald/green gradient with emoji
-          const gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+          // Same facility cluster - use neutral slate gradient (NOT evidence color)
+          const gradient = isDark
+            ? 'linear-gradient(135deg, #475569 0%, #334155 100%)'  // slate-600 to slate-700
+            : 'linear-gradient(135deg, #64748b 0%, #475569 100%)'  // slate-500 to slate-600
           const emoji = facilityEmoji[facilityType as string] || '📍'
-          const label = count > 1 ? `${count} events` : 'event'
+          const label = count > 1 ? `${count} incidents` : 'incident'
           const name = facilityName || (facilityType as string).charAt(0).toUpperCase() + (facilityType as string).slice(1)
           const tooltip = `${emoji} ${name} - ${label}`
 
@@ -109,9 +111,9 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
                 width: 50px;
                 height: 50px;
                 background: ${gradient};
-                border: 3px solid ${isDark ? '#1f2937' : 'white'};
+                border: 3px solid ${isDark ? '#0f172a' : 'white'};
                 border-radius: 50%;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -119,7 +121,7 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
                 color: white;
                 font-weight: bold;
                 font-size: 14px;
-                text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                text-shadow: 0 1px 3px rgba(0,0,0,0.5);
                 cursor: pointer;
                 transition: transform 0.2s;
               " title="${tooltip}">
@@ -347,8 +349,11 @@ function createFacilityMarker(
   }
 
   const emoji = facilityEmoji[assetType || 'other'] || '📍'
-  const gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-  const borderColor = isDark ? '#1f2937' : 'white'
+  // Use neutral slate gradient (NOT evidence color) to avoid confusion with legend
+  const gradient = isDark
+    ? 'linear-gradient(135deg, #475569 0%, #334155 100%)'  // slate-600 to slate-700
+    : 'linear-gradient(135deg, #64748b 0%, #475569 100%)'  // slate-500 to slate-600
+  const borderColor = isDark ? '#0f172a' : 'white'
 
   const icon = L.divIcon({
     html: `
@@ -358,7 +363,7 @@ function createFacilityMarker(
         background: ${gradient};
         border: 3px solid ${borderColor};
         border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -366,7 +371,7 @@ function createFacilityMarker(
         color: white;
         font-weight: bold;
         font-size: 14px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         cursor: pointer;
         transition: transform 0.2s;
       ">
@@ -497,6 +502,9 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
               // Trust weight color (0-100 scale for display)
               const trustWeight = source.trust_weight || 0
               const trustColor = trustWeight >= 0.8 ? '#10b981' : trustWeight >= 0.6 ? '#f59e0b' : '#6b7280'
+              const sourceName = source.source_title || source.source_name || source.source_type || 'Unknown'
+              const showType = source.source_type && source.source_type.toLowerCase() !== sourceName.toLowerCase()
+
               return `
                 <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
                   display: flex;
@@ -513,7 +521,7 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
                 ">
                   <div style="display: flex; align-items: center; gap: 6px;">
                     ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
-                    <span style="font-size: 13px; font-weight: 600;">${source.source_name || source.source_type || 'Unknown'}</span>
+                    <span style="font-size: 13px; font-weight: 600;">${sourceName}</span>
                     ${trustWeight > 0 ? `
                       <span style="
                         background: ${trustColor};
@@ -531,7 +539,7 @@ function createPopupContent(incident: Incident, isDark: boolean = false): string
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
                     </svg>
                   </div>
-                  ${source.source_type && source.source_type !== (source.source_name || '').toLowerCase() ? `
+                  ${showType ? `
                     <span style="font-size: 10px; color: ${textMuted}; padding-left: 20px; text-transform: capitalize;">
                       ${source.source_type}
                     </span>
