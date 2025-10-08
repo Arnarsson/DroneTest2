@@ -9,13 +9,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Production**: https://www.dronemap.cc
 **Platform**: Vercel (auto-deploys from `main` branch)
 
-Real-time drone incident tracking for Europe with evidence-based reporting and multi-source verification.
+Real-time drone incident tracking across Nordic countries + UK + Germany + Poland with evidence-based reporting and multi-source verification.
+
+**Live Coverage**: 45+ sources from 7 countries | 30-100 incidents/month expected
 
 ---
 
 ## Development Commands
 
-### Frontend (Next.js 14.2.33)
+### Local Development Options
+
+**Option 1: Vercel Dev (Recommended for Full Testing)**
+```bash
+cd /Users/sven/Desktop/MCP/DroneTest2  # Run from PROJECT ROOT, not frontend/
+npx vercel dev
+```
+
+This will:
+- Run Next.js dev server on port 3000 (or auto-assigned)
+- Run Python serverless functions locally (`/api/*` endpoints)
+- Properly route API requests to Python functions
+- Simulate production environment
+
+**Option 2: Next.js Dev Only (UI Development)**
 ```bash
 cd frontend
 npm install          # Install dependencies
@@ -23,6 +39,8 @@ npm run dev          # Dev server → http://localhost:3000
 npm run build        # Production build
 npm run lint         # TypeScript + ESLint
 ```
+
+**⚠️ LIMITATION**: Python API endpoints (`/api/incidents`, `/api/ingest`) will return 404 errors with `npm run dev`. The Python serverless functions require Vercel's environment to run. For full local testing with API support, use `vercel dev` instead.
 
 **CRITICAL**: If build fails with "barrel loader" or "TypeScriptTransformer" errors:
 1. Check date-fns imports - use SPECIFIC paths only: `'date-fns/format'` NOT `'date-fns'`
@@ -94,31 +112,62 @@ const facilityKey = `${lat.toFixed(3)},${lon.toFixed(3)}-${asset_type}`
 
 **Why?** Prevents confusing numbered clusters (7, 8, 9) that look like evidence scores.
 
-### 3. Multi-Source Consolidation Pipeline
+### 3. Multi-Source Consolidation Pipeline ✅ IMPLEMENTED (v2.3.0)
 
-**Files**: `ingestion/consolidator.py`, `ingestion/ingest.py`
+**Files**: `ingestion/consolidator.py` (345 lines), `ingestion/ingest.py` (integrated)
 
-**Architecture**: "1 incident → multiple sources"
+**Architecture**: "1 incident → multiple sources" with intelligent deduplication
 
 ```python
 # Hash-based deduplication (location + time, NOT title)
 from consolidator import ConsolidationEngine
-engine = ConsolidationEngine()
+
+engine = ConsolidationEngine(
+    location_precision=0.01,  # ~1km (rounds coordinates)
+    time_window_hours=6        # Groups incidents within 6h window
+)
 
 # Deduplication strategy:
-# - Location rounded to ~1km (0.01°)
-# - Time rounded to 6-hour window
-# - Title NOT in hash (different headlines = same incident)
+# - Location: Rounded to 0.01° (~1.1km at Nordic latitudes)
+# - Time: Grouped into 6-hour windows
+# - Title: NOT included (allows different headlines for same incident)
+# - Country + asset_type: Used to prevent cross-border/type merging
 
+# Get statistics before consolidation
+stats = engine.get_consolidation_stats(raw_incidents)
+# Returns: {total_incidents, unique_hashes, potential_merges, merge_rate}
+
+# Consolidate incidents
 consolidated = engine.consolidate_incidents(raw_incidents)
-# Merges sources, recalculates evidence scores, enhances narratives
+# Returns: List of merged incidents with combined sources
 ```
 
-**Evidence Score Recalculation**:
-- Score 4: ANY official source (police/military/NOTAM/aviation)
-- Score 3: 2+ media sources WITH official quote detection (`has_official_quote()`)
-- Score 2: 1 credible source (trust_weight ≥ 2)
-- Score 1: Low trust sources
+**Source Merging Logic**:
+- Deduplicates sources by URL (prevents double-counting same article)
+- Keeps ALL unique sources (no filtering by type)
+- Uses longest narrative (most detailed)
+- Uses best title (most descriptive - longest with substance)
+- Tracks `merged_from` count and `source_count`
+
+**Evidence Score Recalculation** (from `verification.py`):
+- **Score 4**: ANY official source (police/military/NOTAM/aviation, trust_weight=4)
+- **Score 3**: 2+ media sources (trust_weight≥2) WITH official quote detection
+- **Score 2**: Single credible source (trust_weight ≥ 2)
+- **Score 1**: Low trust sources (trust_weight < 2)
+
+**Testing**: 5 scenarios, 100% pass rate
+- Single incident (no consolidation)
+- Same location + time → MERGE
+- Different locations → NO MERGE
+- Evidence upgrade: media (2) + police (4) → OFFICIAL (4)
+- Consolidation statistics calculation
+
+**Integration** (in `ingest.py`):
+```python
+# Step 5 in ingestion pipeline (after non-incident filtering)
+all_incidents = consolidation_engine.consolidate_incidents(all_incidents)
+# Runs automatically on every ingestion
+```
 
 ### 4. Fake News Detection System
 
@@ -330,6 +379,61 @@ python3 cleanup_foreign_incidents.py
 
 ---
 
+## Troubleshooting Local Development
+
+### Issue: API 404 Errors on Localhost
+
+**Symptoms**:
+```
+GET /api/incidents?... 404 Not Found
+```
+
+**Cause**: Python serverless functions (`frontend/api/*.py`) don't run with `npm run dev`. They require Vercel's runtime environment.
+
+**Solutions**:
+1. **Use `vercel dev`** (recommended) - Run from project root: `npx vercel dev`
+2. **Test on production** - Live site: https://www.dronemap.cc
+3. **Mock API responses** - For pure UI development without backend
+
+### Issue: Chrome DevTools MCP Not Working
+
+**Symptoms**: MCP server fails to start or can't find Chrome canary
+
+**Solution**: The global MCP configuration has been updated to use stable Chrome. If issues persist:
+1. Restart VSCode/reload window
+2. Check that Chrome (stable) is installed
+3. Verify `.claude/.mcp.json` has correct configuration
+
+### Issue: Build Failures (Barrel Loader Errors)
+
+**Symptoms**: 
+```
+Error: barrel loader failed
+Error: TypeScriptTransformer crashed
+```
+
+**Solution**:
+1. Check all date-fns imports - use specific paths: `'date-fns/format'` not `'date-fns'`
+2. Clean rebuild: `rm -rf .next node_modules/.cache && npm run dev`
+3. Ensure Next.js 14.2.33+ is installed
+
+### Localhost Testing Summary (October 8, 2025)
+
+**Tested**: localhost:3001 with `npm run dev`
+**Results**:
+- ✅ Frontend loads correctly (Next.js working)
+- ✅ Map renders (Leaflet integration working)
+- ✅ UI components functional
+- ❌ API endpoints return 404 (Python functions need Vercel)
+- ✅ Chrome DevTools MCP configuration fixed
+
+**Recommendations**:
+- For full local testing: Use `vercel dev` from project root
+- For UI-only development: `npm run dev` is sufficient
+- For quick testing: Use production site (www.dronemap.cc)
+
+---
+
 ## Git Workflow
 
 ```bash
@@ -490,9 +594,11 @@ npm run dev                           # http://localhost:3000
 ```bash
 DATABASE_URL="postgresql://postgres.uhwsuaebakkdmdogzrrz:stUPw5co47Yq8uSI@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
 INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
-OPENROUTER_API_KEY="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"
+OPENROUTER_API_KEY="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"
 OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 ```
+
+**Updated**: October 8, 2025 - New OpenRouter API key deployed to production
 
 **Local Development** (`.env.local`):
 ```bash
