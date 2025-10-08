@@ -231,6 +231,8 @@ class TwitterScraper:
                         'occurred_at': occurred_at.isoformat(),
                         'first_seen_at': tweet['published_at'].isoformat(),
                         'location': location,
+                        'lat': lat,  # Top-level for ingest.py compatibility
+                        'lon': lon,  # Top-level for ingest.py compatibility
                         'asset_type': location.get('asset_type', 'other'),
                         'status': 'active',
                         'verification_status': 'auto_verified',  # Police source
