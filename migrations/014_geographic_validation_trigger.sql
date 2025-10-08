@@ -26,27 +26,26 @@ DROP FUNCTION IF EXISTS validate_incident_geography();
 CREATE OR REPLACE FUNCTION validate_incident_geography()
 RETURNS TRIGGER AS $$
 DECLARE
-    -- Foreign country/location keywords (matching Python filter)
+    -- Excluded region keywords (WAR ZONES and non-EU regions ONLY)
+    -- NOTE: EU countries are INCLUDED in coverage, not excluded!
     foreign_keywords TEXT[] := ARRAY[
-        -- Eastern Europe
-        'ukraina', 'ukraine', 'ukrainsk', 'ukrainian', 'kiev', 'kyiv', 'odesa', 'kharkiv',
-        'russia', 'rusland', 'russisk', 'russian', 'moscow', 'moskva',
+        -- Eastern Europe WAR ZONES (highest priority to exclude)
+        'ukraina', 'ukraine', 'ukrainsk', 'ukrainian', 'kiev', 'kyiv', 'odesa', 'kharkiv', 'lviv',
+        'russia', 'rusland', 'russisk', 'russian', 'moscow', 'moskva', 'st. petersburg',
         'belarus', 'hviderusland', 'hviderussisk', 'belarusian', 'minsk',
-        'poland', 'polen', 'polsk', 'polish', 'warsaw', 'warszawa', 'krakow',
 
-        -- Central/Western Europe
-        'germany', 'tyskland', 'tysk', 'german', 'berlin', 'münchen', 'munich', 'hamburg',
-        'france', 'frankrig', 'fransk', 'french', 'paris',
-        'netherlands', 'holland', 'nederlandsk', 'dutch', 'amsterdam',
-        'belgium', 'belgien', 'belgisk', 'belgian', 'brussels',
-        'uk', 'england', 'britain', 'britisk', 'british', 'london',
-        'spain', 'spanien', 'spansk', 'spanish', 'madrid', 'barcelona',
-        'italy', 'italien', 'italiensk', 'italian', 'rome', 'milano',
+        -- Middle East
+        'israel', 'gaza', 'tel aviv', 'jerusalem',
+        'iran', 'tehran', 'syria', 'damascus', 'iraq', 'baghdad',
 
-        -- Baltic states
-        'estonia', 'estland', 'estisk', 'estonian', 'tallinn',
-        'latvia', 'letland', 'lettisk', 'latvian', 'riga',
-        'lithuania', 'litauen', 'litauisk', 'lithuanian', 'vilnius'
+        -- Asia
+        'china', 'beijing', 'shanghai', 'japan', 'tokyo', 'korea', 'seoul', 'india', 'delhi', 'mumbai',
+
+        -- Africa
+        'africa', 'cairo', 'johannesburg', 'nairobi',
+
+        -- Americas
+        'united states', 'usa', 'washington', 'new york', 'canada', 'mexico'
     ];
 
     keyword TEXT;
@@ -57,26 +56,27 @@ BEGIN
     lat := ST_Y(NEW.location::geometry);
     lon := ST_X(NEW.location::geometry);
 
-    -- VALIDATION 1: Coordinates must be in Nordic region (54-71°N, 4-31°E)
-    IF lat NOT BETWEEN 54 AND 71 OR lon NOT BETWEEN 4 AND 31 THEN
-        RAISE EXCEPTION 'Geographic validation failed: Coordinates outside Nordic region (lat=%, lon=%)', lat, lon
-            USING HINT = 'Nordic region: 54-71°N, 4-31°E';
+    -- VALIDATION 1: Coordinates must be in European coverage region (35-71°N, -10-31°E)
+    -- Covers: Nordic + UK + Ireland + Western/Central Europe + Baltics
+    IF lat NOT BETWEEN 35 AND 71 OR lon NOT BETWEEN -10 AND 31 THEN
+        RAISE EXCEPTION 'Geographic validation failed: Coordinates outside European coverage region (lat=%, lon=%)', lat, lon
+            USING HINT = 'European coverage: 35-71°N, -10-31°E (Nordic + UK + Western/Central Europe)';
     END IF;
 
-    -- VALIDATION 2: Title AND narrative must not contain foreign location keywords
+    -- VALIDATION 2: Title AND narrative must not contain excluded region keywords
     -- This catches incidents like "Massive Russian drone attack over Ukraine"
-    -- that have Nordic coords from context mentions (e.g., "Danish officials comment")
+    -- that have European coords from context mentions (e.g., "EU officials comment in Brussels")
     FOREACH keyword IN ARRAY foreign_keywords
     LOOP
         -- Check title
         IF LOWER(NEW.title) LIKE '%' || keyword || '%' THEN
-            RAISE EXCEPTION 'Geographic validation failed: Foreign incident detected in title (keyword: "%")', keyword
+            RAISE EXCEPTION 'Geographic validation failed: Excluded region incident detected in title (keyword: "%")', keyword
                 USING HINT = 'Title: ' || NEW.title;
         END IF;
 
         -- Check narrative (if present)
         IF NEW.narrative IS NOT NULL AND LOWER(NEW.narrative) LIKE '%' || keyword || '%' THEN
-            RAISE EXCEPTION 'Geographic validation failed: Foreign incident detected in narrative (keyword: "%")', keyword
+            RAISE EXCEPTION 'Geographic validation failed: Excluded region incident detected in narrative (keyword: "%")', keyword
                 USING HINT = 'Title: ' || NEW.title || ', Narrative contains: ' || keyword;
         END IF;
     END LOOP;
@@ -96,8 +96,10 @@ CREATE TRIGGER validate_incident_before_insert
 DO $$
 BEGIN
     RAISE NOTICE 'Geographic validation trigger created successfully';
+    RAISE NOTICE 'Coverage: 35-71°N, -10-31°E (European coverage)';
+    RAISE NOTICE 'Includes: Nordic + UK + Ireland + Western/Central Europe + Baltics';
+    RAISE NOTICE 'Excludes: War zones (Ukraine/Russia/Belarus), Middle East, Asia, Americas';
     RAISE NOTICE 'All incidents will now be validated at database level';
-    RAISE NOTICE 'Foreign incidents will be rejected with clear error messages';
 END $$;
 
 -- TESTING:
