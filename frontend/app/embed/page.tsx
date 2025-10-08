@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useIncidents } from "@/hooks/useIncidents";
-import type { Incident } from "@/types";
+import type { Incident } from "@/types/index";
 
 const Map = dynamic(() => import("@/components/Map"), {
   ssr: false,
