@@ -219,6 +219,134 @@ SOURCES = {
         "verified_date": "2025-10-05",
         "working": True
     },
+
+    # === TIER 2/3: UK MEDIA (HIGH INCIDENT RATE) ===
+
+    "bbc_uk": {
+        "name": "BBC UK",
+        "rss": "https://feeds.bbci.co.uk/news/uk/rss.xml",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "gatwick", "heathrow", "manchester", "airspace", "uav"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "bbc_europe": {
+        "name": "BBC Europe",
+        "rss": "https://feeds.bbci.co.uk/news/world/europe/rss.xml",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "airspace"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "guardian_uk": {
+        "name": "The Guardian UK",
+        "rss": "https://www.theguardian.com/uk-news/rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "gatwick", "heathrow", "airspace"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "sky_news_uk": {
+        "name": "Sky News UK",
+        "rss": "https://news.sky.com/feeds/rss/uk.xml",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "airspace"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "reuters_uk": {
+        "name": "Reuters UK",
+        "rss": "https://www.reuters.com/world/uk/rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "airspace"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "telegraph_uk": {
+        "name": "The Telegraph",
+        "rss": "https://www.telegraph.co.uk/news/rss.xml",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "gatwick", "heathrow"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    # === TIER 2/3: GERMAN MEDIA ===
+
+    "dw_germany": {
+        "name": "Deutsche Welle",
+        "rss": "https://rss.dw.com/rdf/rss-en-all",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "flughafen", "airport", "frankfurt", "munich", "berlin"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "spiegel_international": {
+        "name": "Der Spiegel International",
+        "rss": "https://www.spiegel.de/international/index.rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "airspace"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "dpa_germany": {
+        "name": "DPA (German Press Agency)",
+        "rss": "https://www.dpa.com/en/rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "germany"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    # === TIER 2/3: POLISH MEDIA ===
+
+    "polsat_news": {
+        "name": "Polsat News",
+        "rss": "https://www.polsatnews.pl/rss/swiat.xml",
+        "source_type": "media",
+        "trust_weight": 2,
+        "keywords": ["dron", "lotnisko", "drone", "airport"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    "tvn24_poland": {
+        "name": "TVN24",
+        "rss": "https://tvn24.pl/najnowsze.xml",
+        "source_type": "media",
+        "trust_weight": 2,
+        "keywords": ["dron", "lotnisko", "drone"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
+
+    # === TIER 3: REUTERS INTERNATIONAL ===
+
+    "reuters_europe": {
+        "name": "Reuters Europe",
+        "rss": "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "airspace", "uav"],
+        "verified_date": "2025-10-07",
+        "working": True
+    },
 }
 
 # ============================================================================
