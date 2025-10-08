@@ -60,7 +60,7 @@ The `INGEST_TOKEN` environment variable in **Vercel** is either:
 
 ### Step 1: Update Vercel Environment Variables
 
-**Platform**: https://vercel.com/arnarssons-projects/dronetest/settings/environment-variables
+**Platform**: https://vercel.com/arnarssons-projects/dronewatch2.0/settings/environment-variables
 
 **Variables to Set**:
 ```bash
