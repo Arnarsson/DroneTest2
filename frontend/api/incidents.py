@@ -9,6 +9,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from db import fetch_incidents, run_async
 
+ALLOWED_ORIGINS = [
+    "https://dronemap.cc",
+    "https://www.dronemap.cc",
+    "https://dronewatch.cc",
+    "https://www.dronewatch.cc",
+    "https://dronewatchv2.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3003",
+]
+
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.handle_get()
@@ -17,14 +27,7 @@ class handler(BaseHTTPRequestHandler):
         # Handle CORS preflight
         origin = self.headers.get('Origin', '')
         self.send_response(200)
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronemap.cc",
-            "https://www.dronemap.cc",
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
+        if origin and ('.vercel.app' in origin or origin in ALLOWED_ORIGINS):
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
             self.send_header('Access-Control-Allow-Headers', '*')
@@ -86,14 +89,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json')
         self.send_header('Cache-Control', 'public, max-age=15')
 
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronemap.cc",
-            "https://www.dronemap.cc",
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
+        if origin and ('.vercel.app' in origin or origin in ALLOWED_ORIGINS):
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
             self.send_header('Access-Control-Allow-Headers', '*')

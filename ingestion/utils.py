@@ -252,42 +252,54 @@ def extract_quote(text: str) -> Optional[str]:
 
 def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Optional[float]) -> bool:
     """
-    Check if incident occurred in Nordic region (not just covered by Nordic news).
+    DEPRECATED: Use is_european_incident() instead.
+    Kept for backwards compatibility.
+    """
+    return is_european_incident(title, content, lat, lon)
 
-    This prevents ingesting foreign incidents (e.g., Ukrainian drone attacks) that are
-    merely reported by Nordic news sources but didn't occur in the Nordic region.
+def is_european_incident(title: str, content: str, lat: Optional[float], lon: Optional[float]) -> bool:
+    """
+    Check if incident occurred in coverage region (Nordic + UK + Germany + Poland).
+
+    This prevents ingesting incidents from war zones (Ukraine/Russia) or distant regions
+    that are merely reported by our news sources but didn't occur in our coverage area.
+
+    Coverage Area:
+    - Nordic: Denmark, Norway, Sweden, Finland
+    - Western Europe: UK, Germany, Poland
+    - Geographic bounds: roughly 49-71°N, 4-31°E
 
     Returns True if:
-    - Coordinates are in Nordic region AND text doesn't mention foreign locations
-    - No coordinates but text doesn't mention non-Nordic locations
+    - Coordinates are in coverage region AND text doesn't mention excluded locations
+    - No coordinates but text doesn't mention non-coverage locations
 
     Returns False if:
-    - Coordinates outside Nordic region, OR
-    - Text mentions foreign locations (even if coords are Nordic - e.g., context mentions)
+    - Coordinates outside coverage region, OR
+    - Text mentions excluded locations (war zones, Asia, Middle East, etc.)
     """
     full_text = (title + " " + content).lower()
 
     # Check text for foreign location mentions FIRST (applies to all incidents)
-    # This catches cases where Nordic coords are extracted from context mentions
+    # This catches cases where local coords are extracted from context mentions
 
-    # Non-Nordic country/location keywords
+    # Excluded locations (NOT in our coverage area)
     foreign_locations = [
-        # Eastern Europe (including adjective forms in Nordic languages)
+        # Eastern Europe WAR ZONES (highest priority to exclude)
         "ukraina", "ukraine", "ukrainsk", "ukrainian", "kiev", "kyiv", "odesa", "kharkiv", "lviv",
         "russia", "rusland", "russisk", "russian", "moscow", "moskva", "st. petersburg",
         "belarus", "hviderusland", "hviderussisk", "belarusian", "minsk",
-        "poland", "polen", "polsk", "polish", "warsaw", "warszawa", "krakow",
 
-        # Central/Western Europe (non-Nordic, including adjective forms)
-        "germany", "tyskland", "tysk", "german", "berlin", "münchen", "munich", "hamburg", "frankfurt",
+        # Southern/Western Europe (NOT in coverage)
         "france", "frankrig", "fransk", "french", "paris", "lyon", "marseille",
         "netherlands", "holland", "nederlandsk", "dutch", "amsterdam", "rotterdam",
         "belgium", "belgien", "belgisk", "belgian", "brussels", "bruxelles",
-        "uk", "england", "britain", "britisk", "british", "london", "manchester",
         "spain", "spanien", "spansk", "spanish", "madrid", "barcelona",
         "italy", "italien", "italiensk", "italian", "rome", "milano", "milan",
+        "portugal", "lissabon", "lisbon",
+        "switzerland", "schweiz", "zürich", "geneva",
+        "austria", "østrig", "wien", "vienna",
 
-        # Baltic states (included in detection as non-Nordic, with adjective forms)
+        # Baltic states (border region - exclude for now)
         "estonia", "estland", "estisk", "estonian", "tallinn",
         "latvia", "letland", "lettisk", "latvian", "riga",
         "lithuania", "litauen", "litauisk", "lithuanian", "vilnius",
@@ -305,22 +317,23 @@ def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Opti
         "india", "delhi", "mumbai"
     ]
 
-    # Check if any foreign location is mentioned
+    # Check if any excluded location is mentioned
     # Use word boundaries to avoid false matches
     for location in foreign_locations:
         if re.search(rf'\b{re.escape(location)}\b', full_text):
             return False
 
-    # No foreign locations in text - now check coordinates if available
+    # No excluded locations in text - now check coordinates if available
     if lat is not None and lon is not None:
-        # Nordic region: roughly 54-71°N, 4-31°E
-        if 54 <= lat <= 71 and 4 <= lon <= 31:
+        # European coverage region: roughly 49-71°N, 4-31°E
+        # Covers: Nordic countries + UK + Germany + Poland
+        if 49 <= lat <= 71 and 4 <= lon <= 31:
             return True
         else:
-            # Coordinates outside Nordic region
+            # Coordinates outside coverage region
             return False
 
-    # No foreign locations in text and no coordinates - assume Nordic
+    # No excluded locations in text and no coordinates - assume coverage region
     return True
 
 def is_drone_incident(title: str, content: str) -> bool:

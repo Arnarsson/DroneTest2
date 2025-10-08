@@ -9,7 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Production**: https://www.dronemap.cc
 **Platform**: Vercel (auto-deploys from `main` branch)
 
-Real-time drone incident tracking for Europe with evidence-based reporting and multi-source verification.
+Real-time drone incident tracking across Nordic countries + UK + Germany + Poland with evidence-based reporting and multi-source verification.
+
+**Live Coverage**: 45+ sources from 7 countries | 30-100 incidents/month expected
 
 ---
 

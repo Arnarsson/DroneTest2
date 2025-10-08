@@ -1,420 +1,95 @@
-# DroneWatch 2.0 - Manual E2E Test Checklist
+# Manual Test Checklist - DroneWatch 2.0 v2.3.0
 
-**Production Site**: https://www.dronemap.cc
+**Preview URL**: https://dronewatch20-2bttyvxtp-arnarssons-projects.vercel.app
 **Date**: October 7, 2025
-**System Version**: 2.2.0 (AI Verification + Multi-Layer Defense)
+**Tester**: USER
+**Expected Evidence Counts**: OFFICIAL (5), VERIFIED (1), REPORTED (0), UNCONFIRMED (0)
 
 ---
 
-## 🎯 Test Objectives
+## Quick Test (5 minutes)
 
-- Verify all Phase 1 UX improvements are live
-- Validate evidence scoring system accuracy
-- Test geographic filtering (Nordic-only incidents)
-- Ensure mobile responsiveness
-- Validate AI verification layer integration
+Essential tests to verify core functionality:
 
----
-
-## ✅ Pre-Test Setup
-
-- [ ] Clear browser cache
-- [ ] Test on multiple browsers (Chrome, Firefox, Safari)
-- [ ] Test on mobile device or device emulation
-- [ ] Verify you have stable internet connection
+1. **Legend Displays** - [ ] Bottom-left, shows 5/1/0/0 counts
+2. **Map Loads** - [ ] 6 markers visible (5 green, 1 amber)
+3. **Popup Opens** - [ ] Click any marker → popup with sources
+4. **Cluster Works** - [ ] Copenhagen (3 incidents) or Aalborg (2 incidents)
+5. **No Console Errors** - [ ] Open DevTools → Console → No red errors
 
 ---
 
-## 1️⃣ Initial Page Load
+## Full Test Suite (42 tests - 30 minutes)
 
-### Desktop View
-- [ ] **Site loads successfully** at https://www.dronemap.cc
-- [ ] **Map renders correctly** (Leaflet map visible)
-- [ ] **Incident markers appear** on map
-- [ ] **No console errors** (F12 → Console tab)
-- [ ] **Page loads in <3 seconds**
+### 1. Evidence Legend (6 tests)
+- [ ] 1.1: Auto-opens on first visit, shows correct counts (5/1/0/0)
+- [ ] 1.2: Collapse/expand animation smooth
+- [ ] 1.3: "Learn more" link opens /about page
+- [ ] 1.4: Count badges animate on open
+- [ ] 1.5: Updates when filters applied
+- [ ] 1.6: Hidden on mobile (<1024px)
 
-### Visual Elements
-- [ ] **DroneWatch logo** visible in header
-- [ ] **"Safety Through Transparency" tagline** visible
-- [ ] **Theme toggle button** (sun/moon icon) visible
-- [ ] **View tabs** (Map/List/Analytics) visible and clickable
-- [ ] **Filter button** visible (desktop: sidebar, mobile: floating button)
+### 2. Map & Clustering (6 tests)
+- [ ] 2.1: Map centers on Nordic region, 6 markers visible
+- [ ] 2.2: Aalborg shows cluster OR 2 separate markers
+- [ ] 2.3: Copenhagen shows cluster with ✈️ 3
+- [ ] 2.4: Billund shows single marker (Score 4, green)
+- [ ] 2.5: No numbered Leaflet clusters (7, 8, 9)
+- [ ] 2.6: Facility clusters use neutral slate color
 
----
+### 3. Popup Enhancements (8 tests)
+- [ ] 3.1: Title + date format: "X days ago · DD MMM YYYY HH:MM"
+- [ ] 3.2: Evidence badge correct color (green/amber)
+- [ ] 3.3: Source hierarchy: Quote → Name → "View Source"
+- [ ] 3.4: Trust badge shows (e.g., "POLICE 100%")
+- [ ] 3.5: Quote displayed in blockquote (if exists)
+- [ ] 3.6: "Copy Embed Code" button works
+- [ ] 3.7: "Report Issue" opens GitHub issues
+- [ ] 3.8: Multi-source display (incident #6 has 2 sources)
 
-## 2️⃣ Map View Testing
+### 4. Cluster Modal (6 tests)
+- [ ] 4.1: Modal title: "✈️ Copenhagen Airport (3 incidents)"
+- [ ] 4.2: 3 incident cards visible, sorted newest first
+- [ ] 4.3: Each card clickable with chevron (→)
+- [ ] 4.4: Click card → opens popup
+- [ ] 4.5: Close button (X) + outside click + Escape work
+- [ ] 4.6: Modal animation smooth (fade in/out)
 
-### Map Interaction
-- [ ] **Zoom in/out** works smoothly
-- [ ] **Pan/drag** map works correctly
-- [ ] **Incident markers** are color-coded by evidence score:
-  - Green = Official (Score 4)
-  - Amber = Verified (Score 3)
-  - Orange = Reported (Score 2)
-  - Red = Unconfirmed (Score 1)
+### 5. Filter Integration (6 tests)
+- [ ] 5.1: Min evidence = 4 → Shows 5, legend shows OFFICIAL (5)
+- [ ] 5.2: Min evidence = 3 → Shows 6, legend shows 5/1
+- [ ] 5.3: Min evidence = 1 → Shows 6, legend shows 5/1
+- [ ] 5.4: Country = Denmark → Shows 6 (all DK)
+- [ ] 5.5: Country = Norway → Shows 0
+- [ ] 5.6: Asset = Airport → Shows 6 (all airports)
 
-### Facility Clustering
-- [ ] **Multiple incidents at same location** show cluster marker with count (e.g., ✈️ 3)
-- [ ] **Individual incidents** show evidence score marker (1-4)
-- [ ] **Clicking cluster** zooms to facility and expands markers
-- [ ] **No numbered clusters** (7, 8, 9) appearing - only facility clusters or evidence scores
+### 6. Performance (4 tests)
+- [ ] 6.1: Page load < 3s on 3G
+- [ ] 6.2: API response < 500ms
+- [ ] 6.3: Bundle size < 200 KB
+- [ ] 6.4: No console errors or warnings
 
-### Incident Popups
-- [ ] **Click marker** opens popup
-- [ ] **Popup shows**:
-  - Incident title
-  - Evidence badge (colored, with emoji and label)
-  - Date (formatted: "Oct 3, 2025" or "2 days ago")
-  - Location (city, country)
-  - Asset type with icon
-  - Source badge(s) with trust indicators
-- [ ] **Multiple sources** listed if available
-- [ ] **Popup closes** when clicking X or map
+### 7. Mobile Responsive (3 tests)
+- [ ] 7.1: Map fills mobile screen (375×667)
+- [ ] 7.2: Popup fits mobile, buttons 44×44px min
+- [ ] 7.3: Cluster modal scrollable, full-width
 
----
-
-## 3️⃣ Filter Panel Testing
-
-### Opening/Closing
-- [ ] **Desktop**: Filter panel visible on left sidebar
-- [ ] **Mobile**: Floating filter button (bottom-right, above map controls)
-- [ ] **Mobile button shows active filter count** if filters applied
-- [ ] **Filter panel slides in smoothly** (animation)
-
-### Evidence Level Filter
-- [ ] **4 toggle buttons** visible (Official, Verified, Reported, Unconfirmed)
-- [ ] **Default**: All enabled
-- [ ] **Toggle OFF "Unconfirmed"** → Red markers disappear
-- [ ] **Toggle ON again** → Red markers reappear
-- [ ] **Map updates immediately** when toggling
-
-### Date Range Filter
-- [ ] **Timeline slider** visible
-- [ ] **Drag left handle** → Filters out older incidents
-- [ ] **Drag right handle** → Filters out newer incidents
-- [ ] **Date labels update** as you drag
-- [ ] **Map markers update** in real-time
-
-### Country Filter
-- [ ] **Dropdown shows**: All Countries, Denmark, Norway, Sweden, Finland, Poland, Netherlands
-- [ ] **Select "Denmark"** → Only Danish incidents visible
-- [ ] **Map centers** on Denmark
-- [ ] **Select "All Countries"** → All incidents return
-
-### Asset Type Filter
-- [ ] **6 toggle buttons**: Airport, Military, Harbor, Power Plant, Bridge, Other
-- [ ] **Default**: All enabled
-- [ ] **Toggle OFF "Airport"** → Airport incidents disappear
-- [ ] **Toggle multiple types** → Filters combine correctly
-- [ ] **Icons match asset types** correctly
-
-### Clear Filters
-- [ ] **"Clear All" button** visible
-- [ ] **Click "Clear All"** → All filters reset to default
-- [ ] **All incidents** reappear on map
+### 8. Dark Mode (3 tests)
+- [ ] 8.1: Toggle theme → all components readable
+- [ ] 8.2: Map tiles switch to dark theme
+- [ ] 8.3: Text contrast meets WCAG AA
 
 ---
 
-## 4️⃣ List View Testing
+## Test Results
 
-### Switching Views
-- [ ] **Click "List" tab** in header
-- [ ] **View switches** from map to list
-- [ ] **Tab is highlighted** (active state)
-- [ ] **Smooth transition** (animation)
+**Quick Test**: ___/5 passed
+**Full Test**: ___/42 passed
 
-### List Display
-- [ ] **All incidents displayed** as cards
-- [ ] **Each card shows**:
-  - Evidence badge (colored)
-  - Title
-  - Date
-  - Location with country flag emoji
-  - Asset type with icon
-  - Source badge(s)
-- [ ] **Cards are scrollable** if many incidents
-- [ ] **Sorted by date** (newest first)
+**Critical Issues**:
 
-### Filtering in List View
-- [ ] **Apply evidence filter** → List updates
-- [ ] **Apply date filter** → List updates
-- [ ] **Apply country filter** → List updates
-- [ ] **Apply asset filter** → List updates
-- [ ] **Filters work same as Map view**
 
-### Empty State
-- [ ] **Apply strict filters** (e.g., only Score 1 from 2020)
-- [ ] **Empty state shows**:
-  - 🔍 emoji
-  - "No incidents found" message
-  - Blue help box with 4 tips
-- [ ] **Tips are readable** and helpful
+**Ready for Production**: YES / NO
 
----
-
-## 5️⃣ Analytics View Testing
-
-### Switching Views
-- [ ] **Click "Analytics" tab**
-- [ ] **View switches** to analytics dashboard
-- [ ] **Loading state** if data is being calculated
-
-### Charts Display
-- [ ] **Incidents Over Time chart** visible
-- [ ] **Evidence Distribution chart** visible
-- [ ] **Country Distribution chart** visible
-- [ ] **Asset Type Distribution chart** visible
-- [ ] **Charts render correctly** (no errors)
-- [ ] **Data matches** incident count
-
-### Interactivity
-- [ ] **Hover over chart elements** shows tooltips
-- [ ] **Charts are responsive** to filters
-- [ ] **Apply filter** → Charts update
-
----
-
-## 6️⃣ Theme Toggle Testing
-
-### Light/Dark Mode
-- [ ] **Click theme toggle** (sun/moon icon)
-- [ ] **Theme switches** smoothly
-- [ ] **All elements adapt**:
-  - Background colors
-  - Text colors
-  - Map tiles
-  - Card backgrounds
-  - Buttons
-- [ ] **No visual glitches** during switch
-- [ ] **Toggle again** → Returns to original theme
-- [ ] **Theme persists** after page reload
-
----
-
-## 7️⃣ Mobile Responsiveness Testing
-
-### Mobile View (< 768px)
-- [ ] **Switch to mobile** (375px x 812px - iPhone X)
-- [ ] **Map fills screen** vertically
-- [ ] **Header shrinks** appropriately
-- [ ] **View tabs stack** or remain accessible
-- [ ] **Filter button** floats at bottom-right
-- [ ] **Filter button positioned correctly** (bottom-20, right-4 - NOT overlapping map controls)
-
-### Filter Panel Mobile
-- [ ] **Click filter button**
-- [ ] **Panel slides up** from bottom
-- [ ] **Panel covers most of screen**
-- [ ] **Close button** visible
-- [ ] **All filters accessible** and usable
-- [ ] **Scrollable** if content overflows
-
-### Touch Interactions
-- [ ] **Map pan** works with touch
-- [ ] **Map zoom** works with pinch
-- [ ] **Tap marker** opens popup
-- [ ] **Tap outside popup** closes it
-- [ ] **Swipe to dismiss** filter panel (if implemented)
-
-### Landscape Mode
-- [ ] **Rotate to landscape**
-- [ ] **Layout adapts** correctly
-- [ ] **All elements remain accessible**
-
----
-
-## 8️⃣ Data Quality Validation
-
-### Evidence Scores
-- [ ] **Check 5 random incidents**
-- [ ] **Verify evidence score matches sources**:
-  - Score 4: Police/military/aviation authority source
-  - Score 3: 2+ media sources OR 1 media + official quote
-  - Score 2: 1 credible media source
-  - Score 1: Social media or low-trust source
-- [ ] **No "test" incidents** visible (e.g., "DroneTest Success")
-
-### Geographic Scope
-- [ ] **All incidents are Nordic** (Denmark, Norway, Sweden, Finland, Poland, Netherlands)
-- [ ] **No foreign incidents** (e.g., Ukraine, Russia, Germany outside Nordic)
-- [ ] **Coordinates within** 54-71°N, 4-31°E
-
-### Source Quality
-- [ ] **Each incident has** at least 1 source
-- [ ] **Source badges show**:
-  - Source type (News, Police, Aviation, etc.)
-  - Trust indicator (star/checkmark)
-  - Publication name
-- [ ] **Sources are clickable** (link to original article)
-- [ ] **No broken links**
-
-### Multi-Source Incidents
-- [ ] **Find incident with 2+ sources**
-- [ ] **Verify evidence score upgraded** (e.g., 2 news sources → Score 3)
-- [ ] **All sources listed** in popup
-- [ ] **No duplicate sources**
-
----
-
-## 9️⃣ Performance Testing
-
-### Load Times
-- [ ] **Initial page load**: <3 seconds
-- [ ] **Map render**: <1 second after page load
-- [ ] **Incident data fetch**: <2 seconds
-- [ ] **Filter application**: <100ms (instant)
-- [ ] **View switching**: <200ms (smooth)
-
-### Network Requests
-- [ ] **Open Network tab** (F12 → Network)
-- [ ] **Check API calls**:
-  - `/api/incidents` returns 200 OK
-  - Response time <2 seconds
-  - JSON payload valid
-- [ ] **No failed requests** (404, 500 errors)
-- [ ] **No excessive requests** (no infinite loops)
-
-### Bundle Size
-- [ ] **Check Performance tab**
-- [ ] **Initial JS bundle**: <500KB
-- [ ] **Total transfer**: <2MB
-- [ ] **No memory leaks** after 5 minutes of use
-
----
-
-## 🔟 Accessibility Testing
-
-### Keyboard Navigation
-- [ ] **Tab through page** elements
-- [ ] **All interactive elements** focusable
-- [ ] **Focus indicators** visible
-- [ ] **Enter/Space** activates buttons
-- [ ] **Escape** closes popups/panels
-
-### ARIA Labels
-- [ ] **Inspect ViewTab buttons** (F12 → Elements)
-- [ ] **Verify aria-label**: "Switch to map view", etc.
-- [ ] **Verify aria-current**: "page" on active tab
-- [ ] **Filter button has** aria-label and aria-expanded
-
-### Screen Reader Compatibility
-- [ ] **Use VoiceOver** (Mac: Cmd+F5) or **NVDA** (Windows)
-- [ ] **Navigate page** with screen reader
-- [ ] **All content announced** correctly
-- [ ] **No missing labels**
-
-### Color Contrast
-- [ ] **Evidence badges** readable in both themes
-- [ ] **Text on buttons** readable
-- [ ] **Map labels** readable
-- [ ] **No WCAG AA violations** (use browser extension)
-
----
-
-## 1️⃣1️⃣ AI Verification Layer (Backend)
-
-### Verify AI Layer is Active
-- [ ] **Check recent incidents** (<24 hours old)
-- [ ] **Incidents should be**:
-  - Actual drone sightings/incidents
-  - NOT policy announcements
-  - NOT defense deployments
-  - NOT discussion articles
-- [ ] **No false positives** in database
-
-### Test Cases (Backend Validation)
-If you have access to the database or logs:
-- [ ] **Check `ai_verification` column** in incidents table
-- [ ] **Verify incidents have** `is_incident: true`
-- [ ] **Check confidence scores** (should be >0.7)
-- [ ] **No incidents with** `category: "policy"` or `"defense"`
-
----
-
-## 1️⃣2️⃣ Error Handling
-
-### Network Errors
-- [ ] **Disable network** (DevTools → Network → Offline)
-- [ ] **Reload page**
-- [ ] **Error message displayed** (not blank page)
-- [ ] **Re-enable network**
-- [ ] **Page recovers** when back online
-
-### Invalid Filters
-- [ ] **Manually set date range** where start > end
-- [ ] **App handles gracefully** (no crash)
-- [ ] **Shows appropriate message** or corrects automatically
-
-### Missing Data
-- [ ] **Apply filters** that return 0 results
-- [ ] **Empty state shown** correctly (not error)
-- [ ] **Helpful tips displayed**
-
----
-
-## 1️⃣3️⃣ Cross-Browser Testing
-
-### Chrome
-- [ ] **All tests above** pass in Chrome
-
-### Firefox
-- [ ] **All tests above** pass in Firefox
-- [ ] **Map renders** correctly
-- [ ] **No Firefox-specific bugs**
-
-### Safari
-- [ ] **All tests above** pass in Safari
-- [ ] **iOS Safari** (if testing mobile)
-- [ ] **No Safari-specific bugs**
-
----
-
-## ✅ Test Summary
-
-### Pass/Fail Count
-- **Total Tests**: ___
-- **Passed**: ___
-- **Failed**: ___
-- **Blocked**: ___
-
-### Critical Issues Found
-1.
-2.
-3.
-
-### Minor Issues Found
-1.
-2.
-3.
-
-### Performance Metrics
-- **Average Load Time**: ___ seconds
-- **Largest Contentful Paint**: ___ seconds
-- **First Input Delay**: ___ ms
-- **Cumulative Layout Shift**: ___
-
-### Overall Assessment
-- [ ] **Production Ready** ✅
-- [ ] **Needs Minor Fixes** ⚠️
-- [ ] **Needs Major Fixes** ❌
-
-### Tester Notes
-```
-[Your observations and comments here]
-```
-
----
-
-## 📊 Next Steps
-
-Based on test results:
-1. **If all pass**: Deploy Phase 2 improvements
-2. **If minor issues**: Create bug tickets, fix in next sprint
-3. **If critical issues**: Hotfix immediately before promoting
-
----
-
-**Test Completed By**: _____________
-**Date**: _____________
-**Time Spent**: _____________
+**Tester**: ________________
+**Completed**: ________________
