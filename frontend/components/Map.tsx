@@ -106,8 +106,8 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
           return L.divIcon({
             html: `
               <div style="
-                width: 50px;
-                height: 50px;
+                width: 54px;
+                height: 54px;
                 background: ${gradient};
                 border: 3px solid ${isDark ? '#0f172a' : 'white'};
                 border-radius: 50%;
@@ -122,13 +122,26 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
                 text-shadow: 0 1px 3px rgba(0,0,0,0.5);
                 cursor: pointer;
                 transition: transform 0.2s;
+                position: relative;
               " title="${tooltip}">
-                <div style="font-size: 18px; line-height: 1;">${emoji}</div>
-                <div style="font-size: 13px; margin-top: -2px;">${count}</div>
+                <div style="font-size: 20px; line-height: 1; margin-bottom: 2px;">${emoji}</div>
+                <div style="
+                  position: absolute;
+                  bottom: -8px;
+                  right: -8px;
+                  background: ${isDark ? '#dc2626' : '#ef4444'};
+                  color: white;
+                  border-radius: 12px;
+                  padding: 2px 6px;
+                  font-size: 11px;
+                  font-weight: bold;
+                  border: 2px solid ${isDark ? '#0f172a' : 'white'};
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                ">${count}</div>
               </div>
             `,
             className: 'marker-cluster-facility',
-            iconSize: [50, 50],
+            iconSize: [54, 54],
           })
         }
 
