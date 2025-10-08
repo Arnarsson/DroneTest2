@@ -252,75 +252,68 @@ def extract_quote(text: str) -> Optional[str]:
 
 def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Optional[float]) -> bool:
     """
-    Check if incident occurred in Nordic region (not just covered by Nordic news).
+    Check if incident occurred in European coverage region (not just covered by European news).
 
-    This prevents ingesting foreign incidents (e.g., Ukrainian drone attacks) that are
-    merely reported by Nordic news sources but didn't occur in the Nordic region.
+    European coverage: Nordic + UK + Germany + France + Spain + Italy + Poland + Benelux + Baltics
+
+    This prevents ingesting foreign incidents (e.g., Ukrainian/Russian drone attacks, Middle East, Asia)
+    that are merely reported by European news sources but didn't occur in the coverage region.
 
     Returns True if:
-    - Coordinates are in Nordic region AND text doesn't mention foreign locations
-    - No coordinates but text doesn't mention non-Nordic locations
+    - Coordinates are in European region (35-71°N, -10-31°E) AND text doesn't mention non-European locations
+    - No coordinates but text doesn't mention non-European locations
 
     Returns False if:
-    - Coordinates outside Nordic region, OR
-    - Text mentions foreign locations (even if coords are Nordic - e.g., context mentions)
+    - Coordinates outside European region, OR
+    - Text mentions non-European locations (war zones, Middle East, Asia, Americas, Africa)
     """
     full_text = (title + " " + content).lower()
 
-    # Check text for foreign location mentions FIRST (applies to all incidents)
-    # This catches cases where Nordic coords are extracted from context mentions
+    # Check text for NON-EUROPEAN location mentions FIRST (applies to all incidents)
+    # This catches cases where European coords are extracted from context mentions
 
-    # Non-Nordic country/location keywords
+    # Non-European country/location keywords
     foreign_locations = [
-        # Eastern Europe (including adjective forms in Nordic languages)
+        # War zones (Eastern Europe)
         "ukraina", "ukraine", "ukrainsk", "ukrainian", "kiev", "kyiv", "odesa", "kharkiv", "lviv",
         "russia", "rusland", "russisk", "russian", "moscow", "moskva", "st. petersburg",
         "belarus", "hviderusland", "hviderussisk", "belarusian", "minsk",
-        "poland", "polen", "polsk", "polish", "warsaw", "warszawa", "krakow",
-
-        # Central/Western Europe (non-Nordic, including adjective forms)
-        "germany", "tyskland", "tysk", "german", "berlin", "münchen", "munich", "hamburg", "frankfurt",
-        "france", "frankrig", "fransk", "french", "paris", "lyon", "marseille",
-        "netherlands", "holland", "nederlandsk", "dutch", "amsterdam", "rotterdam",
-        "belgium", "belgien", "belgisk", "belgian", "brussels", "bruxelles",
-        "uk", "england", "britain", "britisk", "british", "london", "manchester",
-        "spain", "spanien", "spansk", "spanish", "madrid", "barcelona",
-        "italy", "italien", "italiensk", "italian", "rome", "milano", "milan",
-
-        # Baltic states (included in detection as non-Nordic, with adjective forms)
-        "estonia", "estland", "estisk", "estonian", "tallinn",
-        "latvia", "letland", "lettisk", "latvian", "riga",
-        "lithuania", "litauen", "litauisk", "lithuanian", "vilnius",
 
         # Middle East
         "israel", "gaza", "tel aviv", "jerusalem",
-        "iran", "tehran",
-        "syria", "damascus",
-        "iraq", "baghdad",
+        "iran", "tehran", "syria", "damascus", "iraq", "baghdad",
+        "saudi arabia", "yemen", "lebanon", "beirut",
 
         # Asia
-        "china", "beijing", "shanghai",
-        "japan", "tokyo",
-        "korea", "seoul",
-        "india", "delhi", "mumbai"
+        "china", "beijing", "shanghai", "japan", "tokyo", "korea", "seoul",
+        "india", "delhi", "mumbai", "pakistan", "afghanistan", "thailand", "vietnam",
+
+        # Americas
+        "united states", "usa", "america", "washington", "new york", "california",
+        "canada", "toronto", "vancouver", "mexico",
+        "brazil", "argentina", "chile",
+
+        # Africa
+        "egypt", "cairo", "south africa", "nigeria", "kenya"
     ]
 
-    # Check if any foreign location is mentioned
+    # Check if any non-European location is mentioned
     # Use word boundaries to avoid false matches
     for location in foreign_locations:
         if re.search(rf'\b{re.escape(location)}\b', full_text):
             return False
 
-    # No foreign locations in text - now check coordinates if available
+    # No non-European locations in text - now check coordinates if available
     if lat is not None and lon is not None:
-        # Nordic region: roughly 54-71°N, 4-31°E
-        if 54 <= lat <= 71 and 4 <= lon <= 31:
+        # European coverage region: 35-71°N, -10-31°E
+        # Covers: Nordic + UK + Ireland + Western/Central Europe + Baltics
+        if 35 <= lat <= 71 and -10 <= lon <= 31:
             return True
         else:
-            # Coordinates outside Nordic region
+            # Coordinates outside European coverage region
             return False
 
-    # No foreign locations in text and no coordinates - assume Nordic
+    # No non-European locations in text and no coordinates - assume European
     return True
 
 def is_drone_incident(title: str, content: str) -> bool:

@@ -49,7 +49,7 @@ test_cases = [
         "content": "Danish article about drone incident in Munich, Germany",
         "lat": 48.1351,
         "lon": 11.5820,
-        "expected": False
+        "expected": True  # European coverage now includes Germany
     },
     {
         "name": "Nordic news about Ukraine (no coords)",
@@ -68,12 +68,12 @@ test_cases = [
         "expected": True  # Nordic location, no foreign mentions
     },
     {
-        "name": "Nordic article mentioning Germany",
+        "name": "European article mentioning Germany",
         "title": "Denmark responds to German drone policy",
         "content": "Danish government reacts to new regulations in Berlin and Munich",
         "lat": None,
         "lon": None,
-        "expected": False  # Mentions Berlin/Munich
+        "expected": True  # European coverage includes Germany - policy articles filtered by is_drone_incident()
     },
     {
         "name": "Ukrainian incident with Nordic coords (context mention)",
@@ -82,6 +82,38 @@ test_cases = [
         "lat": 55.618,
         "lon": 12.6476,
         "expected": False  # Foreign incident despite Nordic coords from context
+    },
+    {
+        "name": "London Heathrow incident (UK)",
+        "title": "Drone sighting halts flights at Heathrow",
+        "content": "British authorities investigating drone near Heathrow Airport",
+        "lat": 51.4700,
+        "lon": -0.4543,
+        "expected": True  # European coverage includes UK
+    },
+    {
+        "name": "Paris incident (France)",
+        "title": "Drone spotted near Eiffel Tower",
+        "content": "French police investigating unauthorized drone in Paris",
+        "lat": 48.8566,
+        "lon": 2.3522,
+        "expected": True  # European coverage includes France
+    },
+    {
+        "name": "Warsaw incident (Poland)",
+        "title": "Drone near Polish government buildings",
+        "content": "Warsaw police respond to drone sighting",
+        "lat": 52.2297,
+        "lon": 21.0122,
+        "expected": True  # European coverage includes Poland
+    },
+    {
+        "name": "Madrid incident (Spain)",
+        "title": "Drone disrupts flights in Madrid",
+        "content": "Spanish aviation authority reports drone near Madrid airport",
+        "lat": 40.4168,
+        "lon": -3.7038,
+        "expected": True  # European coverage includes Spain
     }
 ]
 

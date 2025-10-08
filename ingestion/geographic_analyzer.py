@@ -8,34 +8,30 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Foreign country/location keywords (expanded with adjective forms)
+# Foreign country/location keywords (NON-EUROPEAN regions only)
+# European coverage: Nordic + UK + Germany + France + Spain + Italy + Poland + Benelux + Baltics
 FOREIGN_KEYWORDS = {
-    # Eastern Europe (including adjective forms)
+    # War zones (Eastern Europe)
     'ukraina', 'ukraine', 'ukrainsk', 'ukrainian', 'kiev', 'kyiv', 'odesa', 'kharkiv', 'lviv',
     'russia', 'rusland', 'russisk', 'russian', 'moscow', 'moskva', 'st. petersburg',
     'belarus', 'hviderusland', 'hviderussisk', 'belarusian', 'minsk',
-    'poland', 'polen', 'polsk', 'polish', 'warsaw', 'warszawa', 'krakow',
-
-    # Central/Western Europe (non-Nordic)
-    'germany', 'tyskland', 'tysk', 'german', 'berlin', 'münchen', 'munich', 'hamburg', 'frankfurt',
-    'france', 'frankrig', 'fransk', 'french', 'paris', 'lyon', 'marseille',
-    'netherlands', 'holland', 'nederlandsk', 'dutch', 'amsterdam', 'rotterdam',
-    'belgium', 'belgien', 'belgisk', 'belgian', 'brussels', 'bruxelles',
-    'uk', 'england', 'britain', 'britisk', 'british', 'london', 'manchester',
-    'spain', 'spanien', 'spansk', 'spanish', 'madrid', 'barcelona',
-    'italy', 'italien', 'italiensk', 'italian', 'rome', 'milano', 'milan',
-
-    # Baltic states
-    'estonia', 'estland', 'estisk', 'estonian', 'tallinn',
-    'latvia', 'letland', 'lettisk', 'latvian', 'riga',
-    'lithuania', 'litauen', 'litauisk', 'lithuanian', 'vilnius',
 
     # Middle East
     'israel', 'gaza', 'tel aviv', 'jerusalem',
     'iran', 'tehran', 'syria', 'damascus', 'iraq', 'baghdad',
+    'saudi arabia', 'yemen', 'lebanon', 'beirut',
 
     # Asia
-    'china', 'beijing', 'shanghai', 'japan', 'tokyo', 'korea', 'seoul', 'india', 'delhi', 'mumbai'
+    'china', 'beijing', 'shanghai', 'japan', 'tokyo', 'korea', 'seoul', 'india', 'delhi', 'mumbai',
+    'pakistan', 'afghanistan', 'thailand', 'vietnam',
+
+    # Americas
+    'united states', 'usa', 'america', 'washington', 'new york', 'california',
+    'canada', 'toronto', 'vancouver', 'mexico',
+    'brazil', 'argentina', 'chile',
+
+    # Africa
+    'egypt', 'cairo', 'south africa', 'nigeria', 'kenya'
 }
 
 # Nordic context indicators (suggests Nordic response to foreign events)
@@ -48,8 +44,8 @@ NORDIC_CONTEXT_KEYWORDS = [
     'denmark comments', 'norway reacts', 'sweden responds', 'finland addresses'
 ]
 
-# Nordic cities/locations (whitelist for confidence boost)
-NORDIC_CITIES = {
+# European cities/locations (whitelist for confidence boost)
+EUROPEAN_CITIES = {
     # Denmark
     'copenhagen', 'københavn', 'aarhus', 'odense', 'aalborg', 'esbjerg', 'roskilde',
     'kastrup', 'billund',
@@ -64,10 +60,43 @@ NORDIC_CITIES = {
 
     # Finland
     'helsinki', 'espoo', 'tampere', 'vantaa', 'oulu', 'turku', 'jyväskylä',
-    'lahti', 'kuopio', 'vantaa',
+    'lahti', 'kuopio',
 
     # Iceland
-    'reykjavík', 'reykjavik', 'keflavík', 'keflavik', 'akureyri'
+    'reykjavík', 'reykjavik', 'keflavík', 'keflavik', 'akureyri',
+
+    # UK
+    'london', 'manchester', 'birmingham', 'leeds', 'liverpool', 'glasgow', 'edinburgh',
+    'bristol', 'cardiff', 'belfast', 'heathrow', 'gatwick', 'stansted',
+
+    # Germany
+    'berlin', 'münchen', 'munich', 'hamburg', 'frankfurt', 'köln', 'cologne', 'stuttgart',
+    'düsseldorf', 'dortmund', 'essen', 'leipzig', 'dresden', 'hannover',
+
+    # France
+    'paris', 'marseille', 'lyon', 'toulouse', 'nice', 'nantes', 'strasbourg', 'bordeaux',
+
+    # Spain
+    'madrid', 'barcelona', 'valencia', 'sevilla', 'bilbao', 'málaga',
+
+    # Italy
+    'rome', 'roma', 'milano', 'milan', 'naples', 'napoli', 'turin', 'torino', 'florence', 'firenze',
+
+    # Poland
+    'warsaw', 'warszawa', 'krakow', 'kraków', 'wrocław', 'gdańsk', 'poznań',
+
+    # Netherlands
+    'amsterdam', 'rotterdam', 'the hague', 'utrecht', 'eindhoven', 'schiphol',
+
+    # Belgium
+    'brussels', 'bruxelles', 'antwerp', 'antwerpen', 'bruges', 'brugge', 'ghent', 'gent',
+
+    # Baltics
+    'tallinn', 'riga', 'vilnius', 'tartu', 'kaunas',
+
+    # Other European
+    'vienna', 'wien', 'zurich', 'zürich', 'geneva', 'genève', 'prague', 'praha',
+    'budapest', 'bucharest', 'athens', 'lisbon', 'lisboa', 'dublin'
 }
 
 
@@ -89,17 +118,17 @@ def check_foreign_keywords(text: str) -> List[str]:
     return matches
 
 
-def extract_nordic_cities(text: str) -> List[str]:
+def extract_european_cities(text: str) -> List[str]:
     """
-    Extract Nordic cities mentioned in text
+    Extract European cities mentioned in text
 
     Returns:
-        List of Nordic cities found
+        List of European cities found
     """
     text_lower = text.lower()
     cities_found = []
 
-    for city in NORDIC_CITIES:
+    for city in EUROPEAN_CITIES:
         if re.search(rf'\b{re.escape(city)}\b', text_lower):
             cities_found.append(city)
 
@@ -148,7 +177,7 @@ def analyze_incident_geography(
     confidence = 1.0
     full_text = title + " " + content
 
-    # VALIDATION 1: Coordinates must be in Nordic region
+    # VALIDATION 1: Coordinates must be in European coverage region
     if lat is None or lon is None:
         return {
             'is_nordic': False,
@@ -157,16 +186,18 @@ def analyze_incident_geography(
             'flags': ['missing_coords']
         }
 
-    in_nordic_region = (54 <= lat <= 71 and 4 <= lon <= 31)
-    if not in_nordic_region:
+    # European coverage: 35-71°N, -10-31°E
+    # Covers: Nordic + UK + Ireland + Western/Central Europe + Baltics
+    in_european_region = (35 <= lat <= 71 and -10 <= lon <= 31)
+    if not in_european_region:
         return {
             'is_nordic': False,
             'confidence': 1.0,
-            'reason': f'Coordinates outside Nordic region ({lat}, {lon})',
-            'flags': ['coords_outside_nordic']
+            'reason': f'Coordinates outside European coverage region ({lat}, {lon})',
+            'flags': ['coords_outside_europe']
         }
 
-    flags.append('coords_in_nordic')
+    flags.append('coords_in_europe')
 
     # VALIDATION 2: Check for foreign location keywords
     foreign_matches = check_foreign_keywords(full_text)
@@ -188,11 +219,11 @@ def analyze_incident_geography(
                 'flags': ['foreign_incident'] + [f'keyword:{k}' for k in foreign_matches[:3]]
             }
 
-    # VALIDATION 3: Nordic location verification (whitelist approach)
-    nordic_cities = extract_nordic_cities(full_text)
-    if nordic_cities:
+    # VALIDATION 3: European location verification (whitelist approach)
+    european_cities = extract_european_cities(full_text)
+    if european_cities:
         confidence = min(1.0, confidence + 0.2)
-        flags.append(f'nordic_cities: {", ".join(nordic_cities[:3])}')
+        flags.append(f'european_cities: {", ".join(european_cities[:3])}')
 
     # VALIDATION 4: Check for official sources (confidence boost)
     if any(word in content.lower() for word in ['politi', 'police', 'forsvar', 'defense', 'myndighed', 'authority']):
@@ -203,9 +234,9 @@ def analyze_incident_geography(
     is_nordic = confidence >= 0.5
 
     if is_nordic:
-        reason = 'Passed all checks - Nordic incident confirmed'
+        reason = 'Passed all checks - European incident confirmed'
     else:
-        reason = f'Low confidence ({confidence:.2f}) - Foreign content likely'
+        reason = f'Low confidence ({confidence:.2f}) - Non-European content likely'
 
     return {
         'is_nordic': is_nordic,
