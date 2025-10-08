@@ -54,6 +54,43 @@ def extract_location(text: str, use_ai: bool = True) -> Tuple[Optional[float], O
     return None, None, None
 
 
+def _pattern_match_location(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
+    """
+    Fallback: Pattern match known locations from config when AI fails.
+
+    Returns:
+        (lat, lon, asset_type) tuple or (None, None, None)
+    """
+    from config import EUROPEAN_LOCATIONS
+
+    text_lower = text.lower()
+
+    # Try exact matches first (case-insensitive)
+    for location_name, location_data in EUROPEAN_LOCATIONS.items():
+        # Check if location name appears in text with word boundaries
+        if re.search(rf'\b{re.escape(location_name.lower())}\b', text_lower):
+            logger.info(f"Pattern matched location: {location_name}")
+            return (
+                location_data['lat'],
+                location_data['lon'],
+                location_data.get('type', 'other')
+            )
+
+    # Try partial matches for airports (e.g., "aalborg" matches "aalborg airport")
+    for location_name, location_data in EUROPEAN_LOCATIONS.items():
+        if 'airport' in location_name.lower() or 'lufthavn' in location_name.lower():
+            # Extract city name (first word before "airport"/"lufthavn")
+            city = location_name.split()[0].lower()
+            if city in text_lower and len(city) > 3:  # Avoid short words
+                logger.info(f"Pattern matched airport by city: {city} → {location_name}")
+                return (
+                    location_data['lat'],
+                    location_data['lon'],
+                    location_data.get('type', 'airport')
+                )
+
+    return (None, None, None)
+
 def _extract_location_with_ai(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
     """
     Use AI to extract location from text when regex patterns fail.
@@ -133,7 +170,10 @@ Return only the JSON object, no other text."""
         # Validate
         if lat is None or lon is None:
             logger.info(f"AI could not determine location from text: {text[:80]}...")
-            result_tuple = (None, None, None)
+            # FALLBACK: Try pattern matching against known locations from config
+            result_tuple = _pattern_match_location(text)
+            if result_tuple[0] is not None:
+                logger.info(f"✓ Pattern match fallback found: {result_tuple}")
         else:
             logger.info(f"AI extracted location: {result.get('location')} ({lat}, {lon}) [{asset_type}]")
             result_tuple = (float(lat), float(lon), asset_type)
@@ -144,6 +184,11 @@ Return only the JSON object, no other text."""
 
     except Exception as e:
         logger.error(f"AI location extraction error: {e}")
+        # FALLBACK: Try pattern matching on error
+        result_tuple = _pattern_match_location(text)
+        if result_tuple[0] is not None:
+            logger.info(f"✓ Pattern match fallback found after error: {result_tuple}")
+            return result_tuple
         return None, None, None
 
 def extract_datetime(text: str, fallback: datetime = None) -> datetime:
