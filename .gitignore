@@ -49,3 +49,13 @@ coverage/
 build/
 *.map
 .vercel
+
+# CRITICAL: Never commit secrets
+.env
+.env.*
+!.env.example
+ingestion/.env
+frontend/.env.local
+frontend/.env.production
+*.env.local
+*.env.production
