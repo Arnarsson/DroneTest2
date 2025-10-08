@@ -98,6 +98,40 @@ def _pattern_match_location(text: str) -> Tuple[Optional[float], Optional[float]
                     location_data.get('type', 'airport')
                 )
 
+    # Country/region fallback (broader matches for general location mentions)
+    region_patterns = {
+        # Denmark
+        r'\bdanmark\b': ('copenhagen', 55.6761, 12.5683),
+        r'\bkøbenhavn\b': ('copenhagen', 55.6761, 12.5683),
+        r'\bcopenhagen\b': ('copenhagen', 55.6761, 12.5683),
+        r'\bnordjylland\b': ('north jutland', 57.0488, 9.9217),
+        r'\bmidtjylland\b': ('central jutland', 56.1629, 9.5519),
+        r'\bsydøstjylland\b': ('southeast jutland', 55.4038, 10.4024),
+        r'\bsjælland\b': ('zealand', 55.5, 11.5),
+
+        # Norway
+        r'\bnorge\b': ('oslo', 59.9139, 10.7522),
+        r'\bnorway\b': ('oslo', 59.9139, 10.7522),
+        r'\boslo\b': ('oslo', 59.9139, 10.7522),
+        r'\bbergen\b': ('bergen', 60.3913, 5.3221),
+
+        # Sweden
+        r'\bsverige\b': ('stockholm', 59.3293, 18.0686),
+        r'\bsweden\b': ('stockholm', 59.3293, 18.0686),
+        r'\bstockholm\b': ('stockholm', 59.3293, 18.0686),
+        r'\bgöteborg\b': ('gothenburg', 57.7089, 11.9746),
+
+        # Finland
+        r'\bsuomi\b': ('helsinki', 60.1699, 24.9384),
+        r'\bfinland\b': ('helsinki', 60.1699, 24.9384),
+        r'\bhelsinki\b': ('helsinki', 60.1699, 24.9384),
+    }
+
+    for pattern, (name, lat, lon) in region_patterns.items():
+        if re.search(pattern, text_lower):
+            logger.info(f"Pattern matched region/country: {pattern.strip('\\\\b')} → {name}")
+            return (lat, lon, 'other')
+
     return (None, None, None)
 
 def _extract_location_with_ai(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
