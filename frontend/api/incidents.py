@@ -16,6 +16,7 @@ ALLOWED_ORIGINS = [
     "https://www.dronewatch.cc",
     "https://dronewatchv2.vercel.app",
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:3003",
 ]
 

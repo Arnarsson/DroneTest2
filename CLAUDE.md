@@ -17,7 +17,21 @@ Real-time drone incident tracking across Nordic countries + UK + Germany + Polan
 
 ## Development Commands
 
-### Frontend (Next.js 14.2.33)
+### Local Development Options
+
+**Option 1: Vercel Dev (Recommended for Full Testing)**
+```bash
+cd /Users/sven/Desktop/MCP/DroneTest2  # Run from PROJECT ROOT, not frontend/
+npx vercel dev
+```
+
+This will:
+- Run Next.js dev server on port 3000 (or auto-assigned)
+- Run Python serverless functions locally (`/api/*` endpoints)
+- Properly route API requests to Python functions
+- Simulate production environment
+
+**Option 2: Next.js Dev Only (UI Development)**
 ```bash
 cd frontend
 npm install          # Install dependencies
@@ -25,6 +39,8 @@ npm run dev          # Dev server → http://localhost:3000
 npm run build        # Production build
 npm run lint         # TypeScript + ESLint
 ```
+
+**⚠️ LIMITATION**: Python API endpoints (`/api/incidents`, `/api/ingest`) will return 404 errors with `npm run dev`. The Python serverless functions require Vercel's environment to run. For full local testing with API support, use `vercel dev` instead.
 
 **CRITICAL**: If build fails with "barrel loader" or "TypeScriptTransformer" errors:
 1. Check date-fns imports - use SPECIFIC paths only: `'date-fns/format'` NOT `'date-fns'`
@@ -363,6 +379,61 @@ python3 cleanup_foreign_incidents.py
 
 ---
 
+## Troubleshooting Local Development
+
+### Issue: API 404 Errors on Localhost
+
+**Symptoms**:
+```
+GET /api/incidents?... 404 Not Found
+```
+
+**Cause**: Python serverless functions (`frontend/api/*.py`) don't run with `npm run dev`. They require Vercel's runtime environment.
+
+**Solutions**:
+1. **Use `vercel dev`** (recommended) - Run from project root: `npx vercel dev`
+2. **Test on production** - Live site: https://www.dronemap.cc
+3. **Mock API responses** - For pure UI development without backend
+
+### Issue: Chrome DevTools MCP Not Working
+
+**Symptoms**: MCP server fails to start or can't find Chrome canary
+
+**Solution**: The global MCP configuration has been updated to use stable Chrome. If issues persist:
+1. Restart VSCode/reload window
+2. Check that Chrome (stable) is installed
+3. Verify `.claude/.mcp.json` has correct configuration
+
+### Issue: Build Failures (Barrel Loader Errors)
+
+**Symptoms**: 
+```
+Error: barrel loader failed
+Error: TypeScriptTransformer crashed
+```
+
+**Solution**:
+1. Check all date-fns imports - use specific paths: `'date-fns/format'` not `'date-fns'`
+2. Clean rebuild: `rm -rf .next node_modules/.cache && npm run dev`
+3. Ensure Next.js 14.2.33+ is installed
+
+### Localhost Testing Summary (October 8, 2025)
+
+**Tested**: localhost:3001 with `npm run dev`
+**Results**:
+- ✅ Frontend loads correctly (Next.js working)
+- ✅ Map renders (Leaflet integration working)
+- ✅ UI components functional
+- ❌ API endpoints return 404 (Python functions need Vercel)
+- ✅ Chrome DevTools MCP configuration fixed
+
+**Recommendations**:
+- For full local testing: Use `vercel dev` from project root
+- For UI-only development: `npm run dev` is sufficient
+- For quick testing: Use production site (www.dronemap.cc)
+
+---
+
 ## Git Workflow
 
 ```bash
@@ -523,9 +594,11 @@ npm run dev                           # http://localhost:3000
 ```bash
 DATABASE_URL="postgresql://postgres.uhwsuaebakkdmdogzrrz:stUPw5co47Yq8uSI@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
 INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
-OPENROUTER_API_KEY="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"
+OPENROUTER_API_KEY="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"
 OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 ```
+
+**Updated**: October 8, 2025 - New OpenRouter API key deployed to production
 
 **Local Development** (`.env.local`):
 ```bash
