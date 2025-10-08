@@ -44,9 +44,18 @@ def extract_location(text: str, use_ai: bool = True) -> Tuple[Optional[float], O
     # AI fallback if enabled
     if use_ai:
         try:
-            return _extract_location_with_ai(text)
+            result = _extract_location_with_ai(text)
+            # If AI returned None, try pattern matching fallback
+            if result[0] is None:
+                logger.info("AI returned None, trying pattern matching fallback...")
+                result = _pattern_match_location(text)
+            return result
         except Exception as e:
-            logger.warning(f"AI location extraction failed: {e}")
+            logger.warning(f"AI location extraction failed: {e}, trying pattern matching fallback...")
+            # Pattern matching fallback on exception
+            result = _pattern_match_location(text)
+            if result[0] is not None:
+                return result
             return None, None, None
 
     # Return None if no specific location found
