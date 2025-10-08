@@ -201,12 +201,19 @@ class handler(BaseHTTPRequestHandler):
         auth_header = self.headers.get('Authorization', '')
         expected_token = os.getenv('INGEST_TOKEN', 'test-token-please-change')
 
+        # Debug logging
+        print(f"Auth header: {auth_header[:20]}..." if len(auth_header) > 20 else f"Auth header: {auth_header}", file=sys.stderr)
+        print(f"Expected token: {expected_token[:20]}..." if len(expected_token) > 20 else f"Expected token: {expected_token}", file=sys.stderr)
+
         if not auth_header.startswith('Bearer '):
             self.send_error(401, "Missing Bearer token")
             return
 
         token = auth_header.replace('Bearer ', '')
+        print(f"Received token: {token[:20]}..." if len(token) > 20 else f"Received token: {token}", file=sys.stderr)
+
         if token != expected_token:
+            print(f"Token mismatch! Received: '{token}' Expected: '{expected_token}'", file=sys.stderr)
             self.send_error(403, "Invalid token")
             return
 
