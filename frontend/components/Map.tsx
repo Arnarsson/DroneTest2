@@ -269,6 +269,12 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       ;(marker as any).incidentData = incident
 
       // Create popup content
+      // DEBUG: Log incident data to verify sources
+      if (incident.sources && incident.sources.length > 0) {
+        console.log(`[Map] Incident "${incident.title.substring(0, 50)}" has ${incident.sources.length} sources`)
+      } else {
+        console.warn(`[Map] Incident "${incident.title.substring(0, 50)}" has NO sources!`, incident)
+      }
       const popupContent = createPopupContent(incident, isDark)
       marker.bindPopup(popupContent, {
         maxWidth: 350,
