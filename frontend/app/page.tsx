@@ -44,18 +44,11 @@ export default function Home() {
 
   // Apply client-side date filtering and timeline filtering
   const incidents = useMemo(() => {
-    console.log('[DEBUG] useMemo triggered');
-    console.log('[DEBUG] allIncidents:', allIncidents?.length || 0);
-    console.log('[DEBUG] filters.dateRange:', filters.dateRange);
-    console.log('[DEBUG] timelineRange:', timelineRange);
-
     if (!allIncidents) {
-      console.log('[DEBUG] No allIncidents, returning empty array');
       return [];
     }
 
     let filtered = allIncidents;
-    console.log('[DEBUG] Starting with', filtered.length, 'incidents');
 
     // Apply date range filter (client-side fallback)
     if (filters.dateRange !== "all") {
@@ -74,28 +67,21 @@ export default function Home() {
           break;
       }
 
-      console.log('[DEBUG] Applying date filter:', filters.dateRange, 'since:', since.toISOString());
-      const beforeFilter = filtered.length;
       filtered = filtered.filter(
         (inc: Incident) => new Date(inc.occurred_at) >= since
       );
-      console.log('[DEBUG] After date filter:', filtered.length, 'incidents (removed', beforeFilter - filtered.length, ')');
     }
 
     // Apply timeline filtering
     if (timelineRange.start && timelineRange.end) {
-      console.log('[DEBUG] Applying timeline filter:', timelineRange.start, 'to', timelineRange.end);
-      const beforeFilter = filtered.length;
       filtered = filtered.filter((inc: Incident) =>
         isWithinInterval(new Date(inc.occurred_at), {
           start: timelineRange.start!,
           end: timelineRange.end!,
         })
       );
-      console.log('[DEBUG] After timeline filter:', filtered.length, 'incidents (removed', beforeFilter - filtered.length, ')');
     }
 
-    console.log('[DEBUG] Final filtered incidents:', filtered.length);
     return filtered;
   }, [allIncidents, timelineRange, filters.dateRange]);
 
