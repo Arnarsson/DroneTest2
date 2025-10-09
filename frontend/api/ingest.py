@@ -56,34 +56,54 @@ async def insert_incident(incident_data):
         lat = incident_data.get('lat')
         lon = incident_data.get('lon')
 
-        # Check for existing incident at same facility
+        # RACE CONDITION FIX: Check if source URL already exists globally
+        # This prevents duplicates during batch ingestion when multiple requests
+        # for the same incident arrive simultaneously
+        existing_incident = None
+        if incident_data.get('sources'):
+            for source in incident_data['sources']:
+                source_url = source.get('source_url', '')
+                if source_url:
+                    existing_incident = await conn.fetchrow("""
+                        SELECT i.id, i.evidence_score, i.title, i.asset_type
+                        FROM public.incidents i
+                        JOIN public.incident_sources s ON i.id = s.incident_id
+                        WHERE s.source_url = $1
+                        LIMIT 1
+                    """, source_url)
+                    if existing_incident:
+                        logger.info(f"Found incident via global source check: {existing_incident['title'][:50]}")
+                        break
+
+        # If no existing incident found via source URL, check for existing incident at same facility
         # Strategy: One incident per facility (smart radius based on asset type)
         # Airports/Military: 3km (large facilities)
         # Harbors: 1.5km (medium facilities)
         # Other: 500m (specific locations)
 
-        asset_type = incident_data.get('asset_type', 'other')
-        search_radius = {
-            'airport': 3000,    # 3km - airports are large
-            'military': 3000,   # 3km - military bases are large
-            'harbor': 1500,     # 1.5km - harbors are medium
-            'powerplant': 1000, # 1km - power plants
-            'bridge': 500,      # 500m - bridges are specific
-            'other': 500        # 500m - default for unknown
-        }.get(asset_type, 500)
+        if not existing_incident:
+            asset_type = incident_data.get('asset_type', 'other')
+            search_radius = {
+                'airport': 3000,    # 3km - airports are large
+                'military': 3000,   # 3km - military bases are large
+                'harbor': 1500,     # 1.5km - harbors are medium
+                'powerplant': 1000, # 1km - power plants
+                'bridge': 500,      # 500m - bridges are specific
+                'other': 500        # 500m - default for unknown
+            }.get(asset_type, 500)
 
-        existing_incident = await conn.fetchrow("""
-            SELECT id, evidence_score, title, asset_type
-            FROM public.incidents
-            WHERE ST_DWithin(
-                location::geography,
-                ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
-                $3  -- Dynamic radius based on asset type
-            )
-            AND asset_type = $4  -- Must be same asset type
-            ORDER BY occurred_at ASC
-            LIMIT 1
-        """, lon, lat, search_radius, asset_type)
+            existing_incident = await conn.fetchrow("""
+                SELECT id, evidence_score, title, asset_type
+                FROM public.incidents
+                WHERE ST_DWithin(
+                    location::geography,
+                    ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                    $3  -- Dynamic radius based on asset type
+                )
+                AND asset_type = $4  -- Must be same asset type
+                ORDER BY occurred_at ASC
+                LIMIT 1
+            """, lon, lat, search_radius, asset_type)
 
         if existing_incident:
             # Incident already exists - add this as a source instead
