@@ -219,6 +219,143 @@ SOURCES = {
         "verified_date": "2025-10-05",
         "working": True
     },
+
+    # === TIER 4: NORWEGIAN POLICE (Politiloggen RSS) ===
+    # Norwegian police discontinued Twitter/X in October 2024
+    # They now use Politiloggen app with official RSS feeds
+    # Source type: police (official) - trust_weight: 4
+
+    "politiloggen_oslo": {
+        "name": "Politiloggen Oslo",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=oslo",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "gardermoen", "oslo lufthavn"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Oslo police district - covers Gardermoen Airport"
+    },
+
+    "politiloggen_ost": {
+        "name": "Politiloggen Øst",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=ost",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Eastern Norway police district"
+    },
+
+    "politiloggen_innlandet": {
+        "name": "Politiloggen Innlandet",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=innlandet",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Inland Norway police district"
+    },
+
+    "politiloggen_sorost": {
+        "name": "Politiloggen Sør-Øst",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=sor-ost",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Southeast Norway police district"
+    },
+
+    "politiloggen_agder": {
+        "name": "Politiloggen Agder",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=agder",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "kristiansand"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Agder police district - southern Norway"
+    },
+
+    "politiloggen_sorvest": {
+        "name": "Politiloggen Sør-Vest",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=sor-vest",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "stavanger lufthavn"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Southwest Norway - covers Stavanger Airport"
+    },
+
+    "politiloggen_vest": {
+        "name": "Politiloggen Vest",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=vest",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "bergen lufthavn"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Western Norway - covers Bergen Airport"
+    },
+
+    "politiloggen_more_romsdal": {
+        "name": "Politiloggen Møre og Romsdal",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=more-og-romsdal",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Møre og Romsdal police district"
+    },
+
+    "politiloggen_trondelag": {
+        "name": "Politiloggen Trøndelag",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=trondelag",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "trondheim"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Trøndelag police district - central Norway"
+    },
+
+    "politiloggen_nordland": {
+        "name": "Politiloggen Nordland",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=nordland",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Nordland police district - northern Norway"
+    },
+
+    "politiloggen_troms": {
+        "name": "Politiloggen Troms",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=troms",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy", "tromsø"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Troms police district - northern Norway"
+    },
+
+    "politiloggen_finnmark": {
+        "name": "Politiloggen Finnmark",
+        "rss": "https://api.politiet.no/politiloggen/v1/rss?districts=finnmark",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "ubemannet luftfartøy"],
+        "verified_date": "2025-10-09",
+        "working": True,
+        "note": "Finnmark police district - far northern Norway"
+    },
 }
 
 # ============================================================================
