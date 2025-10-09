@@ -27,6 +27,10 @@ interface MapProps {
 }
 
 export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
+  console.log('[Map] Component rendered')
+  console.log('[Map] Received incidents:', incidents.length)
+  console.log('[Map] isLoading:', isLoading)
+
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null)
@@ -213,7 +217,12 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
   }, [resolvedTheme])
 
   useEffect(() => {
-    if (!clusterRef.current) return
+    console.log('[Map] Incidents useEffect triggered with', incidents.length, 'incidents')
+
+    if (!clusterRef.current) {
+      console.log('[Map] No clusterRef, skipping marker creation')
+      return
+    }
 
     // Clear existing markers
     clusterRef.current.clearLayers()
@@ -283,6 +292,10 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
 
       clusterRef.current!.addLayer(marker)
     })
+
+    console.log('[Map] Added', facilityGroups, 'facility groups')
+    console.log('[Map] Added', singleIncidents.length, 'single incident markers')
+    console.log('[Map] Total markers created:', Object.keys(facilityGroups).length + singleIncidents.length)
   }, [incidents, resolvedTheme])
 
   return (
