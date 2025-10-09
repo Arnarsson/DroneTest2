@@ -53,6 +53,13 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
 
   const data = await response.json()
   console.log('[useIncidents] Received incidents:', data.length)
+  console.log('[useIncidents] Sample incident:', data[0])
+
+  // CRITICAL DEBUG: Log what we're actually returning
+  if (data.length === 0) {
+    console.error('[useIncidents] WARNING: API returned empty array!')
+  }
+
   return data
 }
 
