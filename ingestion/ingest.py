@@ -30,7 +30,7 @@ from verification import (calculate_confidence_score, get_verification_status,
 from non_incident_filter import NonIncidentFilter
 
 # Scraper version for tracking deployments
-SCRAPER_VERSION = "2.2.0"  # Updated with AI verification layer (OpenRouter integration)
+SCRAPER_VERSION = "2.3.0"  # European coverage expansion (35-71°N, -10-31°E)
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

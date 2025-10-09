@@ -9,9 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Production**: https://www.dronemap.cc
 **Platform**: Vercel (auto-deploys from `main` branch)
 
-Real-time drone incident tracking across Nordic countries + UK + Germany + Poland with evidence-based reporting and multi-source verification.
+Real-time drone incident tracking across **ALL OF EUROPE** with evidence-based reporting and multi-source verification.
 
-**Live Coverage**: 45+ sources from 7 countries | 30-100 incidents/month expected
+**Geographic Coverage**: 🌍 35-71°N, -10-31°E (Nordic + UK + Ireland + Germany + France + Spain + Italy + Poland + Benelux + Baltics)
+**Live Sources**: 45+ verified RSS feeds from 15+ countries | 100-200 incidents/month expected
 
 ---
 
@@ -242,15 +243,19 @@ CREATE TRIGGER update_evidence_score_trigger ...
 
 **File**: `ingestion/config.py`
 
-**Coverage**: 111 verified Nordic locations
-- 🇩🇰 Denmark: 7 locations
+**Coverage**: 150+ verified European locations across 15+ countries
+- 🇩🇰 Denmark: 25+ locations
 - 🇳🇴 Norway: 25 locations
 - 🇸🇪 Sweden: 29 locations
 - 🇫🇮 Finland: 19 locations
 - 🇵🇱 Poland: 8 locations
 - 🇳🇱 Netherlands: 5 locations
+- 🇩🇪 Germany: 10+ major cities/airports
+- 🇫🇷 France: 5+ major locations
+- 🇬🇧 UK: 10+ major locations
+- 🇪🇸 Spain, 🇮🇹 Italy, 🇧🇪 Belgium, 🇪🇪 Estonia, 🇱🇻 Latvia, 🇱🇹 Lithuania
 
-**Note**: 16 legacy Danish airports missing country/type metadata (still work for matching)
+**Geographic Bounds**: 35-71°N, -10-31°E (all of Europe)
 
 **Asset Types**: airport, military, harbor, powerplant, bridge, other
 
@@ -259,20 +264,20 @@ CREATE TRIGGER update_evidence_score_trigger ...
 **5-Layer Architecture** - Prevents foreign incidents, policy announcements, and defense deployments from appearing on the map.
 
 #### Layer 1: Database Trigger (PostgreSQL)
-**File**: `migrations/014_geographic_validation_trigger.sql`
+**Files**: `migrations/014_geographic_validation_trigger.sql` (deprecated), `migrations/015_expand_to_european_coverage.sql` (active)
 - Validates EVERY incident BEFORE insertion at database level
-- Checks coordinates (54-71°N, 4-31°E for Nordic region)
-- Validates title AND narrative for foreign keywords
+- Checks coordinates (35-71°N, -10-31°E for European region)
+- Validates title AND narrative for NON-European keywords (Ukraine, Russia, Middle East, Asia, Americas, Africa)
 - Works even if scrapers use old code
-- **Status**: ✅ Active
+- **Status**: ✅ Active (European coverage enabled)
 
 #### Layer 2: Python Filters
 **File**: `ingestion/utils.py`
-- `is_nordic_incident()` - Geographic scope validation
+- `is_nordic_incident()` - **European** scope validation (function name legacy, but validates European bounds 35-71°N, -10-31°E)
 - `is_drone_incident()` - Incident type validation
-- Keyword-based filtering for policy, defense, and international incidents
+- Keyword-based filtering for policy, defense, and NON-European incidents
 - Enhanced with policy/defense exclusion patterns
-- **Status**: ✅ Active
+- **Status**: ✅ Active (European coverage enabled)
 
 #### Layer 3: AI Verification (NEW v2.2.0)
 **Files**: `ingestion/openai_client.py`, `ingestion/ingest.py`
@@ -488,7 +493,7 @@ git push origin main    # Main repository → triggers Vercel deploy
 4. **Quality > Quantity**: Fewer verified incidents better than many unverified
 5. **Multi-Source Verification**: Consolidate sources, upgrade evidence scores
 6. **Fake News Filtering**: 6-layer detection with confidence scoring
-7. **Geographic Scope**: Only Nordic region incidents (54-71°N, 4-31°E) - filters out foreign events covered by Nordic news
+7. **Geographic Scope**: European coverage (35-71°N, -10-31°E) - filters out non-European events (Ukraine/Russia war zones, Middle East, Asia, Americas, Africa)
 
 ---
 
@@ -651,6 +656,27 @@ This will:
 
 ---
 
-**Last Updated**: October 7, 2025
-**Version**: 2.2.0 (DroneWatch 2.0 - AI Verification Layer + Multi-Layer Defense)
+**Last Updated**: October 9, 2025
+**Version**: 2.3.0 (DroneWatch 2.0 - European Coverage Expansion)
 **Repository**: https://github.com/Arnarsson/DroneWatch2.0
+
+---
+
+## Recent Changes - European Coverage (v2.3.0) - October 9, 2025
+
+**What's New**:
+- 🌍 **European Coverage**: Expanded from Nordic-only (54-71°N, 4-31°E) to ALL of Europe (35-71°N, -10-31°E)
+- 🗺️ **Geographic Bounds**: Now includes UK, Ireland, Germany, France, Spain, Italy, Poland, Benelux, Baltics, Mediterranean
+- 🚫 **Smart Filtering**: Blocks non-European incidents (Ukraine/Russia war zones, Middle East, Asia, Americas, Africa)
+- 📊 **Source Coverage**: 45+ RSS feeds now actively processing incidents from 15+ European countries
+
+**Implementation**:
+- Updated `ingestion/utils.py` `is_nordic_incident()` to validate European bounds (35-71°N, -10-31°E)
+- Created `migrations/015_expand_to_european_coverage.sql` - database trigger with European bounds
+- Updated foreign keyword list to exclude ONLY non-European locations (war zones, other continents)
+- Documentation updated to reflect European coverage
+
+**Impact**:
+- Expected incidents: 100-200/month (up from 30-100/month Nordic-only)
+- Coverage: Norwegian, Swedish, Finnish, German, French, UK, Spanish, Italian, Polish, Baltic, Benelux sources all active
+- Previous Nordic sources (Danish police, Twitter, local news) continue working unchanged

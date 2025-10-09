@@ -342,7 +342,8 @@ def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Opti
     """
     Check if incident occurred in European coverage region (not just covered by European news).
 
-    European coverage: Nordic + UK + Germany + France + Spain + Italy + Poland + Benelux + Baltics
+    ✅ EUROPEAN COVERAGE: Nordic + UK + Ireland + Germany + France + Spain + Italy + Poland + Benelux + Baltics
+    📍 GEOGRAPHIC BOUNDS: 35-71°N, -10-31°E (all of Europe)
 
     This prevents ingesting foreign incidents (e.g., Ukrainian/Russian drone attacks, Middle East, Asia)
     that are merely reported by European news sources but didn't occur in the coverage region.
@@ -352,7 +353,7 @@ def is_nordic_incident(title: str, content: str, lat: Optional[float], lon: Opti
     - No coordinates but text doesn't mention non-European locations
 
     Returns False if:
-    - Coordinates outside European region, OR
+    - Coordinates outside European region (e.g., Ukraine, Russia, Middle East), OR
     - Text mentions non-European locations (war zones, Middle East, Asia, Americas, Africa)
     """
     full_text = (title + " " + content).lower()
