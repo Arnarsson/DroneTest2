@@ -296,10 +296,10 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
               onChange={(e) => handleChange('dateRange', e.target.value)}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             >
+              <option value="all">All Time</option>
               <option value="day">Last 24 Hours</option>
               <option value="week">Last 7 Days</option>
               <option value="month">Last 30 Days</option>
-              <option value="all">All Time</option>
             </select>
           </FilterSection>
         </div>
