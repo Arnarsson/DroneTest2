@@ -15,11 +15,6 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle }: FilterPanelProps) {
-  console.log('[FilterPanel] Rendered')
-  console.log('[FilterPanel] incidentCount:', incidentCount)
-  console.log('[FilterPanel] filters:', filters)
-  console.log('[FilterPanel] isOpen:', isOpen)
-
   const [expandedSections, setExpandedSections] = useState({
     evidence: true,
     location: true,
