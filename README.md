@@ -1,9 +1,14 @@
 # 🚁 DroneWatch 2.0 - Real-time Drone Incident Tracking
 
-Live map of verified drone incidents across Europe with evidence-based reporting and multi-source verification.
+Live map of verified drone incidents across **ALL OF EUROPE** with evidence-based reporting and multi-source verification.
 
 **Live Site**: https://dronewatch.cc → https://www.dronemap.cc
 **Repository**: https://github.com/Arnarsson/DroneWatch2.0
+**📚 Full Documentation**: [docs/README.md](docs/README.md)
+
+📍 **Geographic Coverage**: 35-71°N, -10-31°E (Nordic + UK + Ireland + Germany + France + Spain + Italy + Poland + Benelux + Baltics)
+🔗 **Version**: 2.3.0 (European Coverage Expansion)
+📊 **Sources**: 45+ verified RSS feeds from 15+ countries
 
 ---
 
