@@ -129,8 +129,8 @@ export default function Home() {
                 <Map
                   incidents={incidents || []}
                   isLoading={isLoading}
-                  center={[56.0, 10.5]}
-                  zoom={6}
+                  center={[54.5, 15.0]}
+                  zoom={5}
                 />
                 <EvidenceLegend />
               </>
