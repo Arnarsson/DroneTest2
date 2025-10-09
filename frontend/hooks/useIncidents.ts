@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Incident, FilterState } from '@/types'
+import { ENV } from '@/lib/env'
 
-// Use relative API URL - the API is in the same deployment
-// Force relative URL to avoid CORS issues with Vercel preview URLs
-// For local dev without DATABASE_URL, use production API
-const API_URL = process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL
-  ? 'https://www.dronemap.cc/api'
-  : '/api'
+// Use NEXT_PUBLIC_API_URL from environment configuration
+// This ensures frontend points to the correct API endpoint
+const API_URL = ENV.API_URL
 
 async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   console.log('[useIncidents] ========== FETCH START ==========')
