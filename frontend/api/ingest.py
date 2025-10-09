@@ -197,16 +197,21 @@ async def insert_incident(incident_data):
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
-        # Check authorization
-        auth_header = self.headers.get('Authorization', '')
-        expected_token = os.getenv('INGEST_TOKEN', 'test-token-please-change')
+        # Check authorization with security best practices
+        import secrets
+        expected_token = os.getenv('INGEST_TOKEN')
+        if not expected_token:
+            self.send_error(500, "Server configuration error: INGEST_TOKEN not set")
+            return
 
+        auth_header = self.headers.get('Authorization', '')
         if not auth_header.startswith('Bearer '):
             self.send_error(401, "Missing Bearer token")
             return
 
         token = auth_header.replace('Bearer ', '')
-        if token != expected_token:
+        # Use constant-time comparison to prevent timing attacks
+        if not secrets.compare_digest(token, expected_token):
             self.send_error(403, "Invalid token")
             return
 

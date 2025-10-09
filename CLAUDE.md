@@ -592,9 +592,11 @@ npm run dev                           # http://localhost:3000
 
 **Production Values** (from `.env.production`):
 ```bash
-DATABASE_URL="postgresql://postgres.uhwsuaebakkdmdogzrrz:stUPw5co47Yq8uSI@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
-INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
-OPENROUTER_API_KEY="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"
+# ⚠️ SECURITY: Do not expose actual values in documentation
+# Configure these in Vercel dashboard: Settings → Environment Variables
+DATABASE_URL="<CONFIGURED_IN_VERCEL>"
+INGEST_TOKEN="<CONFIGURED_IN_VERCEL>"
+OPENROUTER_API_KEY="<CONFIGURED_IN_VERCEL>"
 OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 ```
 
@@ -602,9 +604,10 @@ OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 
 **Local Development** (`.env.local`):
 ```bash
-DATABASE_URL="postgresql://postgres.uhwsuaebakkdmdogzrrz:stUPw5co47Yq8uSI@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
-INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
-OPENROUTER_API_KEY="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"
+# Copy from .env.example and fill in your values
+DATABASE_URL="<YOUR_SUPABASE_CONNECTION_STRING>"
+INGEST_TOKEN="<YOUR_INGEST_TOKEN>"
+OPENROUTER_API_KEY="<YOUR_OPENROUTER_API_KEY>"
 OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 ```
 
