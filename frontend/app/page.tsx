@@ -44,10 +44,17 @@ export default function Home() {
 
   // Apply client-side date filtering and timeline filtering
   const incidents = useMemo(() => {
+    console.log('[page.tsx] useMemo triggered')
+    console.log('[page.tsx] allIncidents:', allIncidents?.length || 0)
+    console.log('[page.tsx] filters:', filters)
+    console.log('[page.tsx] timelineRange:', timelineRange)
+
     if (!allIncidents) {
+      console.log('[page.tsx] No allIncidents, returning empty array')
       return [];
     }
 
+    console.log('[page.tsx] Starting with', allIncidents.length, 'incidents')
     let filtered = allIncidents;
 
     // Apply date range filter (client-side fallback)
@@ -70,18 +77,22 @@ export default function Home() {
       filtered = filtered.filter(
         (inc: Incident) => new Date(inc.occurred_at) >= since
       );
+      console.log('[page.tsx] After date filter:', filtered.length, 'incidents')
     }
 
     // Apply timeline filtering
     if (timelineRange.start && timelineRange.end) {
+      console.log('[page.tsx] Applying timeline filter')
       filtered = filtered.filter((inc: Incident) =>
         isWithinInterval(new Date(inc.occurred_at), {
           start: timelineRange.start!,
           end: timelineRange.end!,
         })
       );
+      console.log('[page.tsx] After timeline filter:', filtered.length, 'incidents')
     }
 
+    console.log('[page.tsx] Returning', filtered.length, 'incidents')
     return filtered;
   }, [allIncidents, timelineRange, filters.dateRange]);
 
@@ -89,9 +100,31 @@ export default function Home() {
     setFilters(newFilters);
   }, []);
 
+  // DEBUG PANEL - Remove after fixing
+  const debugInfo = {
+    allIncidentsCount: allIncidents?.length || 0,
+    filteredIncidentsCount: incidents?.length || 0,
+    isLoading,
+    hasError: !!error,
+    filters: JSON.stringify(filters),
+    timelineActive: !!(timelineRange.start && timelineRange.end)
+  }
+
   return (
     <>
       <Toaster position="top-right" richColors />
+
+      {/* DEBUG PANEL - VISIBLE ON SCREEN */}
+      <div className="fixed top-16 right-4 z-[9999] bg-red-500 text-white p-4 rounded-lg shadow-2xl text-xs font-mono max-w-sm">
+        <div className="font-bold mb-2">🐛 DEBUG INFO</div>
+        <div>API Data: {debugInfo.allIncidentsCount} incidents</div>
+        <div>Filtered: {debugInfo.filteredIncidentsCount} incidents</div>
+        <div>Loading: {debugInfo.isLoading ? 'YES' : 'NO'}</div>
+        <div>Error: {debugInfo.hasError ? 'YES' : 'NO'}</div>
+        <div>Timeline: {debugInfo.timelineActive ? 'ACTIVE' : 'INACTIVE'}</div>
+        <div className="mt-2 text-xs opacity-75">Filters: {debugInfo.filters}</div>
+      </div>
+
       <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors">
         <Header
           incidentCount={incidents?.length || 0}
@@ -129,8 +162,8 @@ export default function Home() {
                 <Map
                   incidents={incidents || []}
                   isLoading={isLoading}
-                  center={[54.5, 15.0]}
-                  zoom={5}
+                  center={[56.0, 10.5]}
+                  zoom={6}
                 />
                 <EvidenceLegend />
               </>

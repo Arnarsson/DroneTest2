@@ -13,6 +13,9 @@ interface HeaderProps {
 }
 
 export function Header({ incidentCount, isLoading, currentView, onViewChange }: HeaderProps) {
+  console.log('[Header] Rendered with incidentCount:', incidentCount)
+  console.log('[Header] isLoading:', isLoading)
+
   const { isOpen, openModal, closeModal } = useAboutModal()
 
   return (

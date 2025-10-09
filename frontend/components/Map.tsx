@@ -27,6 +27,9 @@ interface MapProps {
 }
 
 export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
+  console.log('[Map] Component rendered')
+  console.log('[Map] Received incidents:', incidents.length)
+  console.log('[Map] isLoading:', isLoading)
 
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -214,8 +217,10 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
   }, [resolvedTheme])
 
   useEffect(() => {
+    console.log('[Map] Incidents useEffect triggered with', incidents.length, 'incidents')
 
     if (!clusterRef.current) {
+      console.log('[Map] No clusterRef, skipping marker creation')
       return
     }
 
@@ -273,6 +278,12 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       ;(marker as any).incidentData = incident
 
       // Create popup content
+      // DEBUG: Log incident data to verify sources
+      if (incident.sources && incident.sources.length > 0) {
+        console.log(`[Map] Incident "${incident.title.substring(0, 50)}" has ${incident.sources.length} sources`)
+      } else {
+        console.warn(`[Map] Incident "${incident.title.substring(0, 50)}" has NO sources!`, incident)
+      }
       const popupContent = createPopupContent(incident, isDark)
       marker.bindPopup(popupContent, {
         maxWidth: 350,
@@ -282,6 +293,9 @@ export default function Map({ incidents, isLoading, center, zoom }: MapProps) {
       clusterRef.current!.addLayer(marker)
     })
 
+    console.log('[Map] Added', facilityGroups, 'facility groups')
+    console.log('[Map] Added', singleIncidents.length, 'single incident markers')
+    console.log('[Map] Total markers created:', Object.keys(facilityGroups).length + singleIncidents.length)
   }, [incidents, resolvedTheme])
 
   return (
