@@ -19,7 +19,7 @@ const nextConfig = {
 module.exports = withSentryConfig(nextConfig, {
   // Suppresses source map uploading logs during build
   silent: true,
-  org: "sentry",
+  org: "svc-cc",
   project: "dronewatch",
   // Auth token is not required for local development
   // authToken: process.env.SENTRY_AUTH_TOKEN,
