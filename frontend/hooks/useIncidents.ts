@@ -1,14 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Incident, FilterState } from '@/types'
 import { ENV } from '@/lib/env'
+import * as Sentry from '@sentry/nextjs'
 
 // Use NEXT_PUBLIC_API_URL from environment configuration
 // This ensures frontend points to the correct API endpoint
 const API_URL = ENV.API_URL
 
 async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
-  console.log('[useIncidents] ========== FETCH START ==========')
-  console.log('[useIncidents] Timestamp:', new Date().toISOString())
+  return Sentry.startSpan(
+    {
+      op: "http.client",
+      name: "GET /api/incidents",
+    },
+    async (span) => {
+      console.log('[useIncidents] ========== FETCH START ==========')
+      console.log('[useIncidents] Timestamp:', new Date().toISOString())
+
+      // Add span attributes
+      span.setAttribute("api_url", API_URL)
+      span.setAttribute("filters", JSON.stringify(filters))
 
   const params = new URLSearchParams({
     min_evidence: filters.minEvidence.toString(),
@@ -44,38 +55,54 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
   console.log('[useIncidents] API_URL base:', API_URL)
   console.log('[useIncidents] Filters:', JSON.stringify(filters))
 
-  try {
-    console.log('[useIncidents] Starting fetch...')
-    const response = await fetch(url)
-    console.log('[useIncidents] Fetch complete!')
-    console.log('[useIncidents] Response status:', response.status, response.statusText)
-    console.log('[useIncidents] Response headers:', Object.fromEntries(response.headers.entries()))
+      try {
+        console.log('[useIncidents] Starting fetch...')
+        const response = await fetch(url)
+        console.log('[useIncidents] Fetch complete!')
+        console.log('[useIncidents] Response status:', response.status, response.statusText)
+        console.log('[useIncidents] Response headers:', Object.fromEntries(response.headers.entries()))
 
-    if (!response.ok) {
-      console.error('[useIncidents] API error:', response.status, response.statusText)
-      throw new Error(`API error: ${response.status}`)
+        span.setAttribute("http.status_code", response.status)
+
+        if (!response.ok) {
+          console.error('[useIncidents] API error:', response.status, response.statusText)
+          Sentry.captureException(new Error(`API error: ${response.status}`))
+          throw new Error(`API error: ${response.status}`)
+        }
+
+        console.log('[useIncidents] Parsing JSON...')
+        const data = await response.json()
+        console.log('[useIncidents] JSON parsed successfully!')
+        console.log('[useIncidents] Received incidents:', data.length)
+        console.log('[useIncidents] Sample incident:', data[0])
+        console.log('[useIncidents] ========== FETCH SUCCESS ==========')
+
+        span.setAttribute("incident_count", data.length)
+
+        // CRITICAL DEBUG: Log what we're actually returning
+        if (data.length === 0) {
+          console.error('[useIncidents] WARNING: API returned empty array!')
+          Sentry.captureMessage('API returned empty array', {
+            level: 'warning',
+            extra: { url, filters }
+          })
+        }
+
+        return data
+      } catch (error) {
+        console.error('[useIncidents] ========== FETCH ERROR ==========')
+        console.error('[useIncidents] Error:', error)
+        console.error('[useIncidents] Error type:', typeof error)
+        console.error('[useIncidents] Error details:', JSON.stringify(error, null, 2))
+
+        Sentry.captureException(error, {
+          extra: { url, filters, api_url: API_URL }
+        })
+
+        throw error
+      }
     }
-
-    console.log('[useIncidents] Parsing JSON...')
-    const data = await response.json()
-    console.log('[useIncidents] JSON parsed successfully!')
-    console.log('[useIncidents] Received incidents:', data.length)
-    console.log('[useIncidents] Sample incident:', data[0])
-    console.log('[useIncidents] ========== FETCH SUCCESS ==========')
-
-    // CRITICAL DEBUG: Log what we're actually returning
-    if (data.length === 0) {
-      console.error('[useIncidents] WARNING: API returned empty array!')
-    }
-
-    return data
-  } catch (error) {
-    console.error('[useIncidents] ========== FETCH ERROR ==========')
-    console.error('[useIncidents] Error:', error)
-    console.error('[useIncidents] Error type:', typeof error)
-    console.error('[useIncidents] Error details:', JSON.stringify(error, null, 2))
-    throw error
-  }
+  )
 }
 
 export function useIncidents(filters: FilterState) {

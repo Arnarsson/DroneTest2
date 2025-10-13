@@ -8,7 +8,7 @@
 
 **Problem**: Frontend showed "0 incidents" despite production API working correctly
 
-**Root Cause**: The production build was not properly using the `NEXT_PUBLIC_API_URL` environment variable from Vercel dashboard, causing API requests to go to the wrong endpoint.
+**Root Cause**: A Next.js mock API route at `frontend/app/api/incidents/route.ts` was overriding the real Python serverless function at `frontend/api/incidents.py`. In Vercel, Next.js API routes take precedence over Python serverless functions at the same path, causing the frontend to fetch mock data instead of real incidents from Supabase.
 
 ---
 
@@ -52,38 +52,52 @@
 
 ### The Problem
 
-The frontend was making requests to:
+The frontend was calling:
 ```
-❌ Wrong endpoint (possible): https://www.dronemap.cc/incidents
+✅ Correct URL: https://www.dronemap.cc/api/incidents
+```
+
+But it was hitting:
+```
+❌ Wrong handler: Next.js mock API route (frontend/app/api/incidents/route.ts)
 ```
 
 Instead of:
 ```
-✅ Correct endpoint: https://www.dronemap.cc/api/incidents
+✅ Correct handler: Python serverless function (frontend/api/incidents.py)
 ```
 
 ### Why This Happened
 
-1. **Vercel Environment Variable**: Correctly set as `https://www.dronemap.cc/api` ✅
-2. **Build Process**: Previous build may not have properly embedded the env var
-3. **Next.js Requirement**: `NEXT_PUBLIC_*` variables are embedded at **build time**
-4. **Result**: Frontend bundle had wrong or missing API URL
+1. **Vercel Route Priority**: Next.js API routes (`app/api/*`) take precedence over Python serverless functions (`api/*`)
+2. **Mock API Presence**: The mock API route with 7 hardcoded incidents was never removed from production
+3. **Path Collision**: Both handlers registered for `/api/incidents` but Next.js won
+4. **Result**: Frontend fetched mock data (which appeared to work locally) instead of real Supabase data
 
 ### The Evidence
 
-**Code Analysis** (`useIncidents.ts` line 42):
+**Mock API Route** (`frontend/app/api/incidents/route.ts`):
 ```typescript
-const url = `${API_URL}/incidents?${params}`
+const mockIncidents = [
+  { id: '1', title: 'Drone Incident at Copenhagen Airport', ... },
+  // 6 more hardcoded incidents
+];
+export async function GET(request: NextRequest) {
+  return NextResponse.json(filteredIncidents, { headers });
+}
 ```
 
-**Expected URL Construction**:
-- `API_URL` = `https://www.dronemap.cc/api` (from Vercel env var)
-- Final URL = `https://www.dronemap.cc/api/incidents` ✅
+**Real Python Function** (`frontend/api/incidents.py`):
+```python
+# This was being BYPASSED by the Next.js route
+conn = await asyncpg.connect(DATABASE_URL)
+query = "SELECT ... FROM incidents ..."  # Real Supabase query
+```
 
 **Actual Behavior**:
-- Frontend showed 0 incidents
-- Debug panel showed: "API Data: 0 incidents, Loading: YES"
-- No error messages (meaning fetch succeeded but returned empty data)
+- API URL was correct: `https://www.dronemap.cc/api/incidents`
+- But Vercel routed it to Next.js mock handler, not Python function
+- Frontend received mock data, not real database incidents
 
 ---
 
@@ -91,22 +105,25 @@ const url = `${API_URL}/incidents?${params}`
 
 ### Fix Steps
 
-1. **Local Environment File Updated**:
-   - File: `frontend/.env.production`
-   - Changed: `NEXT_PUBLIC_API_URL=https://www.dronemap.cc`
-   - To: `NEXT_PUBLIC_API_URL=https://www.dronemap.cc/api`
-   - Note: Git-ignored (won't be committed), but good for local testing
-
-2. **Triggered Fresh Deployment**:
+1. **Deleted Mock API Route**:
+   - File: `frontend/app/api/incidents/route.ts`
+   - Action: Removed entire file with mock data
+   - Reason: Allowed Python serverless function to handle `/api/incidents`
    ```bash
-   git commit --allow-empty -m "fix: trigger redeploy..."
+   rm frontend/app/api/incidents/route.ts
+   ```
+
+2. **Committed and Pushed Fix**:
+   ```bash
+   git add -A
+   git commit -m "fix: remove Next.js mock API route that was overriding Python serverless function"
    git push origin main
    ```
 
 3. **Vercel Auto-Deploy**:
    - Vercel detects push to `main` branch
-   - Builds frontend with env var from Vercel dashboard
-   - Deploys to production
+   - Builds frontend without conflicting Next.js API route
+   - Python serverless function now handles `/api/incidents`
    - **ETA**: 5-7 minutes
 
 ### Expected Result
@@ -192,14 +209,15 @@ curl -s https://www.dronemap.cc/api/incidents | jq 'length'
 5. ✅ Python serverless functions: All working correctly
 
 ### What Was Broken
-1. ❌ Frontend build: Not using correct API URL from env var
-2. ❌ Result: 0 incidents displayed despite data availability
+1. ❌ Mock API route: Next.js handler overriding Python serverless function
+2. ❌ Route priority: Vercel gave precedence to Next.js over Python
+3. ❌ Result: Frontend fetched 7 mock incidents instead of 7 real Supabase incidents
 
 ### The Fix
-1. ✅ Triggered fresh deployment to rebuild frontend
-2. ✅ New build will properly embed Vercel env var
-3. ✅ Frontend will fetch from correct URL
-4. ✅ All 7 incidents will display correctly
+1. ✅ Deleted conflicting Next.js API route completely
+2. ✅ Python serverless function now handles `/api/incidents` without interference
+3. ✅ Frontend will fetch from Python function → Supabase database
+4. ✅ All 7 REAL incidents will display correctly
 
 ---
 

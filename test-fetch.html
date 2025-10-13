@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Fetch Test</title>
+</head>
+<body>
+    <h1>DroneWatch API Test</h1>
+    <button onclick="testFetch()">Test API Fetch</button>
+    <div id="results"></div>
+
+    <script>
+        async function testFetch() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing...</p>';
+
+            try {
+                const url = 'https://www.dronemap.cc/api/incidents';
+                console.log('Fetching from:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                const data = await response.json();
+                console.log('Data received:', data);
+
+                results.innerHTML = `
+                    <h2>✅ SUCCESS</h2>
+                    <p>Status: ${response.status}</p>
+                    <p>Incidents: ${data.length}</p>
+                    <pre>${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                results.innerHTML = `
+                    <h2>❌ ERROR</h2>
+                    <p>${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+
+        // Auto-run
+        window.addEventListener('load', testFetch);
+    </script>
+</body>
+</html>
