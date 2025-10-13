@@ -8,7 +8,7 @@ import os
 from datetime import datetime, timezone
 from typing import Optional, Tuple, Dict
 import dateutil.parser
-from config import DANISH_AIRPORTS, DANISH_HARBORS, CRITICAL_KEYWORDS
+from config import DANISH_AIRPORTS, DANISH_HARBORS, CRITICAL_KEYWORDS, DRONE_KEYWORDS
 
 logger = logging.getLogger(__name__)
 
@@ -412,11 +412,17 @@ def is_drone_incident(title: str, content: str) -> bool:
     """
     full_text = (title + " " + content).lower()
 
-    # Must contain drone-related keywords
-    # Use "drone" OR "dron" (but NOT "dronning" which is queen in Danish)
-    has_drone = (
-        ("drone" in full_text or "dron" in full_text) and "dronning" not in full_text
-    ) or any(word in full_text for word in ["uav", "uas", "luftfartøj", "ubemannet luftfartøy"])
+    # Must contain drone-related keywords from config.py
+    # This includes Danish, Norwegian, Swedish, and Finnish terms
+    has_drone = False
+
+    # Check all configured drone keywords
+    for keyword in DRONE_KEYWORDS:
+        if keyword.lower() in full_text:
+            # Exclude false positives (e.g., "dronning" = queen in Danish)
+            if "dronning" not in full_text or keyword != "dron":
+                has_drone = True
+                break
 
     # Must contain incident indicators (not just mentions of drones)
     # Require ACTUAL observation, action, or response to an incident
