@@ -14,74 +14,55 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
       name: "GET /api/incidents",
     },
     async (span) => {
-      console.log('[useIncidents] ========== FETCH START ==========')
-      console.log('[useIncidents] Timestamp:', new Date().toISOString())
-
-      // Add span attributes
+      // Add span attributes for Sentry monitoring
       span.setAttribute("api_url", API_URL)
       span.setAttribute("filters", JSON.stringify(filters))
 
-  const params = new URLSearchParams({
-    min_evidence: filters.minEvidence.toString(),
-    country: filters.country,
-    status: filters.status,
-    limit: '500'
-  })
+      const params = new URLSearchParams({
+        min_evidence: filters.minEvidence.toString(),
+        country: filters.country,
+        status: filters.status,
+        limit: '500'
+      })
 
-  if (filters.assetType) {
-    params.append('asset_type', filters.assetType)
-  }
+      if (filters.assetType) {
+        params.append('asset_type', filters.assetType)
+      }
 
-  // Add date range
-  const now = new Date()
-  if (filters.dateRange !== 'all') {
-    const since = new Date()
-    switch (filters.dateRange) {
-      case 'day':
-        since.setDate(now.getDate() - 1)
-        break
-      case 'week':
-        since.setDate(now.getDate() - 7)
-        break
-      case 'month':
-        since.setMonth(now.getMonth() - 1)
-        break
-    }
-    params.append('since', since.toISOString())
-  }
+      // Add date range
+      const now = new Date()
+      if (filters.dateRange !== 'all') {
+        const since = new Date()
+        switch (filters.dateRange) {
+          case 'day':
+            since.setDate(now.getDate() - 1)
+            break
+          case 'week':
+            since.setDate(now.getDate() - 7)
+            break
+          case 'month':
+            since.setMonth(now.getMonth() - 1)
+            break
+        }
+        params.append('since', since.toISOString())
+      }
 
-  const url = `${API_URL}/incidents?${params}`
-  console.log('[useIncidents] Full URL:', url)
-  console.log('[useIncidents] API_URL base:', API_URL)
-  console.log('[useIncidents] Filters:', JSON.stringify(filters))
+      const url = `${API_URL}/incidents?${params}`
 
       try {
-        console.log('[useIncidents] Starting fetch...')
         const response = await fetch(url)
-        console.log('[useIncidents] Fetch complete!')
-        console.log('[useIncidents] Response status:', response.status, response.statusText)
-        console.log('[useIncidents] Response headers:', Object.fromEntries(response.headers.entries()))
-
         span.setAttribute("http.status_code", response.status)
 
         if (!response.ok) {
-          console.error('[useIncidents] API error:', response.status, response.statusText)
           Sentry.captureException(new Error(`API error: ${response.status}`))
           throw new Error(`API error: ${response.status}`)
         }
 
-        console.log('[useIncidents] Parsing JSON...')
         const data = await response.json()
-        console.log('[useIncidents] JSON parsed successfully!')
-        console.log('[useIncidents] Received incidents:', data.length)
-        console.log('[useIncidents] Sample incident:', data[0])
-        console.log('[useIncidents] ========== FETCH SUCCESS ==========')
-
         span.setAttribute("incident_count", data.length)
 
-        // CRITICAL DEBUG: Log what we're actually returning
+        // Monitor for empty responses
         if (data.length === 0) {
-          console.error('[useIncidents] WARNING: API returned empty array!')
           Sentry.captureMessage('API returned empty array', {
             level: 'warning',
             extra: { url, filters }
@@ -90,15 +71,9 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
 
         return data
       } catch (error) {
-        console.error('[useIncidents] ========== FETCH ERROR ==========')
-        console.error('[useIncidents] Error:', error)
-        console.error('[useIncidents] Error type:', typeof error)
-        console.error('[useIncidents] Error details:', JSON.stringify(error, null, 2))
-
         Sentry.captureException(error, {
           extra: { url, filters, api_url: API_URL }
         })
-
         throw error
       }
     }
