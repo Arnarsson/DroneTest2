@@ -14,20 +14,12 @@ class handler(BaseHTTPRequestHandler):
         self.handle_get()
 
     def do_OPTIONS(self):
-        # Handle CORS preflight
-        origin = self.headers.get('Origin', '')
+        # Handle CORS preflight - allow all origins for public API
         self.send_response(200)
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronemap.cc",
-            "https://www.dronemap.cc",
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
-            self.send_header('Access-Control-Allow-Origin', origin)
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', '*')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', '*')
+        self.send_header('Access-Control-Max-Age', '86400')
         self.end_headers()
 
     def handle_get(self):
@@ -78,7 +70,7 @@ class handler(BaseHTTPRequestHandler):
             incidents = []
             status_code = 500
 
-        # Handle CORS
+        # Handle CORS - allow all origins for public API
         origin = self.headers.get('Origin', '')
 
         # Send response
@@ -86,17 +78,10 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json')
         self.send_header('Cache-Control', 'public, max-age=15')
 
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronemap.cc",
-            "https://www.dronemap.cc",
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
-            self.send_header('Access-Control-Allow-Origin', origin)
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', '*')
+        # CORS headers - allow all origins since this is a public API
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', '*')
 
         self.end_headers()
         self.wfile.write(json.dumps(incidents).encode())
