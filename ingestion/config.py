@@ -397,6 +397,46 @@ SOURCES = {
         "country": "SE",
         "note": "Norrbotten region - far northern Sweden"
     },
+
+    # === TIER 4: FINNISH POLICE (Poliisi RSS) - VERIFIED SOURCES ONLY ===
+    # Verified: 2025-10-13 via curl testing
+    # Conservative approach - adding national feed + key regional feeds covering airports
+
+    "poliisi_national": {
+        "name": "Poliisi Finland (National)",
+        "rss": "https://poliisi.fi/en/newsroom/-/asset_publisher/ZrUg5zQFOAqI/rss",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "lennokki", "lentokenttä", "puolustusvoimat"],
+        "verified_date": "2025-10-13",
+        "working": True,  # ✅ VERIFIED via curl
+        "country": "FI",
+        "note": "National police news - all of Finland"
+    },
+
+    "poliisi_helsinki": {
+        "name": "Poliisi Helsinki",
+        "rss": "https://poliisi.fi/en/helsinki-police-department/-/asset_publisher/ZtAEeHB39Lxr/rss",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "lennokki", "lentokenttä", "vantaa", "helsinki"],
+        "verified_date": "2025-10-13",
+        "working": True,  # ✅ VERIFIED via curl
+        "country": "FI",
+        "note": "Helsinki region - covers Helsinki-Vantaa Airport"
+    },
+
+    "poliisi_southwestern": {
+        "name": "Poliisi Southwestern Finland",
+        "rss": "https://poliisi.fi/en/southwestern-finland-police-department/-/asset_publisher/ZtAEeHB39Lxr/rss",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "lennokki", "lentokenttä", "turku"],
+        "verified_date": "2025-10-13",
+        "working": True,  # ✅ VERIFIED via curl
+        "country": "FI",
+        "note": "Southwestern Finland - covers Turku Airport"
+    },
 }
 
 # ============================================================================
