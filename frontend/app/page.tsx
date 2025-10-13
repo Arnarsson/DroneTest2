@@ -23,14 +23,6 @@ const Map = dynamic(() => import("@/components/Map"), {
 });
 
 export default function Home() {
-  // Trigger Sentry test error on mount (REMOVE AFTER TESTING)
-  if (typeof window !== 'undefined') {
-    setTimeout(() => {
-      // @ts-ignore - intentional error for Sentry testing
-      myUndefinedFunction();
-    }, 2000);
-  }
-
   const [view, setView] = useState<"map" | "list" | "analytics">("map");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [timelineRange, setTimelineRange] = useState<{
