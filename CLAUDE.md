@@ -918,3 +918,44 @@ const RELEASE = process.env.SENTRY_RELEASE ||
 - `SENTRY_AUTH_TOKEN` - For source map uploads (not set, not required for error capture)
 - `SENTRY_RELEASE` - Override default release name
 - `NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA` - Auto-set by Vercel for release tracking
+
+### Current Debugging Status - October 13, 2025
+
+**Issue**: Frontend shows "0 incidents" and "Loading: YES" indefinitely
+
+**What's Working**:
+- ✅ API endpoint verified functional - returns 7 incidents correctly
+- ✅ Environment variable NEXT_PUBLIC_API_URL set correctly to `https://www.dronemap.cc/api`
+- ✅ Sentry integration complete and deployed
+- ✅ Latest build deployed successfully (18 minutes ago)
+- ✅ Database has 7 unique incidents (verified with direct API test)
+
+**What's Not Working**:
+- ❌ Frontend React Query not receiving/processing data
+- ❌ useIncidents hook appears stuck in loading state
+- ❌ No errors thrown or captured yet
+
+**Next Debugging Steps**:
+1. Check Sentry dashboard for console logs showing API URL construction
+2. Look for Sentry Performance traces of `GET /api/incidents`
+3. Investigate potential issues:
+   - React Query cache stuck with stale data
+   - Browser caching old JavaScript bundle
+   - CORS issue preventing data from reaching component
+   - React hydration mismatch
+   - Service Worker caching
+
+**Sentry Investigation Guide**:
+- **Performance Tab**: Search for `GET /api/incidents` transactions
+  - Check span attributes: `api_url`, `incident_count`, `http.status_code`
+  - Verify if fetch is completing or timing out
+- **Issues Tab**: Filter by `level:warning`
+  - Look for "API returned empty array" messages
+- **Console Logs**: Search for `[useIncidents]`
+  - See exact URL being constructed: `https://www.dronemap.cc/api/incidents?...`
+  - Check response data and parsing
+
+**Files to Check**:
+- `frontend/hooks/useIncidents.ts` - Already instrumented with Sentry spans
+- `frontend/lib/env.ts` - API URL configuration (verified correct)
+- `frontend/app/page.tsx` - Data consumption and debug panel
