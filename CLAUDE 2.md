@@ -259,108 +259,25 @@ CREATE TRIGGER update_evidence_score_trigger ...
 
 **Asset Types**: airport, military, harbor, powerplant, bridge, other
 
-### 8. Duplicate Prevention System (October 2025)
-
-**4-Layer Protection** - Prevents duplicate incidents from appearing in the database and on the map.
-
-#### Layer 1: Database Constraints (PostgreSQL)
-**File**: `migrations/016_prevent_duplicate_incidents.sql`
-- Prevents duplicate incident storage at database level
-- Unique constraint on `content_hash` column (combination of date, location, title, narrative)
-- Works even if scraper logic fails
-- **Status**: ✅ Active (executed October 9, 2025)
-- **Result**: Removed 2 duplicate incidents from database (9 → 7 incidents)
-
-```sql
--- Unique constraint prevents duplicates
-ALTER TABLE incidents ADD CONSTRAINT unique_content_hash UNIQUE (content_hash);
-
--- Automatic hash generation on insert
-UPDATE incidents SET content_hash = MD5(
-    CONCAT(
-        COALESCE(incident_date::text, ''),
-        COALESCE(ST_X(location::geometry)::text, ''),
-        COALESCE(ST_Y(location::geometry)::text, ''),
-        COALESCE(LOWER(title), ''),
-        COALESCE(LOWER(narrative), '')
-    )
-) WHERE content_hash IS NULL;
-```
-
-#### Layer 2: API Source Checking
-**File**: `frontend/api/ingest.py`
-- Checks if source URL already exists before processing incident
-- Prevents race conditions from parallel scraper runs
-- Returns early if duplicate source detected
-- **Status**: ✅ Active (implemented October 9, 2025)
-
-```python
-# Check if this source URL already exists
-cursor.execute("SELECT COUNT(*) FROM incident_sources WHERE source_url = %s", (source_url,))
-if cursor.fetchone()[0] > 0:
-    return {"status": "duplicate", "message": "Source already exists"}
-```
-
-#### Layer 3: Geographic Consolidation
-**File**: `ingestion/consolidator.py`
-- Consolidates incidents with same location + time window
-- Merges multiple sources for same incident
-- Prevents map clutter from duplicate reports
-- **Status**: ✅ Active (v2.3.0)
-
-```python
-# Deduplication strategy:
-# - Location: Rounded to 0.01° (~1.1km)
-# - Time: Grouped into 6-hour windows
-# - Merges sources, upgrades evidence scores
-```
-
-#### Layer 4: Scraper Hash Deduplication
-**File**: `ingestion/db_cache.py`
-- Hash-based caching of processed incidents
-- Prevents re-processing of same content
-- Session-level duplicate detection
-- **Status**: ✅ Active
-
-**Testing**:
-```bash
-cd ingestion
-
-# Test consolidation (Layer 3)
-python3 test_consolidator.py
-
-# Test geographic filtering
-python3 test_geographic_filter.py
-
-# Integration test
-python3 ingest.py --test
-```
-
-**Current Database State** (October 9, 2025):
-- **7 incidents** total (down from 9)
-- 2 duplicates removed by migration 016
-- All incidents have unique content hashes
-- No duplicate source URLs in incident_sources table
-
-### 9. Multi-Layer Defense System (v2.2.0)
+### 8. Multi-Layer Defense System (v2.2.0)
 
 **5-Layer Architecture** - Prevents foreign incidents, policy announcements, and defense deployments from appearing on the map.
 
 #### Layer 1: Database Trigger (PostgreSQL)
-**Files**: `migrations/014_geographic_validation_trigger.sql` (deprecated), `migrations/015_expand_to_european_coverage.sql` (active)
+**File**: `migrations/014_geographic_validation_trigger.sql`
 - Validates EVERY incident BEFORE insertion at database level
-- Checks coordinates (35-71°N, -10-31°E for European region)
-- Validates title AND narrative for NON-European keywords (Ukraine, Russia, Middle East, Asia, Americas, Africa)
+- Checks coordinates (54-71°N, 4-31°E for Nordic region)
+- Validates title AND narrative for foreign keywords
 - Works even if scrapers use old code
-- **Status**: ✅ Active (European coverage enabled)
+- **Status**: ✅ Active
 
 #### Layer 2: Python Filters
 **File**: `ingestion/utils.py`
-- `is_nordic_incident()` - **European** scope validation (function name legacy, but validates European bounds 35-71°N, -10-31°E)
+- `is_nordic_incident()` - Geographic scope validation
 - `is_drone_incident()` - Incident type validation
-- Keyword-based filtering for policy, defense, and NON-European incidents
+- Keyword-based filtering for policy, defense, and international incidents
 - Enhanced with policy/defense exclusion patterns
-- **Status**: ✅ Active (European coverage enabled)
+- **Status**: ✅ Active
 
 #### Layer 3: AI Verification (NEW v2.2.0)
 **Files**: `ingestion/openai_client.py`, `ingestion/ingest.py`
@@ -417,35 +334,6 @@ python3 cleanup_foreign_incidents.py
 ---
 
 ## Recent Changes & Build Fixes (October 2025)
-
-### Duplicate Prevention System - October 9, 2025
-**Migration**: `016_prevent_duplicate_incidents.sql`
-
-**What's New**:
-- Database-level duplicate prevention with unique content hash constraint
-- API-level source URL checking to prevent race conditions
-- 4-layer protection architecture (database, API, consolidation, scraper)
-- Automatic cleanup of existing duplicates
-
-**Implementation**:
-- Added `content_hash` column with unique constraint to `incidents` table
-- Enhanced `frontend/api/ingest.py` with source URL duplicate checking
-- Leveraged existing consolidation and scraper deduplication layers
-- Migration automatically removed 2 duplicate incidents
-
-**Test Results**:
-```
-✅ Migration executed successfully
-✅ 2 duplicate incidents removed (9 → 7 incidents)
-✅ Unique constraint active on content_hash
-✅ All 7 remaining incidents have unique hashes
-✅ API source checking prevents new duplicates
-```
-
-**Database State**:
-- Total incidents: 7 (verified unique)
-- Duplicates removed: 2 (Kastrup duplicates from October 2-3)
-- Source URLs: All unique in incident_sources table
 
 ### AI Verification Layer (v2.2.0) - October 6, 2025
 **Commit**: `6f863c0`
@@ -595,18 +483,6 @@ git push origin main    # Main repository → triggers Vercel deploy
 
 **Fixed in:** October 2025 - `is_nordic_incident()` now checks text before coordinates + added adjective forms ("russisk", "ukrainsk", "tysk")
 
-### 8. Duplicate Prevention (NEW October 2025)
-❌ Same incident submitted multiple times → Database allows duplicates
-✅ Content hash + source URL checking → Automatic duplicate prevention
-
-**Why?** Multiple scraper runs or race conditions can create duplicate incidents. The 4-layer system prevents this:
-1. Database constraint on content_hash (location + date + title + narrative)
-2. API checks source_url before processing
-3. Geographic consolidation merges similar incidents
-4. Scraper hash cache prevents re-processing
-
-**Result**: Database cleaned from 9 → 7 incidents, all verified unique
-
 ---
 
 ## Data Quality Principles
@@ -617,8 +493,7 @@ git push origin main    # Main repository → triggers Vercel deploy
 4. **Quality > Quantity**: Fewer verified incidents better than many unverified
 5. **Multi-Source Verification**: Consolidate sources, upgrade evidence scores
 6. **Fake News Filtering**: 6-layer detection with confidence scoring
-7. **Geographic Scope**: European coverage (35-71°N, -10-31°E) - filters out non-European events (Ukraine/Russia war zones, Middle East, Asia, Americas, Africa)
-8. **Duplicate Prevention**: 4-layer protection prevents duplicate incidents (database constraints, API checking, consolidation, scraper hashing)
+7. **Geographic Scope**: Only Nordic region incidents (54-71°N, 4-31°E) - filters out foreign events covered by Nordic news
 
 ---
 
@@ -700,9 +575,7 @@ npm run dev                           # http://localhost:3000
 **Database**:
 - `migrations/011_source_verification.sql` - Multi-source schema (PENDING execution)
 - `migrations/012_flight_correlation.sql` - OpenSky integration (PENDING execution)
-- `migrations/016_prevent_duplicate_incidents.sql` - Duplicate prevention (EXECUTED October 9, 2025)
 - `frontend/api/db.py` - PostGIS query builders
-- `frontend/api/ingest.py` - API ingestion with source URL duplicate checking
 
 **Testing**:
 - `ingestion/test_consolidator.py` - Multi-source consolidation tests
@@ -783,27 +656,6 @@ This will:
 
 ---
 
-**Last Updated**: October 9, 2025
-**Version**: 2.3.0 (DroneWatch 2.0 - European Coverage Expansion)
+**Last Updated**: October 7, 2025
+**Version**: 2.2.0 (DroneWatch 2.0 - AI Verification Layer + Multi-Layer Defense)
 **Repository**: https://github.com/Arnarsson/DroneWatch2.0
-
----
-
-## Recent Changes - European Coverage (v2.3.0) - October 9, 2025
-
-**What's New**:
-- 🌍 **European Coverage**: Expanded from Nordic-only (54-71°N, 4-31°E) to ALL of Europe (35-71°N, -10-31°E)
-- 🗺️ **Geographic Bounds**: Now includes UK, Ireland, Germany, France, Spain, Italy, Poland, Benelux, Baltics, Mediterranean
-- 🚫 **Smart Filtering**: Blocks non-European incidents (Ukraine/Russia war zones, Middle East, Asia, Americas, Africa)
-- 📊 **Source Coverage**: 45+ RSS feeds now actively processing incidents from 15+ European countries
-
-**Implementation**:
-- Updated `ingestion/utils.py` `is_nordic_incident()` to validate European bounds (35-71°N, -10-31°E)
-- Created `migrations/015_expand_to_european_coverage.sql` - database trigger with European bounds
-- Updated foreign keyword list to exclude ONLY non-European locations (war zones, other continents)
-- Documentation updated to reflect European coverage
-
-**Impact**:
-- Expected incidents: 100-200/month (up from 30-100/month Nordic-only)
-- Coverage: Norwegian, Swedish, Finnish, German, French, UK, Spanish, Italian, Polish, Baltic, Benelux sources all active
-- Previous Nordic sources (Danish police, Twitter, local news) continue working unchanged
