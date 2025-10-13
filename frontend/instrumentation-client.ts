@@ -15,13 +15,6 @@ Sentry.init({
   // Adjust this value in production
   tracesSampleRate: 1.0,
 
-  // Session tracking for Release Health
-  // Automatically tracks user sessions and crash-free statistics
-  autoSessionTracking: true,
-
-  // Session sample rate (100% for debugging, reduce in production)
-  sessionSampleRate: 1.0,
-
   // Enable debug mode in development
   debug: process.env.NODE_ENV === 'development',
 
@@ -35,13 +28,7 @@ Sentry.init({
     Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
 
     // Browser tracing for performance monitoring
-    Sentry.browserTracingIntegration({
-      tracePropagationTargets: [
-        "localhost",
-        /^https:\/\/.*\.dronemap\.cc/,
-        /^https:\/\/.*\.dronewatch\.cc/,
-      ],
-    }),
+    Sentry.browserTracingIntegration(),
   ],
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
@@ -54,3 +41,6 @@ Sentry.init({
     return event;
   },
 });
+
+// Export router transition hook for navigation instrumentation
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
