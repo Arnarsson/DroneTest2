@@ -50,7 +50,12 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
       const url = `${API_URL}/incidents?${params}`
 
       try {
-        const response = await fetch(url)
+        const response = await fetch(url, {
+          cache: 'no-store', // Disable browser cache for API calls
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+          },
+        })
         span.setAttribute("http.status_code", response.status)
 
         if (!response.ok) {
@@ -86,5 +91,10 @@ export function useIncidents(filters: FilterState) {
     queryFn: () => fetchIncidents(filters),
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 1000 * 60 * 5, // Cache for 5 minutes after unmount
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when network reconnects
   })
 }
