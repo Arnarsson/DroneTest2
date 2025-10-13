@@ -826,6 +826,14 @@ UK_LOCATIONS = {
     "raf northolt": {"lat": 51.5530, "lon": -0.4181, "type": "military", "country": "GB", "icao": "EGWU"},
 }
 
+# Ireland - Major airports
+# Verified: 2025-10-13 via Wikipedia (aviation database source)
+IRISH_LOCATIONS = {
+    "dublin airport": {"lat": 53.4214, "lon": -6.2700, "type": "airport", "country": "IE", "icao": "EIDW"},
+    "cork airport": {"lat": 51.8414, "lon": -8.4911, "type": "airport", "country": "IE", "icao": "EICK"},
+    "shannon airport": {"lat": 52.7019, "lon": -8.9247, "type": "airport", "country": "IE", "icao": "EINN"},
+}
+
 # Netherlands - Airports
 DUTCH_LOCATIONS = {
     "amsterdam schiphol": {"lat": 52.3105, "lon": 4.7683, "type": "airport", "country": "NL", "icao": "EHAM"},
@@ -866,6 +874,13 @@ ESTONIAN_LOCATIONS = {
     "tallinn airport": {"lat": 59.4133, "lon": 24.8328, "type": "airport", "country": "EE", "icao": "EETN"},
 }
 
+# Lithuania - Major airports
+# Verified: 2025-10-13 via Wikipedia (aviation database source)
+LITHUANIAN_LOCATIONS = {
+    "vilnius airport": {"lat": 54.6369, "lon": 25.2878, "type": "airport", "country": "LT", "icao": "EYVI"},
+    "kaunas airport": {"lat": 54.9639, "lon": 24.0847, "type": "airport", "country": "LT", "icao": "EYKA"},
+}
+
 # Norway - Major airports
 NORWEGIAN_LOCATIONS = {
     "oslo airport": {"lat": 60.1939, "lon": 11.1004, "type": "airport", "country": "NO", "icao": "ENGM"},
@@ -900,12 +915,14 @@ EUROPEAN_LOCATIONS = {
     **GERMAN_LOCATIONS,
     **FRENCH_LOCATIONS,
     **UK_LOCATIONS,
+    **IRISH_LOCATIONS,
     **DUTCH_LOCATIONS,
     **BELGIAN_LOCATIONS,
     **SPANISH_LOCATIONS,
     **ITALIAN_LOCATIONS,
     **LATVIAN_LOCATIONS,
     **ESTONIAN_LOCATIONS,
+    **LITHUANIAN_LOCATIONS,
     **NORWEGIAN_LOCATIONS,
     **SWEDISH_LOCATIONS,
     **FINNISH_LOCATIONS,
