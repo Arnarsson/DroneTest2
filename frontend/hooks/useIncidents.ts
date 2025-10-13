@@ -92,7 +92,7 @@ export function useIncidents(filters: FilterState) {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 0, // Always fetch fresh data
-    cacheTime: 1000 * 60 * 5, // Cache for 5 minutes after unmount
+    gcTime: 1000 * 60 * 5, // Garbage collection time - cache for 5 minutes after unmount
     refetchOnMount: true, // Refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
     refetchOnReconnect: true, // Refetch when network reconnects
