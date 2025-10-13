@@ -81,7 +81,7 @@ class PoliceScraper:
 
             logger.debug(f"Processing {len(feed.entries)} entries from {source_key}")
 
-            for entry in feed.entries[:20]:  # Check last 20 entries
+            for entry in feed.entries[:100]:  # Check last 100 entries (captures ~2 weeks of incidents)
                 try:
                     # Check if drone-related
                     title = entry.get('title', '')

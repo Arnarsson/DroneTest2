@@ -24,7 +24,7 @@ function EmbedContent() {
   };
 
   const { data: incidents, isLoading } = useIncidents(filters);
-  const safeIncidents: Incident[] = incidents ?? [];
+  const safeIncidents: Incident[] = incidents || [];
 
   return (
     <div className="w-full h-screen relative">

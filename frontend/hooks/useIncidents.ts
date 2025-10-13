@@ -86,7 +86,7 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
 }
 
 export function useIncidents(filters: FilterState) {
-  return useQuery<Incident[]>({
+  return useQuery<Incident[], Error, Incident[]>({
     queryKey: ['incidents', filters],
     queryFn: () => fetchIncidents(filters),
     retry: 3,
