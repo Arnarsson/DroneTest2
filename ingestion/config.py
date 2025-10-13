@@ -930,19 +930,51 @@ EUROPEAN_LOCATIONS = {
 }
 
 # Keywords that indicate drone incidents
+# Expanded: 2025-10-13 with comprehensive Swedish and Finnish terms
 DRONE_KEYWORDS = [
-    "drone", "dron", "uav", "uas",
-    "unmanned aerial", "ubemannede luftfartøj",
-    "drönare", "lennokki",  # Swedish, Finnish
-    "quadcopter", "multirotor"
+    # English
+    "drone", "dron", "uav", "uas", "unmanned aerial", "quadcopter", "multirotor",
+
+    # Danish/Norwegian
+    "ubemannede luftfartøj", "ubemannet luftfartøy",
+
+    # Swedish
+    "drönare", "drönarflygning", "obemannad luftfarkost", "drönarsystem",
+
+    # Finnish
+    "lennokki", "miehittämätön ilma-alus", "lennokkijärjestelmä",
 ]
 
 # Keywords for critical infrastructure
+# Expanded: 2025-10-13 with comprehensive Swedish and Finnish terms
 CRITICAL_KEYWORDS = [
-    "lufthavn", "airport", "flyveplads", "flygplats", "lentokenttä",
-    "havn", "harbor", "port",
-    "militær", "military", "forsvar", "försvar", "puolustusvoimat",
-    "kraftværk", "power plant",
-    "bro", "bridge",
-    "vindmølle", "wind farm"
+    # Airports (Danish/Norwegian/English)
+    "lufthavn", "airport", "flyveplads",
+
+    # Airports (Swedish)
+    "flygplats", "flygfält", "flyghamn",
+
+    # Airports (Finnish)
+    "lentokenttä", "lentoasema",
+
+    # Harbors (all languages)
+    "havn", "harbor", "port", "hamn", "satama",
+
+    # Military/Defense (Danish/Norwegian/English)
+    "militær", "military", "forsvar", "forsvaret",
+
+    # Military/Defense (Swedish)
+    "militär", "försvar", "försvaret", "militärområde",
+
+    # Military/Defense (Finnish)
+    "sotilasalue", "puolustusvoimat", "puolustus",
+
+    # Power plants (all languages)
+    "kraftværk", "power plant", "kraftverk", "voimalaitos",
+
+    # Bridges (all languages)
+    "bro", "bridge", "silta",
+
+    # Wind farms (all languages)
+    "vindmølle", "wind farm", "vindkraftverk", "tuulivoimala",
 ]
