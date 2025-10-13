@@ -954,3 +954,328 @@ const RELEASE = process.env.SENTRY_RELEASE ||
 2. Browser/CDN caching can mask successful fixes
 3. Sentry instrumentation invaluable for production debugging
 4. Always verify deployment completion before troubleshooting frontend
+
+---
+
+## European Expansion Roadmap (v2.4.0) - October 13, 2025
+
+### Overview
+
+**Goal**: Expand from 7 Danish incidents to comprehensive Nordic + EU coverage with 100-200 incidents/month.
+
+**Current State** (v2.3.0):
+- ✅ Database supports European bounds (35-71°N, -10-31°E)
+- ✅ Geographic validation trigger active
+- ✅ 150+ European locations in database
+- ✅ Multi-layer defense prevents foreign incidents
+- ⚠️ Only Danish sources actively scraping
+
+**Target State** (v2.4.0):
+- 🎯 50-100 new RSS feeds across 15+ countries
+- 🎯 100-200 verified incidents per month
+- 🎯 Multi-language support (Nordic + major EU languages)
+- 🎯 Comprehensive police + media coverage
+
+### Phase 1: Nordic Completion (Week 1)
+
+**Swedish Police RSS** - 21 regional districts
+- Source: Polisen.se regional RSS feeds
+- Trust Weight: 4 (Official police)
+- Keywords: "drönare", "drone", "flygplats", "försvar"
+- Format: `https://polisen.se/[region]/rss/`
+- Expected: 15-25 incidents/month
+
+**Finnish Police & Media**
+- Police: Finnish Police press releases
+- Media: YLE, Helsingin Sanomat, Ilta-Sanomat (already configured)
+- Keywords: "drone", "lennokki", "lentokenttä", "puolustusvoimat"
+- Expected: 5-10 incidents/month
+
+**Norwegian Sources** ✅
+- Already active: 12 Politiloggen RSS feeds
+- Working: 100% (verified October 9, 2025)
+
+**Danish Sources** ✅
+- Twitter RSS: 10 active police feeds via RSS.app
+- Media: DR, TV2 regional stations
+- Working: 100% (verified October 13, 2025)
+
+### Phase 2: Western Europe (Week 2)
+
+**Germany** - Federal Police + Regional + Media
+- Bundespolizei (Federal Police) press releases
+- 16 Länderpolizei (state police) - prioritize airport regions
+- Major media: Der Spiegel, Die Welt, Süddeutsche Zeitung
+- Keywords: "drone", "drohne", "flughafen", "luftraum"
+- Expected: 20-30 incidents/month
+
+**France** - National Police + Aviation + Media
+- Police Nationale press releases
+- Aviation authority (DGAC) NOTAMs
+- Major media: Le Monde, Le Figaro, France24
+- Keywords: "drone", "aéroport", "espace aérien"
+- Expected: 15-25 incidents/month
+
+**United Kingdom** - Police Forces + Media
+- Metropolitan Police + regional forces (43 total)
+- Prioritize: London, Manchester, Birmingham, Edinburgh
+- Major media: BBC News, The Guardian, Sky News
+- Keywords: "drone", "UAV", "airport", "airspace"
+- Expected: 10-20 incidents/month
+
+**Netherlands** - Police + Media
+- Politie.nl press releases
+- Major media: NOS, NU.nl
+- Keywords: "drone", "luchthaven", "luchtruim"
+- Expected: 5-10 incidents/month
+
+**Belgium** - Federal + Regional Police + Media
+- Federal Police + local forces
+- Major media: VRT NWS, RTBF (Dutch + French)
+- Keywords: "drone", "luchthaven"/"aéroport"
+- Expected: 3-5 incidents/month
+
+### Phase 3: Southern & Eastern Europe (Week 3)
+
+**Spain** - National Police + Media
+- Policía Nacional, Guardia Civil
+- Major media: El País, El Mundo
+- Keywords: "dron", "aeropuerto", "espacio aéreo"
+- Expected: 10-15 incidents/month
+
+**Italy** - Carabinieri + Media
+- Carabinieri, Polizia di Stato
+- Major media: La Repubblica, Corriere della Sera
+- Keywords: "drone", "aeroporto", "spazio aereo"
+- Expected: 8-12 incidents/month
+
+**Poland** - Police + Media
+- Policja press releases
+- Major media: Gazeta Wyborcza, Onet
+- Keywords: "dron", "lotnisko"
+- Expected: 5-10 incidents/month
+
+**Baltic States** (Estonia, Latvia, Lithuania)
+- National police forces
+- National broadcasters
+- Keywords: Multilingual (English + local)
+- Expected: 3-5 incidents/month
+
+**Ireland** - Garda + Media
+- An Garda Síochána press releases
+- Major media: RTÉ, Irish Times
+- Keywords: "drone", "airport", "airspace"
+- Expected: 3-5 incidents/month
+
+### RSS Source Management
+
+**Source Configuration** (`ingestion/config.py`):
+```python
+# Example: Swedish police district
+"polisen_stockholm": {
+    "name": "Polisen Stockholm",
+    "rss": "https://polisen.se/stockholm/rss/",
+    "source_type": "police",
+    "trust_weight": 4,
+    "keywords": ["drönare", "drone", "flygplats", "arlanda"],
+    "verified_date": "2025-10-13",
+    "working": True,
+    "country": "SE"
+}
+```
+
+**Trust Weight Guidelines**:
+- **4 (Official)**: Police, military, aviation authorities, NOTAM systems
+- **3 (Verified Media)**: National broadcasters, major newspapers with editorial standards
+- **2 (Credible Media)**: Regional news, credible online media
+- **1 (Social/Unverified)**: Twitter, blogs, unverified sources (filter aggressively)
+
+**Verification Process**:
+1. Test RSS feed accessibility
+2. Verify feed format parseable
+3. Check recent entries exist
+4. Validate keyword relevance
+5. Document verification date
+
+### Multi-Language Support
+
+**Location Extraction** (`ingestion/utils.py`):
+```python
+# Expand LOCATION_KEYWORDS with multi-language support
+LOCATION_KEYWORDS = {
+    "airport": ["airport", "lufthavn", "flygplats", "lentokenttä",
+                "flughafen", "aéroport", "aeropuerto", "aeroporto", "lotnisko"],
+    "military": ["military", "forsvar", "försvar", "puolustusvoimat",
+                "militär", "militaire", "militar", "wojskowy"],
+    # ... additional categories
+}
+```
+
+**Country Detection**:
+- Domain-based: `.se`, `.no`, `.fi`, `.dk`, `.de`, `.fr`, `.uk`, etc.
+- Content-based: Language detection + location keywords
+- Fallback: Use configured `country` field in source config
+
+### Evidence Scoring for International Sources
+
+**No changes needed** - existing 4-tier system applies:
+- **Score 4**: ANY official police/military source (trust_weight=4)
+- **Score 3**: 2+ media sources WITH official quotes
+- **Score 2**: Single credible media source (trust_weight≥2)
+- **Score 1**: Low trust sources
+
+**Multi-Source Consolidation**:
+- Merges incidents from different countries/languages
+- Example: German + French media reporting same border incident
+- Evidence score upgraded based on combined source trust
+
+### Geographic Database (Already Complete ✅)
+
+**Current Coverage** (`ingestion/config.py` lines 706-832):
+- 🇩🇪 Germany: 7 airports + 2 military bases
+- 🇫🇷 France: 6 airports + 2 military bases
+- 🇬🇧 UK: 5 airports + 4 RAF bases
+- 🇳🇱 Netherlands: 3 airports
+- 🇧🇪 Belgium: 2 airports
+- 🇪🇸 Spain: 4 airports
+- 🇮🇹 Italy: 4 airports
+- 🇵🇱 Poland: 4 airports
+- 🇪🇪 Estonia, 🇱🇻 Latvia: 2 airports
+- 🇳🇴 Norway: 4 airports (25 total locations)
+- 🇸🇪 Sweden: 3 airports (29 total locations)
+- 🇫🇮 Finland: 2 airports (19 total locations)
+- 🇩🇰 Denmark: 9 airports + 6 harbors
+
+**Additions Needed**:
+- 🇱🇹 Lithuania: Vilnius Airport, Kaunas Airport
+- 🇮🇪 Ireland: Dublin, Cork, Shannon airports
+- 🇵🇹 Portugal: Lisbon, Porto airports (optional - outside current bounds)
+
+### Testing & Validation
+
+**Source Testing**:
+```bash
+cd ingestion
+
+# Test individual sources
+python3 -c "from config import SOURCES; from scrapers.news_scraper import NewsScraper; s=NewsScraper(); print(s.fetch_news_rss('polisen_stockholm'))"
+
+# Test geographic filtering
+python3 test_geographic_filter.py
+
+# Integration test (dry run)
+python3 ingest.py --test
+```
+
+**Quality Checks**:
+1. Evidence score distribution (target: 40-50% score 4)
+2. Geographic distribution across countries
+3. Duplicate rate (<5%)
+4. False positive rate (<2%)
+
+### Gradual Rollout Strategy
+
+**Week 1** (Phase 1):
+- Enable Swedish police (21 feeds)
+- Enable Finnish sources (3 feeds)
+- Monitor: 2-3 days before next phase
+- Target: 20-35 incidents total
+
+**Week 2** (Phase 2):
+- Enable German sources (15-20 feeds)
+- Enable French sources (10-15 feeds)
+- Enable UK sources (10-15 feeds)
+- Enable Benelux (5-8 feeds)
+- Monitor: 3-4 days before next phase
+- Target: 60-120 incidents total
+
+**Week 3** (Phase 3):
+- Enable Spanish sources (5-8 feeds)
+- Enable Italian sources (5-8 feeds)
+- Enable Polish sources (3-5 feeds)
+- Enable Baltic sources (3-5 feeds)
+- Enable Irish sources (2-3 feeds)
+- Monitor: 1 week before declaring complete
+- Target: 100-200 incidents total
+
+**Rollback Plan**:
+- Any source with >20% false positives: disable immediately
+- Any source causing duplicate clusters: review and adjust
+- Scraper errors: exponential backoff, disable after 5 failures
+
+### Monitoring & Maintenance
+
+**Sentry Alerts**:
+- Scraper failures (immediate)
+- >5 foreign incidents detected (hourly scan)
+- Evidence score anomalies (daily)
+- API rate limit warnings
+
+**Weekly Review**:
+- Source performance (incidents/feed, quality)
+- Evidence score distribution
+- Geographic coverage gaps
+- User feedback on false positives
+
+**Monthly Maintenance**:
+- RSS feed validation (check for broken links)
+- Trust weight adjustments based on quality
+- Add new sources as discovered
+- Remove consistently failing sources
+
+### Expected Outcomes
+
+**Data Volume**:
+- Week 1: 20-35 incidents (Nordic complete)
+- Week 2: 60-120 incidents (+ Western Europe)
+- Week 3: 100-200 incidents (Full European coverage)
+
+**Evidence Distribution** (target):
+- Score 4 (Official): 40-50% (police sources)
+- Score 3 (Verified): 20-30% (multi-source media)
+- Score 2 (Reported): 20-30% (single source)
+- Score 1 (Unconfirmed): <10% (filtered aggressively)
+
+**Geographic Coverage**:
+- 15+ countries actively monitored
+- 50+ major airports covered
+- 20+ military installations tracked
+- 80-120 RSS feeds actively scraped
+
+### Success Metrics
+
+**Quality Metrics**:
+- False positive rate: <2%
+- Duplicate rate: <5%
+- Evidence score accuracy: >90%
+- Source uptime: >95%
+
+**Coverage Metrics**:
+- Incidents per country per month (track trends)
+- Source diversity (multiple sources per country)
+- Time to detection (<24 hours from publication)
+
+**System Performance**:
+- API response time: <200ms
+- Scraper execution: <5 minutes
+- Database query time: <100ms
+- Frontend load time: <3s
+
+### Dependencies & Blockers
+
+**Ready**:
+- ✅ Database schema supports European coverage
+- ✅ Geographic validation active
+- ✅ Multi-layer defense working
+- ✅ Duplicate prevention tested
+- ✅ Evidence scoring system proven
+
+**Needed**:
+- ⚠️ RSS feed URLs research and validation (20-40 hours)
+- ⚠️ Language-specific keywords research (10-15 hours)
+- ⚠️ Translation for UI (if displaying non-English titles)
+- ⚠️ Testing budget for AI verification costs
+
+**Blockers** (none currently):
+- All technical infrastructure ready
+- Only configuration and content work remains
