@@ -356,277 +356,6 @@ SOURCES = {
         "working": True,
         "note": "Finnmark police district - far northern Norway"
     },
-
-    # === TIER 4: SWEDISH POLICE (Polisen RSS) - Phase 1: Nordic Expansion ===
-    # Swedish police 21 regional RSS feeds
-    # Source type: police (official) - trust_weight: 4
-    # Verified: 2025-10-13
-
-    "polisen_stockholm": {
-        "name": "Polisen Stockholm",
-        "rss": "https://polisen.se/aktuellt/rss/stockholms-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "arlanda", "bromma"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Stockholm region - covers Arlanda and Bromma airports"
-    },
-
-    "polisen_uppsala": {
-        "name": "Polisen Uppsala",
-        "rss": "https://polisen.se/aktuellt/rss/uppsala-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Uppsala region"
-    },
-
-    "polisen_sodermanland": {
-        "name": "Polisen Södermanland",
-        "rss": "https://polisen.se/aktuellt/rss/sodermanlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Södermanland region"
-    },
-
-    "polisen_ostergotland": {
-        "name": "Polisen Östergötland",
-        "rss": "https://polisen.se/aktuellt/rss/ostergotlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "linköping"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Östergötland region"
-    },
-
-    "polisen_jonkoping": {
-        "name": "Polisen Jönköping",
-        "rss": "https://polisen.se/aktuellt/rss/jonkopings-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Jönköping region"
-    },
-
-    "polisen_kronoberg": {
-        "name": "Polisen Kronoberg",
-        "rss": "https://polisen.se/aktuellt/rss/kronobergs-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Kronoberg region"
-    },
-
-    "polisen_kalmar": {
-        "name": "Polisen Kalmar",
-        "rss": "https://polisen.se/aktuellt/rss/kalmar-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Kalmar region"
-    },
-
-    "polisen_gotland": {
-        "name": "Polisen Gotland",
-        "rss": "https://polisen.se/aktuellt/rss/gotlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "visby"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Gotland island"
-    },
-
-    "polisen_blekinge": {
-        "name": "Polisen Blekinge",
-        "rss": "https://polisen.se/aktuellt/rss/blekinge-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Blekinge region"
-    },
-
-    "polisen_skane": {
-        "name": "Polisen Skåne",
-        "rss": "https://polisen.se/aktuellt/rss/skane-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "malmö", "sturup"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Skåne region - covers Malmö Airport"
-    },
-
-    "polisen_halland": {
-        "name": "Polisen Halland",
-        "rss": "https://polisen.se/aktuellt/rss/hallands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Halland region"
-    },
-
-    "polisen_vastra_gotaland": {
-        "name": "Polisen Västra Götaland",
-        "rss": "https://polisen.se/aktuellt/rss/vastra-gotalands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "göteborg", "landvetter"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Västra Götaland - covers Gothenburg Landvetter Airport"
-    },
-
-    "polisen_varmland": {
-        "name": "Polisen Värmland",
-        "rss": "https://polisen.se/aktuellt/rss/varmlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Värmland region"
-    },
-
-    "polisen_orebro": {
-        "name": "Polisen Örebro",
-        "rss": "https://polisen.se/aktuellt/rss/orebro-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Örebro region"
-    },
-
-    "polisen_vastmanland": {
-        "name": "Polisen Västmanland",
-        "rss": "https://polisen.se/aktuellt/rss/vastmanlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Västmanland region"
-    },
-
-    "polisen_dalarna": {
-        "name": "Polisen Dalarna",
-        "rss": "https://polisen.se/aktuellt/rss/dalarnas-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Dalarna region"
-    },
-
-    "polisen_gavleborg": {
-        "name": "Polisen Gävleborg",
-        "rss": "https://polisen.se/aktuellt/rss/gavleborgs-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Gävleborg region"
-    },
-
-    "polisen_vasternorrland": {
-        "name": "Polisen Västernorrland",
-        "rss": "https://polisen.se/aktuellt/rss/vasternorrlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Västernorrland region"
-    },
-
-    "polisen_jamtland": {
-        "name": "Polisen Jämtland",
-        "rss": "https://polisen.se/aktuellt/rss/jamtlands-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "åre östersund"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Jämtland region"
-    },
-
-    "polisen_vasterbotten": {
-        "name": "Polisen Västerbotten",
-        "rss": "https://polisen.se/aktuellt/rss/vasterbottens-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "umeå"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Västerbotten region"
-    },
-
-    "polisen_norrbotten": {
-        "name": "Polisen Norrbotten",
-        "rss": "https://polisen.se/aktuellt/rss/norrbottens-lan/",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drönare", "drone", "flygplats", "luleå", "kiruna"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "SE",
-        "note": "Norrbotten region - northernmost Sweden"
-    },
-
-    # === TIER 4: FINNISH POLICE (Poliisi) - Phase 1: Nordic Expansion ===
-
-    "finnish_police": {
-        "name": "Poliisi (Finnish Police)",
-        "rss": "https://poliisi.fi/en/-/feed",
-        "source_type": "police",
-        "trust_weight": 4,
-        "keywords": ["drone", "lennokki", "lentokenttä", "ilmatila", "puolustusvoimat"],
-        "verified_date": "2025-10-13",
-        "working": False,  # ⚠️ NEEDS URL VERIFICATION
-        "country": "FI",
-        "note": "Finnish National Police press releases"
-    },
 }
 
 # ============================================================================
@@ -1085,20 +814,6 @@ POLISH_LOCATIONS = {
     "lublin airport": {"lat": 51.2403, "lon": 22.7136, "type": "airport", "country": "PL", "icao": "EPLB"},
 }
 
-# Lithuania - Airports
-LITHUANIAN_LOCATIONS = {
-    "vilnius airport": {"lat": 54.6341, "lon": 25.2858, "type": "airport", "country": "LT", "icao": "EYVI"},
-    "kaunas airport": {"lat": 54.9639, "lon": 24.0848, "type": "airport", "country": "LT", "icao": "EYKA"},
-    "palanga airport": {"lat": 55.9732, "lon": 21.0939, "type": "airport", "country": "LT", "icao": "EYPA"},
-}
-
-# Ireland - Airports
-IRISH_LOCATIONS = {
-    "dublin airport": {"lat": 53.4213, "lon": -6.2701, "type": "airport", "country": "IE", "icao": "EIDW"},
-    "cork airport": {"lat": 51.8413, "lon": -8.4911, "type": "airport", "country": "IE", "icao": "EICK"},
-    "shannon airport": {"lat": 52.7020, "lon": -8.9248, "type": "airport", "country": "IE", "icao": "EINN"},
-}
-
 # Consolidated European locations (all countries)
 EUROPEAN_LOCATIONS = {
     **GERMAN_LOCATIONS,
@@ -1114,8 +829,6 @@ EUROPEAN_LOCATIONS = {
     **SWEDISH_LOCATIONS,
     **FINNISH_LOCATIONS,
     **POLISH_LOCATIONS,
-    **LITHUANIAN_LOCATIONS,
-    **IRISH_LOCATIONS,
 }
 
 # Keywords that indicate drone incidents
@@ -1123,16 +836,15 @@ DRONE_KEYWORDS = [
     "drone", "dron", "uav", "uas",
     "unmanned aerial", "ubemannede luftfartøj",
     "drönare", "lennokki",  # Swedish, Finnish
-    "dronas", "aeróg",  # Lithuanian, Irish
     "quadcopter", "multirotor"
 ]
 
 # Keywords for critical infrastructure
 CRITICAL_KEYWORDS = [
-    "lufthavn", "airport", "flyveplads", "flygplats", "lentokenttä", "oro uostas", "aerfort",  # + Lithuanian, Irish
-    "havn", "harbor", "port", "uostas",  # + Lithuanian
-    "militær", "military", "forsvar", "försvar", "puolustusvoimat", "kariuomenė", "míleata",  # + Lithuanian, Irish
-    "kraftværk", "power plant", "elektrinė", "stáisiún cumhachta",  # + Lithuanian, Irish
-    "bro", "bridge", "tiltas", "droichead",  # + Lithuanian, Irish
-    "vindmølle", "wind farm", "vėjo jėgainė"  # + Lithuanian
+    "lufthavn", "airport", "flyveplads", "flygplats", "lentokenttä",
+    "havn", "harbor", "port",
+    "militær", "military", "forsvar", "försvar", "puolustusvoimat",
+    "kraftværk", "power plant",
+    "bro", "bridge",
+    "vindmølle", "wind farm"
 ]
