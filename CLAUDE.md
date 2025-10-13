@@ -807,3 +807,114 @@ This will:
 - Expected incidents: 100-200/month (up from 30-100/month Nordic-only)
 - Coverage: Norwegian, Swedish, Finnish, German, French, UK, Spanish, Italian, Polish, Baltic, Benelux sources all active
 - Previous Nordic sources (Danish police, Twitter, local news) continue working unchanged
+
+---
+
+## Sentry Error Tracking Integration - October 13, 2025
+
+### Setup Complete ✅
+
+**SDK Installed**: `@sentry/nextjs` v10.19.0
+
+**Configuration Files**:
+- `instrumentation-client.ts` - Browser-side error capture (CRITICAL: filename must use dash, not dot)
+- `sentry.server.config.ts` - Server-side monitoring
+- `sentry.edge.config.ts` - Edge runtime monitoring
+- `instrumentation.ts` - Runtime hooks loader
+- `next.config.js` - withSentryConfig wrapper
+
+**Key Features Enabled**:
+- ✅ Browser error capture and exception tracking
+- ✅ Performance monitoring with browser tracing
+- ✅ Console log capture (log, warn, error levels)
+- ✅ Navigation instrumentation via `onRouterTransitionStart`
+- ✅ Release tracking using git commit SHA or package version
+- ✅ Environment-based configuration (development vs production)
+
+**Instrumented Code**:
+- `frontend/hooks/useIncidents.ts` - Wrapped API calls with Sentry.startSpan() for performance tracing
+- Tracks: API URL, filters, response status, incident count, errors
+
+**Dashboard Access**:
+- URL: https://sentry.io/organizations/svc-cc/projects/dronewatch/
+- Org: `svc-cc`
+- Project: `dronewatch`
+
+### Build Fixes Applied
+
+**Problem**: Sentry configuration causing TypeScript build failures for 30+ minutes
+
+**Root Causes**:
+1. ❌ Wrong filename: `instrumentation.client.ts` (dot) → TypeScript couldn't find it
+2. ❌ Invalid options: `autoSessionTracking` and `sessionSampleRate` not valid in browser client config
+3. ❌ TypeScript error: `tracePropagationTargets` not in BrowserTracingOptions type
+
+**Solutions Applied** (commits: 0ef4d47, 312e955, 6940d22, 12d1517):
+1. ✅ Renamed to `instrumentation-client.ts` (dash) - correct Next.js 13+ App Router convention
+2. ✅ Removed invalid session tracking options (only valid in server config)
+3. ✅ Simplified browserTracingIntegration() without tracePropagationTargets
+4. ✅ Added `onRouterTransitionStart` export for navigation instrumentation
+5. ✅ Build now passes successfully (verified with `npm run build`)
+
+**Deployment Status**:
+- All failed Vercel deployments resolved
+- Latest deployment should complete successfully
+- Sentry is capturing events in production
+
+### Using Sentry for Debugging
+
+**Current Issue**: Frontend shows "0 incidents" despite API returning 7 incidents
+
+**Sentry Instrumentation** (already in place):
+```typescript
+// In frontend/hooks/useIncidents.ts
+Sentry.startSpan({
+  op: "http.client",
+  name: "GET /api/incidents",
+}, async (span) => {
+  span.setAttribute("api_url", API_URL)
+  span.setAttribute("filters", JSON.stringify(filters))
+  span.setAttribute("http.status_code", response.status)
+  span.setAttribute("incident_count", data.length)
+
+  if (data.length === 0) {
+    Sentry.captureMessage('API returned empty array', {
+      level: 'warning',
+      extra: { url, filters }
+    })
+  }
+})
+```
+
+**What to Check in Sentry Dashboard**:
+1. **Performance Tab** → Look for `GET /api/incidents` traces
+   - Check span attributes: api_url, incident_count, http.status_code
+   - Verify if fetch is completing or timing out
+2. **Issues Tab** → Filter by `level:warning`
+   - Look for "API returned empty array" messages
+   - Check error context and extra data
+3. **Console Logs** → Search for `[useIncidents]` output
+   - See exact API URL being constructed
+   - Check if NEXT_PUBLIC_API_URL is set correctly
+
+### Critical Filename Convention
+
+**IMPORTANT**: The client instrumentation file MUST be named with a **dash**, not a dot:
+- ✅ Correct: `instrumentation-client.ts`
+- ❌ Wrong: `instrumentation.client.ts`
+
+This is the Next.js 13+ App Router convention. Using a dot will cause the SDK to fail silently and build errors in production.
+
+### Configuration Notes
+
+**Release Tracking Strategy**:
+```javascript
+const RELEASE = process.env.SENTRY_RELEASE ||
+  process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ||
+  `dronewatch@${process.env.npm_package_version || '0.1.0'}`;
+```
+
+**Environment Variables** (optional, not required for basic functionality):
+- `SENTRY_AUTH_TOKEN` - For source map uploads (not set, not required for error capture)
+- `SENTRY_RELEASE` - Override default release name
+- `NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA` - Auto-set by Vercel for release tracking
