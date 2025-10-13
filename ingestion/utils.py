@@ -427,8 +427,13 @@ def is_drone_incident(title: str, content: str) -> bool:
     # Must contain incident indicators (not just mentions of drones)
     # Require ACTUAL observation, action, or response to an incident
     has_observation = any(word in full_text for word in [
+        # English/Danish/Norwegian
         "observed", "spotted", "sighted", "set", "opdaget", "filmed", "recorded",
-        "detected", "detekteret", "mistænk", "suspect"
+        "detected", "detekteret", "mistænk", "suspect",
+        # Swedish
+        "observerad", "upptäckt", "filmad", "identifierad",
+        # Finnish
+        "havaittu", "tunnistettu", "kuvattu"
     ])
 
     has_action = any(word in full_text for word in [
@@ -439,9 +444,14 @@ def is_drone_incident(title: str, content: str) -> bool:
     ])
 
     has_response = any(word in full_text for word in [
-        "investigating", "undersøger", "investigation", "undersøgelse", "efterforskning",  # Added "efterforskning"
+        # English/Danish/Norwegian
+        "investigating", "undersøger", "investigation", "undersøgelse", "efterforskning",
         "searching", "søger", "responding", "reagerer",
-        "politi", "police", "authorities", "myndigheder"
+        "politi", "police", "authorities", "myndigheder",
+        # Swedish
+        "polisen", "utredning", "undersöker", "söker", "myndigheter",
+        # Finnish
+        "poliisi", "tutkinta", "tutkii", "etsii", "viranomaiset"
     ])
 
     has_incident = has_observation or has_action or has_response
