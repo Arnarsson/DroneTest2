@@ -356,6 +356,47 @@ SOURCES = {
         "working": True,
         "note": "Finnmark police district - far northern Norway"
     },
+
+    # === TIER 4: SWEDISH POLICE (Polisen RSS) - VERIFIED SOURCES ONLY ===
+    # Verified: 2025-10-13 via curl testing
+    # URL pattern: https://polisen.se/aktuellt/rss/[region]/handelser-rss---[region]/
+    # Note: Conservative approach - only adding feeds confirmed working via HTTP request
+
+    "polisen_stockholm": {
+        "name": "Polisen Stockholm",
+        "rss": "https://polisen.se/aktuellt/rss/stockholms-lan/handelser-rss---stockholms-lan/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "arlanda", "bromma"],
+        "verified_date": "2025-10-13",
+        "working": True,  # ✅ VERIFIED via curl
+        "country": "SE",
+        "note": "Stockholm region - covers Arlanda and Bromma airports"
+    },
+
+    "polisen_skane": {
+        "name": "Polisen Skåne",
+        "rss": "https://polisen.se/aktuellt/rss/skane/handelser-rss---skane/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "malmö", "sturup"],
+        "verified_date": "2025-10-13",
+        "working": True,  # ✅ VERIFIED via curl
+        "country": "SE",
+        "note": "Skåne region - covers Malmö and Sturup airports"
+    },
+
+    "polisen_norrbotten": {
+        "name": "Polisen Norrbotten",
+        "rss": "https://polisen.se/aktuellt/rss/norrbotten/handelser-rss---norrbotten/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats"],
+        "verified_date": "2025-10-13",
+        "working": True,  # ✅ VERIFIED via curl
+        "country": "SE",
+        "note": "Norrbotten region - far northern Sweden"
+    },
 }
 
 # ============================================================================
