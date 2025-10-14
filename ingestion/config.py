@@ -1,7 +1,7 @@
 """
 DroneWatch Source Configuration - VERIFIED SOURCES ONLY
 Generated: 2025-10-05
-Updated: 2025-10-14 - Added 17 new verified sources (14 Swedish police + 3 Norwegian media)
+Updated: 2025-10-14 - European Tier 1 expansion completed
 
 Validation: ALL URLs tested and confirmed working
 
@@ -20,7 +20,12 @@ Anti-Hallucination Measures:
 Recent Additions (2025-10-14):
 - Wave 2: 14 Swedish police regions (Västra Götaland, Södermanland, Östergötland, etc.)
 - Wave 4: 3 Norwegian media sources (TV2, Nettavisen, NRK Regional)
-- Total working sources: 58 RSS feeds + 3 HTML scrapers
+- Wave 5: 9 European Tier 1 sources (Netherlands police + UK/DE/FR media)
+  * Netherlands: 2 police feeds (Politie Nederland national + urgent)
+  * UK: 2 media feeds (BBC UK + BBC General)
+  * Germany: 2 media feeds (Deutsche Welle + The Local Germany)
+  * France: 3 media feeds (France24 main + France + Europe)
+- Total working sources: 67 RSS feeds + 3 HTML scrapers (70 total sources)
 """
 
 import os
@@ -652,6 +657,131 @@ SOURCES = {
         "working": True,  # ✅ VERIFIED via curl
         "country": "FI",
         "note": "Southwestern Finland - covers Turku Airport"
+    },
+
+    # === TIER 4: NETHERLANDS POLICE (Politie Nederland RSS) - Wave 5 ===
+    # Verified: 2025-10-14 via curl testing
+    # Netherlands police provides comprehensive RSS feeds for all regions
+    # URL: https://www.politie.nl/rss
+
+    "politie_national": {
+        "name": "Politie Nederland (National)",
+        "rss": "https://rss.politie.nl/rss/algemeen/nb/alle-nieuwsberichten.xml",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "onbemand luchtvaartuig", "schiphol", "luchthaven"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "NL",
+        "note": "National police news - all of Netherlands, covers Schiphol Airport"
+    },
+
+    "politie_urgent": {
+        "name": "Politie Nederland Urgent Messages",
+        "rss": "https://rss.politie.nl/urgentpolitiebericht.xml",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drone", "onbemand luchtvaartuig", "schiphol"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "NL",
+        "note": "Urgent police messages - high priority incidents"
+    },
+
+    # === TIER 3: UK MEDIA (Wave 5) ===
+    # No official police RSS feeds available for drone incidents in UK
+    # Using verified media sources with strong track record
+
+    "bbc_uk_news": {
+        "name": "BBC UK News",
+        "rss": "https://feeds.bbci.co.uk/news/uk/rss.xml",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "airport", "heathrow", "gatwick", "manchester airport"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "GB",
+        "note": "BBC UK news feed - covers major UK drone incidents at airports"
+    },
+
+    "bbc_general_news": {
+        "name": "BBC News",
+        "rss": "https://feeds.bbci.co.uk/news/rss.xml",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "uav", "airport", "heathrow", "gatwick"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "GB",
+        "note": "BBC general news feed - international coverage including UK drone incidents"
+    },
+
+    # === TIER 3: GERMANY MEDIA (Wave 5) ===
+    # No official Bundespolizei RSS feeds available for drone incidents
+    # Using verified German media sources
+
+    "deutsche_welle": {
+        "name": "Deutsche Welle",
+        "rss": "https://rss.dw.com/rdf/rss-en-all",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drohne", "airport", "flughafen", "munich", "frankfurt", "berlin"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "DE",
+        "note": "Deutsche Welle English news - German and European coverage"
+    },
+
+    "the_local_germany": {
+        "name": "The Local Germany",
+        "rss": "https://feeds.thelocal.com/rss/de",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drohne", "airport", "flughafen", "munich", "frankfurt", "berlin"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "DE",
+        "note": "The Local Germany - English language news about Germany"
+    },
+
+    # === TIER 3: FRANCE MEDIA (Wave 5) ===
+    # No official Gendarmerie RSS feeds available for drone incidents
+    # Using verified French media sources
+
+    "france24_main": {
+        "name": "France24",
+        "rss": "https://www.france24.com/en/rss",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "aéroport", "charles de gaulle", "orly", "paris"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: application/rss+xml
+        "country": "FR",
+        "note": "France24 main feed - French and European news coverage"
+    },
+
+    "france24_france": {
+        "name": "France24 France News",
+        "rss": "https://www.france24.com/en/france/rss",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "aéroport", "charles de gaulle", "orly"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: application/rss+xml
+        "country": "FR",
+        "note": "France24 France-specific news - domestic drone incidents"
+    },
+
+    "france24_europe": {
+        "name": "France24 Europe News",
+        "rss": "https://www.france24.com/en/europe/rss",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "aéroport"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: application/rss+xml
+        "country": "FR",
+        "note": "France24 Europe news - regional drone incident coverage"
     },
 }
 
