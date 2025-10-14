@@ -215,8 +215,8 @@ class NewsScraper:
         successful_sources = 0
         failed_sources = []
 
-        # Filter for news/media sources (source_type contains 'media')
-        news_sources = [k for k, v in SOURCES.items() if 'media' in v.get('source_type', '').lower()]
+        # Filter for news/media sources (source_type contains 'media' or 'wire_service')
+        news_sources = [k for k, v in SOURCES.items() if 'media' in v.get('source_type', '').lower() or v.get('source_type', '') == 'wire_service']
 
         logger.info(f"Checking {len(news_sources)} news sources...")
 
