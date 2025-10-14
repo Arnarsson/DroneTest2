@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/ingest.py", line 24, in <module>
+    from scrapers.news_scraper import NewsScraper
+  File "/home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/scrapers/news_scraper.py", line 7, in <module>
+    from bs4 import BeautifulSoup
+ModuleNotFoundError: No module named 'bs4'

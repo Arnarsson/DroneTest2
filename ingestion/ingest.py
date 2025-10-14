@@ -20,7 +20,16 @@ load_dotenv()
 from config import API_BASE_URL, INGEST_TOKEN
 from db_cache import ScraperCache
 from geographic_analyzer import analyze_incident_geography
-from openai_client import OpenAIClient, OpenAIClientError
+
+# Optional AI verification
+try:
+    from openai_client import OpenAIClient, OpenAIClientError
+    HAS_OPENAI = True
+except ImportError:
+    HAS_OPENAI = False
+    logger = logging.getLogger(__name__)
+    logger.warning("OpenAI package not available - AI verification disabled")
+
 from scrapers.news_scraper import NewsScraper
 from scrapers.police_scraper import PoliceScraper
 from scrapers.twitter_scraper import TwitterScraper
@@ -137,7 +146,7 @@ class DroneWatchIngester:
                     incident['ai_reasoning'] = ai_verification['reasoning']
                     logger.info(f"✓ AI verification passed: {ai_verification['category']} (confidence: {ai_verification['confidence']})")
 
-                except OpenAIClientError as e:
+                except Exception as e:  # Catch OpenAIClientError if available, or generic Exception
                     logger.warning(f"AI verification failed, continuing with Python filters: {e}")
                     # Fallback: Continue without AI verification (Python filters already passed)
             else:
@@ -252,12 +261,14 @@ class DroneWatchIngester:
         try:
             cleaned_narrative = client.cleanup_text(incident['narrative'])
             incident['narrative'] = cleaned_narrative
-        except OpenAIClientError:
+        except Exception:  # Catch OpenAIClientError if available, or generic Exception
             logger.warning("OpenAI cleanup failed; using original narrative")
 
         return incident
 
-    def _get_openai_client(self) -> OpenAIClient:
+    def _get_openai_client(self):
+        if not HAS_OPENAI:
+            return None
         if self._openai_client is None:
             self._openai_client = OpenAIClient()
         return self._openai_client

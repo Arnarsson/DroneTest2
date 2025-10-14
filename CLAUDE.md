@@ -2338,3 +2338,4 @@ python3 verify_sources_cli.py --verbose
 **Version**: 2.6.2 (MCP documented as non-functional)  
 **MCP Status**: ❌ BROKEN (after 2+ hours troubleshooting)  
 **Production Status**: ✅ ALL SYSTEMS OPERATIONAL
+- git secrets
