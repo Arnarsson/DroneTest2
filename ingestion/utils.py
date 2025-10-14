@@ -15,6 +15,93 @@ logger = logging.getLogger(__name__)
 # Location extraction cache to avoid repeated AI calls
 _location_cache = {}
 
+def get_country_from_coordinates(lat: float, lon: float) -> str:
+    """
+    Determine ISO 3166-1 alpha-2 country code from coordinates using geographic boundaries.
+
+    Args:
+        lat: Latitude
+        lon: Longitude
+
+    Returns:
+        Country code (DK, NO, SE, FI, UK, DE, FR, ES, IT, PL, NL, BE, AT, CH, IE, LV, EE, LT) or 'XX' for unknown
+    """
+    # Denmark (approximate boundaries)
+    if 54.5 <= lat <= 58.0 and 8.0 <= lon <= 15.5:
+        return 'DK'
+
+    # Norway (approximate boundaries)
+    elif 57.5 <= lat <= 71.5 and 4.5 <= lon <= 31.5:
+        return 'NO'
+
+    # Sweden (approximate boundaries)
+    elif 55.0 <= lat <= 69.5 and 10.5 <= lon <= 24.5:
+        return 'SE'
+
+    # Finland (approximate boundaries)
+    elif 59.5 <= lat <= 70.5 and 19.0 <= lon <= 32.0:
+        return 'FI'
+
+    # United Kingdom (approximate boundaries)
+    elif 49.5 <= lat <= 61.0 and -8.5 <= lon <= 2.0:
+        return 'GB'
+
+    # Ireland (approximate boundaries)
+    elif 51.0 <= lat <= 56.0 and -11.0 <= lon <= -5.5:
+        return 'IE'
+
+    # Germany (approximate boundaries)
+    elif 47.0 <= lat <= 55.5 and 5.5 <= lon <= 15.5:
+        return 'DE'
+
+    # France (approximate boundaries)
+    elif 41.0 <= lat <= 51.5 and -5.5 <= lon <= 10.0:
+        return 'FR'
+
+    # Spain (approximate boundaries)
+    elif 35.5 <= lat <= 44.0 and -10.0 <= lon <= 5.0:
+        return 'ES'
+
+    # Italy (approximate boundaries)
+    elif 35.5 <= lat <= 47.5 and 6.0 <= lon <= 19.0:
+        return 'IT'
+
+    # Poland (approximate boundaries)
+    elif 49.0 <= lat <= 55.0 and 14.0 <= lon <= 25.0:
+        return 'PL'
+
+    # Netherlands (approximate boundaries)
+    elif 50.5 <= lat <= 54.0 and 3.0 <= lon <= 7.5:
+        return 'NL'
+
+    # Belgium (approximate boundaries)
+    elif 49.5 <= lat <= 51.5 and 2.5 <= lon <= 6.5:
+        return 'BE'
+
+    # Austria (approximate boundaries)
+    elif 46.0 <= lat <= 49.5 and 9.0 <= lon <= 17.5:
+        return 'AT'
+
+    # Switzerland (approximate boundaries)
+    elif 45.5 <= lat <= 48.0 and 5.5 <= lon <= 11.0:
+        return 'CH'
+
+    # Latvia (approximate boundaries)
+    elif 55.5 <= lat <= 58.5 and 20.5 <= lon <= 28.5:
+        return 'LV'
+
+    # Estonia (approximate boundaries)
+    elif 57.5 <= lat <= 60.0 and 21.5 <= lon <= 28.5:
+        return 'EE'
+
+    # Lithuania (approximate boundaries)
+    elif 53.5 <= lat <= 56.5 and 20.5 <= lon <= 27.0:
+        return 'LT'
+
+    # Unknown/other
+    else:
+        return 'XX'
+
 def extract_location(text: str, use_ai: bool = True) -> Tuple[Optional[float], Optional[float], Optional[str]]:
     """
     Extract location from text by looking for known places.
@@ -129,7 +216,9 @@ def _pattern_match_location(text: str) -> Tuple[Optional[float], Optional[float]
 
     for pattern, (name, lat, lon) in region_patterns.items():
         if re.search(pattern, text_lower):
-            logger.info(f"Pattern matched region/country: {pattern.strip('\\\\b')} → {name}")
+            # Extract backslash pattern before f-string (Python f-strings can't contain backslashes)
+            cleaned_pattern = pattern.strip('\\b')
+            logger.info(f"Pattern matched region/country: {cleaned_pattern} → {name}")
             return (lat, lon, 'other')
 
     return (None, None, None)

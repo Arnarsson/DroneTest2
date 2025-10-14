@@ -16,7 +16,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import SOURCES
 from utils import (
     extract_location, extract_datetime, extract_quote,
-    is_drone_incident, is_nordic_incident, clean_html
+    is_drone_incident, is_nordic_incident, clean_html,
+    get_country_from_coordinates
 )
 
 # Configure logging
@@ -184,7 +185,7 @@ class NewsScraper:
                         "asset_type": asset_type,
                         "status": "active",
                         "evidence_score": evidence_score,
-                        "country": "DK",
+                        "country": get_country_from_coordinates(lat, lon),
                         "sources": [{
                             "source_url": link,
                             "source_type": "media",

@@ -18,7 +18,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import SOURCES
 from utils import (
     extract_location, extract_datetime, extract_quote,
-    is_drone_incident, is_nordic_incident, clean_html, calculate_evidence_score
+    is_drone_incident, is_nordic_incident, clean_html, calculate_evidence_score,
+    get_country_from_coordinates
 )
 
 # Configure logging
@@ -131,7 +132,7 @@ class PoliceScraper:
                         "asset_type": asset_type,
                         "status": "active",
                         "evidence_score": 4,  # Police = official
-                        "country": "DK",
+                        "country": get_country_from_coordinates(lat, lon),
                         "sources": [{
                             "source_url": link,
                             "source_type": "police",
@@ -268,7 +269,7 @@ class PoliceScraper:
                         "asset_type": asset_type,
                         "status": "active",
                         "evidence_score": 4,  # Police = official
-                        "country": "DK",
+                        "country": get_country_from_coordinates(lat, lon),
                         "sources": [{
                             "source_url": article_url or base_url,
                             "source_type": "police",
