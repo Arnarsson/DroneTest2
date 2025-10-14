@@ -25,7 +25,14 @@ Recent Additions (2025-10-14):
   * UK: 2 media feeds (BBC UK + BBC General)
   * Germany: 2 media feeds (Deutsche Welle + The Local Germany)
   * France: 3 media feeds (France24 main + France + Europe)
-- Total working sources: 67 RSS feeds + 3 HTML scrapers (70 total sources)
+- Waves 13-16: 7 Additional European media sources
+  * Belgium: 1 source (Brussels Times)
+  * Spain: 1 source (The Local Spain)
+  * Italy: 2 sources (The Local Italy + ANSA English)
+  * Poland: 1 source (Notes From Poland)
+  * Austria: 1 source (The Local Austria)
+  * Switzerland: 1 source (The Local Switzerland)
+- Total working sources: 74 RSS feeds + 3 HTML scrapers (77 total sources)
 """
 
 import os
@@ -782,6 +789,109 @@ SOURCES = {
         "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: application/rss+xml
         "country": "FR",
         "note": "France24 Europe news - regional drone incident coverage"
+    },
+
+    # === TIER 3: BELGIUM MEDIA (Waves 13-16) ===
+    # No official police RSS feeds available in Belgium
+    # Using Brussels Times (largest English-language Belgian news)
+
+    "brussels_times": {
+        "name": "The Brussels Times",
+        "rss": "https://www.brusselstimes.com/feed",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "brussels", "zaventem", "charleroi"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/html
+        "country": "BE",
+        "note": "Belgium's largest English-language news - covers Brussels airports"
+    },
+
+    # === TIER 3: SPAIN MEDIA (Waves 13-16) ===
+    # Using The Local Spain (largest English-language Spanish news)
+
+    "the_local_spain": {
+        "name": "The Local Spain",
+        "rss": "https://feeds.thelocal.com/rss/es",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "aeropuerto", "madrid", "barcelona", "malaga"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "ES",
+        "note": "Largest English-language news source in Spain - covers major Spanish airports"
+    },
+
+    # === TIER 3: ITALY MEDIA (Waves 13-16) ===
+    # Using The Local Italy + ANSA English
+
+    "the_local_italy": {
+        "name": "The Local Italy",
+        "rss": "https://feeds.thelocal.com/rss/it",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "aeroporto", "roma", "milan", "venice"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "IT",
+        "note": "Largest English-language news source in Italy - covers major Italian airports"
+    },
+
+    "ansa_english": {
+        "name": "ANSA English",
+        "rss": "https://www.ansa.it/english/news/english_nr_rss.xml",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "aeroporto", "rome", "milan", "military"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "IT",
+        "note": "Italian national news agency English feed - authoritative source"
+    },
+
+    # === TIER 3: POLAND MEDIA (Waves 13-16) ===
+    # Using Notes From Poland (English-language Polish news)
+
+    "notes_from_poland": {
+        "name": "Notes From Poland",
+        "rss": "https://notesfrompoland.com/feed/",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "lotnisko", "warsaw", "krakow", "gdansk", "russia"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: application/rss+xml
+        "country": "PL",
+        "note": "Regular English news from Poland - covers drone incidents including Russian incursions"
+    },
+
+    # === TIER 3: AUSTRIA MEDIA (Waves 13-16) ===
+    # Using The Local Austria (English-language Austrian news)
+
+    "the_local_austria": {
+        "name": "The Local Austria",
+        "rss": "https://feeds.thelocal.com/rss/at",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "flughafen", "vienna", "wien", "salzburg"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "AT",
+        "note": "English-language news from Austria - covers Vienna and Austrian airports"
+    },
+
+    # === TIER 3: SWITZERLAND MEDIA (Waves 13-16) ===
+    # Using The Local Switzerland (English-language Swiss news)
+
+    "the_local_switzerland": {
+        "name": "The Local Switzerland",
+        "rss": "https://feeds.thelocal.com/rss/ch",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "airport", "flughafen", "zurich", "geneva", "military"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: text/xml
+        "country": "CH",
+        "note": "Largest English-language news network in Switzerland - covers Swiss airports"
     },
 }
 
