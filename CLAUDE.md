@@ -841,9 +841,9 @@ This will:
 - Return deployment URL
 
 **Check Deployment Status**:
-- Dashboard: https://vercel.com/arnarssons-projects/dronetest
+- Dashboard: https://vercel.com/arnarssons-projects/dronewatch2.0
 - Logs: Available in Vercel dashboard
-- Live Site: Check deployment URL
+- Live Site: https://www.dronemap.cc
 
 ---
 
