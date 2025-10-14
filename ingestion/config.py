@@ -1388,8 +1388,13 @@ EUROPEAN_LOCATIONS = {
 # Keywords that indicate drone incidents
 # Expanded: 2025-10-13 with comprehensive Swedish and Finnish terms
 DRONE_KEYWORDS = [
-    # English
+    # English - Basic terms
     "drone", "dron", "uav", "uas", "unmanned aerial", "quadcopter", "multirotor",
+
+    # English - Activity/event terms (NEW - capture incidents like "drone sighting", "drone incursion")
+    "sighting", "sighted", "spotted", "observed",
+    "disruption", "disrupt", "disrupted",
+    "incursion", "intrusion", "breach",
 
     # Danish/Norwegian
     "ubemannede luftfartøj", "ubemannet luftfartøy",

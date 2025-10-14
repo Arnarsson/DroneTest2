@@ -154,6 +154,12 @@ def extract_location(text: str, use_ai: bool = True) -> Tuple[Optional[float], O
             if result[0] is None:
                 logger.info("AI returned None, trying pattern matching fallback...")
                 result = _pattern_match_location(text)
+                # If pattern matching also fails, try country fallback
+                if result[0] is None:
+                    logger.info("Pattern match also failed, trying country fallback...")
+                    result = _get_country_capital_fallback(text)
+                    if result[0] is not None:
+                        logger.info(f"Using country→capital fallback: {result}")
             return result
         except Exception as e:
             logger.warning(f"AI location extraction failed: {e}, trying pattern matching fallback...")
@@ -161,7 +167,19 @@ def extract_location(text: str, use_ai: bool = True) -> Tuple[Optional[float], O
             result = _pattern_match_location(text)
             if result[0] is not None:
                 return result
+            # Try country fallback if pattern matching also failed
+            result = _get_country_capital_fallback(text)
+            if result[0] is not None:
+                logger.info(f"Using country→capital fallback after AI+pattern fail: {result}")
+                return result
             return None, None, None
+
+    # NEW: Country → Capital fallback if AI and patterns fail
+    # Handles incidents like "drones in Poland" without specific city
+    result = _get_country_capital_fallback(text)
+    if result[0] is not None:
+        logger.info(f"Using country→capital fallback: {result}")
+        return result
 
     # Return None if no specific location found
     # This prevents clustering unrelated incidents at a default coordinate
@@ -238,6 +256,63 @@ def _pattern_match_location(text: str) -> Tuple[Optional[float], Optional[float]
             cleaned_pattern = pattern.strip('\\b')
             logger.info(f"Pattern matched region/country: {cleaned_pattern} → {name}")
             return (lat, lon, 'other')
+
+    return (None, None, None)
+
+def _get_country_capital_fallback(text: str) -> Tuple[Optional[float], Optional[float], Optional[str]]:
+    """
+    Map country name to capital city coordinates when specific location cannot be extracted.
+    Used as fallback when incident mentions only country (e.g., "drones in Poland").
+
+    Args:
+        text: Text to search for country names
+
+    Returns:
+        (lat, lon, asset_type) tuple or (None, None, None)
+    """
+    import re
+
+    text_lower = text.lower()
+
+    # Map country names to capital city coordinates
+    # Format: pattern → (lat, lon, asset_type)
+    country_capitals = {
+        # Nordic countries (existing coverage)
+        r'\b(norway|norge)\b': (59.9139, 10.7522, 'other'),  # Oslo
+        r'\b(sweden|sverige)\b': (59.3293, 18.0686, 'other'),  # Stockholm
+        r'\b(denmark|danmark)\b': (55.6761, 12.5683, 'other'),  # Copenhagen
+        r'\b(finland|suomi)\b': (60.1699, 24.9384, 'other'),  # Helsinki
+
+        # Central Europe (NEW - primary targets)
+        r'\b(poland|polen|polska)\b': (52.2297, 21.0122, 'other'),  # Warsaw
+        r'\b(germany|tyskland|deutschland)\b': (52.5200, 13.4050, 'other'),  # Berlin
+        r'\b(netherlands|nederland|holland)\b': (52.3702, 4.8952, 'other'),  # Amsterdam
+        r'\b(belgium|belgique|belgië)\b': (50.8503, 4.3517, 'other'),  # Brussels
+
+        # Western Europe
+        r'\b(france|frankrike)\b': (48.8566, 2.3522, 'other'),  # Paris
+        r'\b(united kingdom|uk|britain)\b': (51.5074, -0.1278, 'other'),  # London
+        r'\b(spain|españa|spanien)\b': (40.4168, -3.7038, 'other'),  # Madrid
+        r'\b(italy|italia|italien)\b': (41.9028, 12.4964, 'other'),  # Rome
+
+        # Alpine region
+        r'\b(austria|österreich)\b': (48.2082, 16.3738, 'other'),  # Vienna
+        r'\b(switzerland|schweiz|suisse)\b': (46.9479, 7.4474, 'other'),  # Bern
+
+        # Baltic states
+        r'\b(estonia|eesti)\b': (59.4370, 24.7536, 'other'),  # Tallinn
+        r'\b(latvia|latvija)\b': (56.9496, 24.1052, 'other'),  # Riga
+        r'\b(lithuania|lietuva)\b': (54.6872, 25.2797, 'other'),  # Vilnius
+
+        # Ireland
+        r'\b(ireland|éire)\b': (53.3498, -6.2603, 'other'),  # Dublin
+    }
+
+    for pattern, (lat, lon, asset_type) in country_capitals.items():
+        if re.search(pattern, text_lower):
+            cleaned_pattern = pattern.strip('\\b()')
+            logger.info(f"Country fallback matched: {cleaned_pattern} → capital ({lat}, {lon})")
+            return (lat, lon, asset_type)
 
     return (None, None, None)
 
@@ -571,16 +646,18 @@ def is_drone_incident(title: str, content: str) -> bool:
         "bryllup", "wedding", "parforhold", "relationship"  # Exclude personal news
     ])
 
-    # CRITICAL: Exclude non-Nordic international incidents
-    # These are often reported by Nordic news but happened elsewhere
+    # CRITICAL: Exclude incidents OUTSIDE European coverage area (35-71°N, -10-31°E)
+    # European countries (Poland, Germany, etc.) are NOW INCLUDED in coverage
+    # Only exclude war zones and regions outside our geographic scope
     is_international = any(location in full_text for location in [
-        "ukraina", "ukraine", "kiev", "kyiv", "odesa",  # Ukraine
-        "russia", "rusland", "moscow", "moskva",  # Russia
-        "münchen", "munich", "berlin", "germany", "tyskland",  # Germany
-        "poland", "polen", "warsaw", "warszawa",  # Poland (unless Nordic-specific)
-        "middle east", "mellemøsten", "israel", "gaza",  # Middle East
-        "china", "kina", "beijing",  # China
-        "united states", "usa", "washington", "new york"  # USA
+        # War zones OUTSIDE coverage (Eastern Europe beyond 31°E)
+        "ukraina", "ukraine", "ukrainian", "kiev", "kyiv", "odesa", "kharkiv",  # Ukraine
+        "russia", "rusland", "russian", "moscow", "moskva", "st. petersburg",  # Russia
+        "belarus", "hviderusland", "belarusian", "minsk",  # Belarus
+        # Middle East, Asia, Americas (outside 35-71°N, -10-31°E)
+        "middle east", "mellemøsten", "israel", "gaza", "iran", "iraq",
+        "china", "kina", "beijing", "japan", "tokyo",
+        "united states", "usa", "washington", "new york", "canada"
     ])
 
     # Exclude policy/announcement articles (not actual incidents)
