@@ -4,9 +4,11 @@
       "command": "npx",
       "args": [
         "chrome-devtools-mcp@latest",
-        "--executable-path=/usr/bin/chromium",
-        "--headless=true",
-        "--isolated=true"
+        "--executable-path=/opt/google/chrome/chrome",
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--disable-dev-shm-usage"
       ]
     }
   }
