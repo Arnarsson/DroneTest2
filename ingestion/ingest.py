@@ -153,10 +153,10 @@ class DroneWatchIngester:
                 logger.debug("AI verification disabled (no API key configured)")
 
             # === TEMPORAL VALIDATION (Layer 7 - Age Check) ===
-            # Ensure incident is recent (not old article, not future-dated)
+            # Accept all incidents from 2025 (user requirement: "everything from 2025 is interesting")
             is_valid, reason = is_recent_incident(
                 datetime.fromisoformat(incident['occurred_at']),
-                max_age_days=7
+                max_age_days=365  # Changed from 7 to 365 to capture all of 2025
             )
 
             if not is_valid:
