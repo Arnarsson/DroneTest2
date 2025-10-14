@@ -42,22 +42,11 @@ export default function Home() {
 
   const { data: allIncidents, isLoading, error } = useIncidents(filters);
 
-  // DEBUG: Log data state
-  console.log('[HomePage] useIncidents result:', {
-    allIncidents,
-    incidentCount: allIncidents?.length,
-    isLoading,
-    error: error?.message,
-  });
-
   // Apply client-side date filtering and timeline filtering
   const incidents = useMemo(() => {
     if (!allIncidents) {
-      console.log('[HomePage] allIncidents is undefined/null, returning empty array');
       return [];
     }
-
-    console.log('[HomePage] Processing', allIncidents.length, 'incidents through filters');
 
     let filtered = allIncidents;
 

@@ -8,9 +8,6 @@ import * as Sentry from '@sentry/nextjs'
 const API_URL = ENV.API_URL
 
 async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
-  console.log('[useIncidents] fetchIncidents called with filters:', filters);
-  console.log('[useIncidents] API_URL:', API_URL);
-
   return Sentry.startSpan(
     {
       op: "http.client",
@@ -51,7 +48,6 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
       }
 
       const url = `${API_URL}/incidents?${params}`
-      console.log('[useIncidents] Fetching from URL:', url);
 
       try {
         const response = await fetch(url, {
@@ -61,18 +57,14 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
           },
         })
         span.setAttribute("http.status_code", response.status)
-        console.log('[useIncidents] Response status:', response.status);
 
         if (!response.ok) {
-          console.error('[useIncidents] API error:', response.status);
           Sentry.captureException(new Error(`API error: ${response.status}`))
           throw new Error(`API error: ${response.status}`)
         }
 
         const data = await response.json()
         span.setAttribute("incident_count", data.length)
-        console.log('[useIncidents] Received', data.length, 'incidents');
-        console.log('[useIncidents] First incident:', data[0]);
 
         // Monitor for empty responses
         if (data.length === 0) {
@@ -82,10 +74,8 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
           })
         }
 
-        console.log('[useIncidents] Returning data array with', data.length, 'incidents');
         return data
       } catch (error) {
-        console.error('[useIncidents] Fetch error:', error);
         Sentry.captureException(error, {
           extra: { url, filters, api_url: API_URL }
         })
