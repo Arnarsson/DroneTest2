@@ -116,9 +116,11 @@ class OpenAIClient:
             logger.debug(f"Cache hit for verification: {title[:50]}")
             return self._verification_cache[cache_key]
 
-        system_prompt = """You are a drone incident classifier for a real-time incident tracking system.
+        system_prompt = """You are a drone incident classifier for European DroneWatch coverage (35-71°N, -10-31°E).
 
 Analyze if this article is about an ACTUAL drone incident or a non-incident.
+
+**CRITICAL: Only classify as "incident" if it's a REAL drone sighting or disruption that occurred in Europe.**
 
 ACTUAL INCIDENTS (return is_incident=true):
 - Drone observed/spotted/sighted at a location
@@ -126,19 +128,30 @@ ACTUAL INCIDENTS (return is_incident=true):
 - Airport operations disrupted by drones
 - Investigation launched after drone detection
 - Police/military responding to drone sighting
+- Actual security breach or airspace violation
 
 NON-INCIDENTS (return is_incident=false):
-- POLICY: Drone bans, regulations, proposed measures, government announcements
-- DEFENSE: Military assets deployed, equipment sent to defend, security increased
+- SIMULATION: Military exercises, airport drills, training scenarios, test flights, demonstrations, rehearsals
+  Examples: "NATO conducts counter-drone exercise", "Airport holds drone detection drill", "Military tests new drone defense system"
+
+- POLICY: Drone bans, regulations, proposed measures, government announcements, advisories
+  Examples: "New drone ban announced", "Government introduces restrictions", "No-fly zone established"
+
+- DEFENSE: Military assets deployed, equipment sent to defend, security increased (without actual incident)
+  Examples: "Troops rushed to defend", "Anti-drone systems deployed", "Security measures enhanced"
+
 - DISCUSSION: Analysis pieces, opinion articles, think pieces about drone threats
-- CONTEXT: Background information, historical context, general discussions
+  Examples: "The growing threat of drones", "Expert discusses drone security", "Report analyzes drone risks"
+
+- FAKE: Satire, unverified rumors, absurd claims, conspiracy theories
+  Examples: "Aliens use drones to spy", articles from satire sites, obviously false claims
 
 Return ONLY valid JSON (no markdown, no extra text):
 {
   "is_incident": true or false,
   "confidence": 0.0 to 1.0,
-  "reasoning": "Brief 1-sentence explanation",
-  "category": "incident" or "policy" or "defense" or "discussion"
+  "reasoning": "Brief 1-2 sentence explanation",
+  "category": "incident" or "simulation" or "policy" or "defense" or "discussion" or "fake"
 }"""
 
         user_prompt = f"""Title: {title}

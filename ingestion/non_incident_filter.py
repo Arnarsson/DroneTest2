@@ -15,26 +15,81 @@ class NonIncidentFilter:
     REGULATORY_KEYWORDS = {
         # English
         'ban', 'banned', 'restriction', 'restricted', 'prohibit', 'prohibited',
-        'regulation', 'rule', 'law', 'legislation', 'advisory', 'warning',
+        'regulation', 'rule', 'rules', 'law', 'legislation', 'advisory', 'warning',
         'no-fly zone', 'temporary flight restriction', 'tfr', 'notam',
         'upcoming', 'planned', 'will be', 'going to be', 'future',
+        'harmonized', 'harmonize', 'standardize', 'framework', 'guideline', 'guidelines',
+        'issued', 'issues', 'announces', 'announced', 'announcement',
+        'proposes', 'proposed', 'proposal', 'introduces', 'introduced',
 
         # Danish
         'forbud', 'forbudt', 'forbyder', 'restriktion', 'begrænsning',
-        'regel', 'lov', 'lovgivning', 'advarsel', 'vejledning',
+        'regel', 'regler', 'lov', 'lovgivning', 'advarsel', 'vejledning',
         'kommende', 'planlagt', 'vil blive', 'skal være',
+        'annoncerer', 'annonceret', 'foreslår', 'foreslået',
 
         # Norwegian
-        'forbud', 'forbudt', 'restriksjon', 'begrensning', 'regel',
+        'forbud', 'forbudt', 'restriksjon', 'begrensning', 'regel', 'regler',
+        'annonserer', 'annonsert', 'foreslår', 'foreslått',
 
         # Swedish
-        'förbud', 'förbjudet', 'restriktion', 'begränsning', 'regel',
+        'förbud', 'förbjudet', 'restriktion', 'begränsning', 'regel', 'regler',
+        'utfärdar', 'utfärdad', 'föreslår', 'föreslagen',
 
         # German
         'verbot', 'verboten', 'beschränkung', 'einschränkung', 'vorschrift',
+        'ankündigt', 'angekündigt', 'vorschlägt', 'vorgeschlagen',
 
         # French
         'interdit', 'interdiction', 'restriction', 'règlement', 'avertissement',
+        'annonce', 'annoncé', 'propose', 'proposé',
+    }
+
+    # Simulation/Drill/Exercise keywords
+    SIMULATION_KEYWORDS = {
+        # English
+        'simulation', 'simulated', 'exercise', 'drill', 'practice', 'training',
+        'test flight', 'mock', 'demonstration', 'demo', 'rehearsal',
+
+        # Danish
+        'øvelse', 'træning', 'simulering', 'testflyvning', 'demonstration',
+        'prøve', 'afprøvning', 'træningsøvelse',
+
+        # Norwegian
+        'øvelse', 'trening', 'simulering', 'testflyging', 'testflygning',
+        'prøve', 'treningsøvelse',
+
+        # Swedish
+        'övning', 'träning', 'simulering', 'testflygning', 'demonstration',
+        'prov', 'träningsövning',
+
+        # Finnish
+        'harjoitus', 'simulaatio', 'koulutus', 'testilento',
+        'koe', 'harjoittelulento',
+
+        # German
+        'übung', 'simulation', 'test', 'demonstration', 'manöver',
+        'probe', 'training', 'testflug',
+
+        # French
+        'exercice', 'simulation', 'entraînement', 'démonstration', 'manœuvre',
+        'essai', 'vol test',
+
+        # Dutch
+        'oefening', 'simulatie', 'training', 'demonstratie',
+        'proef', 'testvlucht',
+
+        # Spanish
+        'ejercicio', 'simulación', 'entrenamiento', 'demostración', 'maniobra',
+        'prueba', 'vuelo de prueba',
+
+        # Italian
+        'esercitazione', 'simulazione', 'addestramento', 'dimostrazione',
+        'prova', 'volo di prova',
+
+        # Polish
+        'ćwiczenia', 'symulacja', 'szkolenie', 'demonstracja',
+        'próba', 'lot testowy',
     }
 
     # Phrases that indicate regulatory news
@@ -70,6 +125,56 @@ class NonIncidentFilter:
         # French
         r'interdiction.*drone',
         r'restriction.*drone',
+    ]
+
+    # Simulation/Exercise phrases
+    SIMULATION_PHRASES = [
+        # English
+        r'military\s+exercise',
+        r'airport\s+(drill|exercise)',
+        r'test\s+of\s+.*drone.*system',
+        r'planned\s+(exercise|drill)',
+        r'training\s+(scenario|exercise)',
+        r'counter.*drone.*(exercise|drill)',
+        r'(practicing|rehearsing).*drone',
+        r'simulated\s+(attack|incident)',
+
+        # Danish/Norwegian/Swedish (similar)
+        r'militær\s*øvelse',
+        r'militær\s*övning',
+        r'lufthavns\s*(øvelse|övning)',
+        r'test.*drone.*system',
+        r'planlagt\s*øvelse',
+        r'trænings\s*øvelse',
+        r'trenings\s*øvelse',
+
+        # German
+        r'militärische\s+übung',
+        r'flughafen.*übung',
+        r'test.*drohne.*system',
+        r'geplante\s+übung',
+
+        # French
+        r'exercice\s+militaire',
+        r'exercice.*aéroport',
+        r'test.*système.*drone',
+        r'exercice\s+planifié',
+
+        # Dutch
+        r'militaire\s+oefening',
+        r'luchthaven.*oefening',
+
+        # Spanish
+        r'ejercicio\s+militar',
+        r'ejercicio.*aeropuerto',
+
+        # Italian
+        r'esercitazione\s+militare',
+        r'esercitazione.*aeroporto',
+
+        # Polish
+        r'ćwiczenia\s+wojskowe',
+        r'ćwiczenia.*lotnisko',
     ]
 
     # Keywords indicating actual incidents (override regulatory detection)
@@ -117,10 +222,12 @@ class NonIncidentFilter:
         incident_score = 0
 
         # Check for regulatory keywords
+        regulatory_keyword_count = 0
         for keyword in self.REGULATORY_KEYWORDS:
             if keyword in text:
+                regulatory_keyword_count += 1
                 regulatory_score += 1
-                if regulatory_score == 1:  # Only add first match
+                if regulatory_keyword_count == 1:  # Only add first match
                     reasons.append(f"Regulatory keyword: '{keyword}'")
 
         # Check for regulatory phrases
@@ -128,6 +235,22 @@ class NonIncidentFilter:
             if re.search(pattern, text, re.IGNORECASE):
                 regulatory_score += 2
                 reasons.append(f"Regulatory phrase pattern matched")
+                break
+
+        # Check for simulation keywords
+        simulation_count = 0
+        for keyword in self.SIMULATION_KEYWORDS:
+            if keyword in text:
+                simulation_count += 1
+                regulatory_score += 2  # Simulations get higher weight
+                if simulation_count == 1:  # Only add first match
+                    reasons.append(f"Simulation keyword: '{keyword}'")
+
+        # Check for simulation phrases (strong indicator)
+        for pattern in self.SIMULATION_PHRASES:
+            if re.search(pattern, text, re.IGNORECASE):
+                regulatory_score += 3  # Phrases get even higher weight
+                reasons.append(f"Simulation phrase pattern matched")
                 break
 
         # Check for actual incident keywords (override)
@@ -138,7 +261,12 @@ class NonIncidentFilter:
         # Calculate confidence
         net_score = regulatory_score - incident_score
 
-        if net_score >= 3:
+        # Enhanced logic for policy announcements:
+        # Multiple regulatory keywords (2+) indicate policy announcement
+        if regulatory_keyword_count >= 2 and net_score >= 2:
+            confidence = min(0.9, 0.6 + (net_score * 0.1))
+            return (True, confidence, reasons)
+        elif net_score >= 3:
             confidence = min(0.9, 0.5 + (net_score * 0.1))
             return (True, confidence, reasons)
         elif net_score >= 1:

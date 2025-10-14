@@ -24,10 +24,11 @@ from openai_client import OpenAIClient, OpenAIClientError
 from scrapers.news_scraper import NewsScraper
 from scrapers.police_scraper import PoliceScraper
 from scrapers.twitter_scraper import TwitterScraper
-from utils import generate_incident_hash
+from utils import generate_incident_hash, is_recent_incident, format_age
 from verification import (calculate_confidence_score, get_verification_status,
                           requires_manual_review)
 from non_incident_filter import NonIncidentFilter
+from satire_domains import is_satire_domain, get_satire_reason
 
 # Scraper version for tracking deployments
 SCRAPER_VERSION = "2.3.0"  # European coverage expansion (35-71°N, -10-31°E)
@@ -77,6 +78,18 @@ class DroneWatchIngester:
             if any(test_word in title_lower for test_word in ['dronetest', 'test incident', 'testing drone']):
                 logger.warning(f"🚫 Blocking test incident: {incident['title'][:50]}")
                 return False
+
+            # === SATIRE DOMAIN BLOCKING (Layer 1 - Domain Blacklist) ===
+            # Check all sources for satire domains
+            sources = incident.get('sources', [])
+            for source in sources:
+                source_url = source.get('source_url', '')
+                if is_satire_domain(source_url):
+                    reason_short, reason_detail = get_satire_reason(source_url)
+                    logger.warning(f"🚫 BLOCKED (Satire Domain): {incident['title'][:60]}")
+                    logger.warning(f"   Reason: {reason_detail}")
+                    logger.warning(f"   URL: {source_url}")
+                    return False
 
             # === GEOGRAPHIC VALIDATION (Layer 2 - Python Filter) ===
             # Analyze incident geography with confidence scoring
@@ -129,6 +142,22 @@ class DroneWatchIngester:
                     # Fallback: Continue without AI verification (Python filters already passed)
             else:
                 logger.debug("AI verification disabled (no API key configured)")
+
+            # === TEMPORAL VALIDATION (Layer 7 - Age Check) ===
+            # Ensure incident is recent (not old article, not future-dated)
+            is_valid, reason = is_recent_incident(
+                datetime.fromisoformat(incident['occurred_at']),
+                max_age_days=7
+            )
+
+            if not is_valid:
+                logger.warning(f"🚫 BLOCKED (Temporal): {incident['title'][:60]}")
+                logger.warning(f"   Reason: {reason}")
+                return False
+
+            # Add age metadata
+            incident['incident_age'] = format_age(datetime.fromisoformat(incident['occurred_at']))
+            logger.info(f"✓ Temporal validation passed: {incident['incident_age']}")
 
             # Generate hash for deduplication
             incident_hash = generate_incident_hash(
@@ -283,10 +312,32 @@ class DroneWatchIngester:
 
         all_incidents = actual_incidents
 
-        # 5. Sort by evidence score (highest first)
+        # 5. Consolidate incidents (merge multiple sources)
+        print(f"\n🔄 Consolidating incidents (merging multiple sources)...")
+        from consolidator import ConsolidationEngine
+
+        consolidation_engine = ConsolidationEngine(
+            location_precision=0.01,  # ~1km (rounds to 0.01° ≈ 1.1km at Nordic latitudes)
+            time_window_hours=6       # Groups incidents within 6-hour windows
+        )
+
+        # Get statistics before consolidation
+        stats = consolidation_engine.get_consolidation_stats(all_incidents)
+        print(f"   Before consolidation: {stats['total_incidents']} incidents")
+        print(f"   Unique locations: {stats['unique_hashes']}")
+        print(f"   Multi-source groups: {stats['multi_source_groups']}")
+        if stats['potential_merges'] > 0:
+            print(f"   Potential merges: {stats['potential_merges']} incidents → {stats['multi_source_groups']} consolidated")
+            print(f"   Merge rate: {stats['merge_rate']:.1f}%")
+
+        # Consolidate
+        all_incidents = consolidation_engine.consolidate_incidents(all_incidents)
+        print(f"   After consolidation: {len(all_incidents)} incidents")
+
+        # 6. Sort by evidence score (highest first)
         all_incidents.sort(key=lambda x: x['evidence_score'], reverse=True)
 
-        # 6. Send to API
+        # 7. Send to API
         print(f"\n📤 Sending {len(all_incidents)} incidents to API...")
 
         if test_mode and all_incidents:

@@ -1,6 +1,8 @@
 """
 DroneWatch Source Configuration - VERIFIED SOURCES ONLY
 Generated: 2025-10-05
+Updated: 2025-10-14 - Added 17 new verified sources (14 Swedish police + 3 Norwegian media)
+
 Validation: ALL URLs tested and confirmed working
 
 Context Engineering Principles:
@@ -14,6 +16,11 @@ Anti-Hallucination Measures:
 - RSS feeds confirmed parseable
 - Broken URLs removed completely
 - Verification date documented
+
+Recent Additions (2025-10-14):
+- Wave 2: 14 Swedish police regions (Västra Götaland, Södermanland, Östergötland, etc.)
+- Wave 4: 3 Norwegian media sources (TV2, Nettavisen, NRK Regional)
+- Total working sources: 58 RSS feeds + 3 HTML scrapers
 """
 
 import os
@@ -102,6 +109,44 @@ SOURCES = {
         "keywords": ["drone", "lufthavn", "gardermoen"],
         "verified_date": "2025-10-05",
         "working": True
+    },
+
+    # === NEW NORWEGIAN MEDIA (Wave 4 - Verified 2025-10-14) ===
+
+    "tv2_norway": {
+        "name": "TV2 Norway",
+        "rss": "https://www.tv2.no/rss",
+        "source_type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "lufthavn", "forsvar", "gardermoen"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "NO",
+        "note": "National Norwegian broadcaster"
+    },
+
+    "nettavisen": {
+        "name": "Nettavisen",
+        "rss": "https://www.nettavisen.no/rss",
+        "source_type": "media",
+        "trust_weight": 2,
+        "keywords": ["drone", "lufthavn", "forsvar"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "NO",
+        "note": "Norwegian online news outlet"
+    },
+
+    "nrk_regional": {
+        "name": "NRK Regional News",
+        "rss": "https://www.nrk.no/nyheter/siste.rss",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "lufthavn", "forsvar", "gardermoen"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200, Content-Type: application/xml
+        "country": "NO",
+        "note": "NRK regional news feed - supplements main NRK feed"
     },
 
     # === TIER 2/3: SWEDISH MEDIA ===
@@ -396,6 +441,177 @@ SOURCES = {
         "working": True,  # ✅ VERIFIED via curl
         "country": "SE",
         "note": "Norrbotten region - far northern Sweden"
+    },
+
+    # === NEW SWEDISH POLICE REGIONS (Wave 2 - Verified 2025-10-14) ===
+    # Added 14 new regions with working RSS feeds
+
+    "polisen_vastra_gotaland": {
+        "name": "Polisen Västra Götaland",
+        "rss": "https://polisen.se/aktuellt/rss/vastra-gotaland/handelser-rss---vastra-gotaland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "göteborg", "landvetter"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Västra Götaland region - covers Gothenburg Landvetter Airport"
+    },
+
+    "polisen_sodermanland": {
+        "name": "Polisen Södermanland",
+        "rss": "https://polisen.se/aktuellt/rss/sodermanland/handelser-rss---sodermanland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Södermanland region - southeast of Stockholm"
+    },
+
+    "polisen_ostergotland": {
+        "name": "Polisen Östergötland",
+        "rss": "https://polisen.se/aktuellt/rss/ostergotland/handelser-rss---ostergotland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "linköping"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Östergötland region - covers Linköping area"
+    },
+
+    "polisen_kronoberg": {
+        "name": "Polisen Kronoberg",
+        "rss": "https://polisen.se/aktuellt/rss/kronoberg/handelser-rss---kronoberg/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "växjö"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Kronoberg region - southern Sweden"
+    },
+
+    "polisen_gotland": {
+        "name": "Polisen Gotland",
+        "rss": "https://polisen.se/aktuellt/rss/gotland/handelser-rss---gotland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "visby"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Gotland island - Baltic Sea"
+    },
+
+    "polisen_blekinge": {
+        "name": "Polisen Blekinge",
+        "rss": "https://polisen.se/aktuellt/rss/blekinge/handelser-rss---blekinge/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "karlskrona"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Blekinge region - southern Sweden, naval base"
+    },
+
+    "polisen_halland": {
+        "name": "Polisen Halland",
+        "rss": "https://polisen.se/aktuellt/rss/halland/handelser-rss---halland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "halmstad"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Halland region - west coast"
+    },
+
+    "polisen_varmland": {
+        "name": "Polisen Värmland",
+        "rss": "https://polisen.se/aktuellt/rss/varmland/handelser-rss---varmland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "karlstad"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Värmland region - west central Sweden"
+    },
+
+    "polisen_vastmanland": {
+        "name": "Polisen Västmanland",
+        "rss": "https://polisen.se/aktuellt/rss/vastmanland/handelser-rss---vastmanland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "västerås"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Västmanland region - central Sweden"
+    },
+
+    "polisen_dalarna": {
+        "name": "Polisen Dalarna",
+        "rss": "https://polisen.se/aktuellt/rss/dalarna/handelser-rss---dalarna/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Dalarna region - central Sweden"
+    },
+
+    "polisen_gavleborg": {
+        "name": "Polisen Gävleborg",
+        "rss": "https://polisen.se/aktuellt/rss/gavleborg/handelser-rss---gavleborg/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "gävle"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Gävleborg region - east central Sweden"
+    },
+
+    "polisen_vasternorrland": {
+        "name": "Polisen Västernorrland",
+        "rss": "https://polisen.se/aktuellt/rss/vasternorrland/handelser-rss---vasternorrland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "sundsvall"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Västernorrland region - northern Sweden"
+    },
+
+    "polisen_jamtland": {
+        "name": "Polisen Jämtland",
+        "rss": "https://polisen.se/aktuellt/rss/jamtland/handelser-rss---jamtland/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "östersund"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Jämtland region - northwestern Sweden"
+    },
+
+    "polisen_vasterbotten": {
+        "name": "Polisen Västerbotten",
+        "rss": "https://polisen.se/aktuellt/rss/vasterbotten/handelser-rss---vasterbotten/",
+        "source_type": "police",
+        "trust_weight": 4,
+        "keywords": ["drönare", "drone", "flygplats", "umeå"],
+        "verified_date": "2025-10-14",
+        "working": True,  # ✅ VERIFIED via curl - HTTP 200
+        "country": "SE",
+        "note": "Västerbotten region - northern Sweden"
     },
 
     # === TIER 4: FINNISH POLICE (Poliisi RSS) - VERIFIED SOURCES ONLY ===

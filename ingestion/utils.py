@@ -5,7 +5,7 @@ import re
 import hashlib
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple, Dict
 import dateutil.parser
 from config import DANISH_AIRPORTS, DANISH_HARBORS, CRITICAL_KEYWORDS, DRONE_KEYWORDS
@@ -521,3 +521,79 @@ def clean_html(html_text: str) -> str:
     # Remove extra whitespace
     clean = re.sub(r'\s+', ' ', clean)
     return clean.strip()
+
+def is_recent_incident(occurred_at: datetime, max_age_days: int = 7) -> Tuple[bool, str]:
+    """
+    Check if incident occurred within acceptable timeframe
+
+    Rules:
+    - Not in future (>1 day ahead)
+    - Not too old (>max_age_days ago)
+    - Not ancient history (>1 year ago)
+
+    Args:
+        occurred_at: Incident datetime (timezone-aware)
+        max_age_days: Maximum age in days (default 7)
+
+    Returns:
+        (is_valid, reason)
+
+    Examples:
+        >>> now = datetime.now(timezone.utc)
+        >>> is_recent_incident(now - timedelta(days=2))
+        (True, "Recent incident")
+
+        >>> is_recent_incident(now - timedelta(days=10))
+        (False, "Too old: 10 days ago (max 7)")
+
+        >>> is_recent_incident(now + timedelta(days=2))
+        (False, "Future date: 2025-10-16T...")
+    """
+    if not occurred_at.tzinfo:
+        # Make timezone-aware if naive
+        occurred_at = occurred_at.replace(tzinfo=timezone.utc)
+
+    now = datetime.now(timezone.utc)
+    age = now - occurred_at
+    age_days = age.days
+
+    # Check: Future date (allow 1 day buffer for timezone differences)
+    if occurred_at > now + timedelta(days=1):
+        return (False, f"Future date: {occurred_at.isoformat()}")
+
+    # Check: Ancient history (>1 year) - check this BEFORE max_age_days to provide more specific error
+    if age_days > 365:
+        return (False, f"Historical article: {age_days} days ago ({age_days // 365} years)")
+
+    # Check: Too old (within 1 year but older than max_age_days)
+    if age_days > max_age_days:
+        return (False, f"Too old: {age_days} days ago (max {max_age_days})")
+
+    return (True, "Recent incident")
+
+
+def format_age(occurred_at: datetime) -> str:
+    """
+    Format incident age in human-readable format
+
+    Examples:
+        "2 hours ago"
+        "3 days ago"
+        "5 minutes ago"
+    """
+    if not occurred_at.tzinfo:
+        occurred_at = occurred_at.replace(tzinfo=timezone.utc)
+
+    now = datetime.now(timezone.utc)
+    delta = now - occurred_at
+
+    if delta.days > 0:
+        return f"{delta.days} day{'s' if delta.days > 1 else ''} ago"
+    elif delta.seconds >= 3600:
+        hours = delta.seconds // 3600
+        return f"{hours} hour{'s' if hours > 1 else ''} ago"
+    elif delta.seconds >= 60:
+        minutes = delta.seconds // 60
+        return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    else:
+        return "just now"
