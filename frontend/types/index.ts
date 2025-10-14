@@ -20,12 +20,12 @@ export interface Incident {
 export interface IncidentSource {
   source_name?: string
   source_url: string
-  source_type: string
+  source_type: 'police' | 'military' | 'aviation_authority' | 'notam' | 'verified_media' | 'media' | 'news' | 'social' | 'other' | string
   source_title?: string
   source_quote?: string
   published_at?: string
   domain?: string
-  trust_weight?: number
+  trust_weight?: number  // 1-4: 4=Official/Police, 3=Verified Media, 2=Media, 1=Social/Low Trust
 }
 
 export interface FilterState {

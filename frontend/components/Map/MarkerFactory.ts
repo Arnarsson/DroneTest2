@@ -1,42 +1,104 @@
 import L from 'leaflet'
 import { EVIDENCE_SYSTEM } from '@/constants/evidence'
 import { getFacilityEmoji } from './FacilityGrouper'
+import type { Incident } from '@/types'
 
 /**
  * Creates an evidence-based marker icon for a single incident
+ * With optional source count and police confirmation badges
  *
  * @param evidenceScore - Evidence score (1-4)
  * @param isDark - Whether dark mode is active
+ * @param incident - Full incident object (optional, for source badges)
  * @returns Leaflet DivIcon
  */
-export function createIncidentIcon(evidenceScore: number, isDark: boolean = false): L.DivIcon {
+export function createIncidentIcon(
+  evidenceScore: number,
+  isDark: boolean = false,
+  incident?: Incident
+): L.DivIcon {
   const config = EVIDENCE_SYSTEM[evidenceScore as 1 | 2 | 3 | 4]
   const borderColor = isDark ? '#1f2937' : 'white'
 
+  // Check for source count and police confirmation
+  const sourceCount = incident?.sources?.length || 0
+  const hasPoliceSource = incident?.sources?.some((s) => s.trust_weight && s.trust_weight >= 4) || false
+  const hasMultipleSources = sourceCount >= 2
+
+  // Calculate marker size (larger if has badges)
+  const markerSize = hasPoliceSource || hasMultipleSources ? 42 : 38
+  const markerAnchor = Math.round(markerSize / 2)
+
   return L.divIcon({
     html: `
-      <div style="
-        width: 38px;
-        height: 38px;
-        background: ${config.gradient};
-        border: 3px solid ${borderColor};
-        border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${config.glow};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 15px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      ">
-        ${evidenceScore}
+      <div class="marker-wrapper" style="position: relative; width: ${markerSize}px; height: ${markerSize}px;">
+        <div class="marker-base" style="
+          width: ${markerSize}px;
+          height: ${markerSize}px;
+          background: ${config.gradient};
+          border: 3px solid ${borderColor};
+          border-radius: 50%;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${config.glow};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 15px;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        ">
+          ${evidenceScore}
+        </div>
+        ${hasPoliceSource ? `
+          <div class="police-badge" style="
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: 2px solid ${borderColor};
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 1001;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: pulse-police 2s ease-in-out infinite;
+          ">
+            🚨
+          </div>
+        ` : ''}
+        ${hasMultipleSources && !hasPoliceSource ? `
+          <div class="source-count-badge" style="
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: 2px solid ${borderColor};
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 1001;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          ">
+            ${sourceCount}
+          </div>
+        ` : ''}
       </div>
     `,
-    className: 'custom-marker',
-    iconSize: [38, 38],
-    iconAnchor: [19, 19],
+    className: `custom-marker ${hasPoliceSource ? 'police-confirmed' : ''} ${hasMultipleSources ? 'multi-source' : ''}`,
+    iconSize: [markerSize, markerSize],
+    iconAnchor: [markerAnchor, markerAnchor],
   })
 }
 

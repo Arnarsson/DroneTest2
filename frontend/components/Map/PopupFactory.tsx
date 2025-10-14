@@ -47,31 +47,58 @@ function getFavicon(url: string): string {
 }
 
 /**
- * Source type emoji mapping
+ * Source type emoji mapping based on trust weight
  */
 const SOURCE_TYPE_EMOJI: Record<string, string> = {
-  'police': '🚔',
-  'notam': '🛫',
-  'media': '📰',
-  'news': '📰',
-  'social': '💬',
+  'police': '🚨',
+  'military': '🚨',
+  'aviation_authority': '🚨',
+  'notam': '🚨',
+  'verified_media': '📰',
+  'media': '📄',
+  'news': '📄',
+  'social': '📱',
   'other': '🔗'
 }
 
 /**
- * Get emoji for source type
+ * Get emoji for source based on trust weight and type
  */
-function getSourceEmoji(sourceType?: string): string {
+function getSourceEmoji(trustWeight: number, sourceType?: string): string {
+  // Authority-based emoji selection (overrides type)
+  if (trustWeight >= 4) return '🚨'  // Police/Official
+  if (trustWeight >= 3) return '📰'  // Verified Media
+  if (trustWeight >= 2) return '📄'  // Media
+  if (trustWeight >= 1) return '📱'  // Social/Low Trust
+
+  // Fallback to type-based emoji
   return SOURCE_TYPE_EMOJI[sourceType?.toLowerCase() || 'other'] || '🔗'
 }
 
 /**
- * Get trust weight color
+ * Get trust weight color and border based on authority level
  */
-function getTrustColor(trustWeight: number): string {
-  if (trustWeight >= 0.8) return '#10b981'
-  if (trustWeight >= 0.6) return '#f59e0b'
-  return '#6b7280'
+function getTrustStyles(trustWeight: number): { bgClass: string; borderClass: string; textClass: string } {
+  if (trustWeight >= 4) return {
+    bgClass: 'bg-green-50 dark:bg-green-900/20',
+    borderClass: 'border-green-500',
+    textClass: 'text-green-900 dark:text-green-100'
+  }
+  if (trustWeight >= 3) return {
+    bgClass: 'bg-amber-50 dark:bg-amber-900/20',
+    borderClass: 'border-amber-500',
+    textClass: 'text-amber-900 dark:text-amber-100'
+  }
+  if (trustWeight >= 2) return {
+    bgClass: 'bg-orange-50 dark:bg-orange-900/20',
+    borderClass: 'border-orange-500',
+    textClass: 'text-orange-900 dark:text-orange-100'
+  }
+  return {
+    bgClass: 'bg-red-50 dark:bg-red-900/20',
+    borderClass: 'border-red-500',
+    textClass: 'text-red-900 dark:text-red-100'
+  }
 }
 
 /**
@@ -132,79 +159,129 @@ export function createPopupContent(incident: Incident, isDark: boolean = false):
       ` : ''}
 
       ${incident.sources && incident.sources.length > 0 ? `
-        <div style="border-top: 1px solid ${theme.borderColor}; padding-top: 10px; margin-top: 8px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <div style="font-size: 11px; color: ${theme.textMuted}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-              Sources ${incident.sources.length > 1 ? `(${incident.sources.length})` : ''}
+        <div style="border-top: 1px solid ${theme.borderColor}; padding-top: 12px; margin-top: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="font-size: 12px; color: ${theme.textMuted}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+              ${incident.sources.length === 1 ? 'Source' : `Sources (${incident.sources.length})`}
             </div>
-            ${incident.sources.length >= 2 ? `
+            ${incident.sources.some((s: any) => s.trust_weight >= 4) ? `
               <div style="
                 background: linear-gradient(135deg, #10b981 0%, #059669 100%);
                 color: white;
-                padding: 3px 8px;
-                border-radius: 12px;
+                padding: 4px 10px;
+                border-radius: 14px;
                 font-size: 10px;
                 font-weight: 700;
                 display: inline-flex;
                 align-items: center;
                 gap: 4px;
+                box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+              ">
+                🚨 Official Source
+              </div>
+            ` : incident.sources.length >= 2 ? `
+              <div style="
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                color: white;
+                padding: 4px 10px;
+                border-radius: 14px;
+                font-size: 10px;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
               ">
                 ✓ Multi-source verified
               </div>
             ` : ''}
           </div>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            ${incident.sources.map(source => {
-              const favicon = getFavicon(source.source_url)
-              const emoji = getSourceEmoji(source.source_type)
-              // Trust weight color (0-100 scale for display)
-              const trustWeight = source.trust_weight || 0
-              const trustColor = getTrustColor(trustWeight)
-              const sourceName = source.source_title || source.source_name || source.source_type || 'Unknown'
-              const showType = source.source_type && source.source_type.toLowerCase() !== sourceName.toLowerCase()
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${[...incident.sources]
+              .sort((a: any, b: any) => (b.trust_weight || 0) - (a.trust_weight || 0))
+              .map((source: any) => {
+                const trustWeight = source.trust_weight || 0
+                const emoji = getSourceEmoji(trustWeight, source.source_type)
+                const sourceName = source.source_title || source.source_name || source.source_type || 'Unknown Source'
+                const showType = source.source_type && source.source_type.toLowerCase() !== sourceName.toLowerCase()
 
-              return `
-                <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 2px;
-                  padding: 6px 10px;
-                  background: ${theme.linkBg};
-                  border-radius: 10px;
-                  color: ${theme.linkColor};
-                  text-decoration: none;
-                  transition: all 0.2s;
-                  border: 1px solid ${theme.borderColor};
-                  margin-bottom: 4px;
-                ">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    ${favicon ? `<img src="${favicon}" width="14" height="14" style="border-radius: 2px;" />` : `<span style="font-size: 14px;">${emoji}</span>`}
-                    <span style="font-size: 13px; font-weight: 600;">${sourceName}</span>
-                    ${trustWeight > 0 ? `
-                      <span style="
-                        background: ${trustColor};
-                        color: white;
-                        padding: 2px 6px;
-                        border-radius: 8px;
-                        font-size: 9px;
-                        font-weight: 700;
-                        margin-left: auto;
+                // Inline styling based on trust weight
+                let borderColor = '#ef4444'  // red-500
+                let bgColor = isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(254, 242, 242, 0.8)'
+                let authorityLabel = ''
+
+                if (trustWeight >= 4) {
+                  borderColor = '#10b981'  // green-500
+                  bgColor = isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(236, 253, 245, 0.9)'
+                  authorityLabel = 'Official/Police Source'
+                } else if (trustWeight >= 3) {
+                  borderColor = '#f59e0b'  // amber-500
+                  bgColor = isDark ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 251, 235, 0.9)'
+                  authorityLabel = 'Verified Media'
+                } else if (trustWeight >= 2) {
+                  borderColor = '#f97316'  // orange-500
+                  bgColor = isDark ? 'rgba(249, 115, 22, 0.15)' : 'rgba(255, 247, 237, 0.9)'
+                  authorityLabel = 'News Media'
+                } else {
+                  authorityLabel = 'Low Trust Source'
+                }
+
+                return `
+                  <div style="
+                    padding: 10px;
+                    background: ${bgColor};
+                    border: 2px solid ${borderColor};
+                    border-radius: 10px;
+                    transition: all 0.2s ease;
+                  ">
+                    <div style="display: flex; align-items: start; gap: 8px; margin-bottom: 6px;">
+                      <span style="font-size: 20px; line-height: 1; flex-shrink: 0;">${emoji}</span>
+                      <div style="flex: 1; min-width: 0;">
+                        <a href="${source.source_url}" target="_blank" rel="noopener noreferrer" style="
+                          color: ${theme.linkColor};
+                          font-size: 13px;
+                          font-weight: 600;
+                          text-decoration: none;
+                          word-break: break-word;
+                          display: flex;
+                          align-items: center;
+                          gap: 4px;
+                        ">
+                          ${sourceName}
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                          </svg>
+                        </a>
+                        <div style="
+                          font-size: 10px;
+                          color: ${theme.textMuted};
+                          margin-top: 2px;
+                          font-weight: 600;
+                          text-transform: uppercase;
+                          letter-spacing: 0.3px;
+                        ">
+                          ${authorityLabel}${showType ? ` • ${source.source_type}` : ''}
+                        </div>
+                      </div>
+                    </div>
+                    ${source.source_quote ? `
+                      <blockquote style="
+                        margin: 6px 0 0 28px;
+                        padding: 6px 10px;
+                        background: ${isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)'};
+                        border-left: 3px solid ${borderColor};
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-style: italic;
+                        color: ${theme.textSecondary};
+                        line-height: 1.5;
                       ">
-                        ${Math.round(trustWeight * 100)}%
-                      </span>
+                        "${source.source_quote.substring(0, 150)}${source.source_quote.length > 150 ? '...' : ''}"
+                      </blockquote>
                     ` : ''}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: ${trustWeight > 0 ? '2px' : 'auto'};">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
                   </div>
-                  ${showType ? `
-                    <span style="font-size: 10px; color: ${theme.textMuted}; padding-left: 20px; text-transform: capitalize;">
-                      ${source.source_type}
-                    </span>
-                  ` : ''}
-                </a>
-              `
-            }).join('')}
+                `
+              }).join('')}
           </div>
         </div>
       ` : ''}

@@ -56,7 +56,8 @@ export function useMarkerClustering(
 
     // Add single incident markers
     singleIncidents.forEach((incident) => {
-      const icon = createIncidentIcon(incident.evidence_score, isDark)
+      // Pass the full incident object to enable source count badges
+      const icon = createIncidentIcon(incident.evidence_score, isDark, incident)
       const marker = L.marker([incident.lat, incident.lon], { icon })
 
       // Attach incident data to marker for cluster analysis
