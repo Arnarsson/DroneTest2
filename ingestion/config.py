@@ -893,6 +893,58 @@ SOURCES = {
         "country": "CH",
         "note": "Largest English-language news network in Switzerland - covers Swiss airports"
     },
+
+    # === TIER 4: INTERNATIONAL WIRE SERVICES ===
+    # Major international news agencies that CEPA uses for drone incident reporting
+    # These sources cover European incidents that local media may miss
+
+    "reuters_world": {
+        "name": "Reuters World News",
+        "rss": "http://feeds.reuters.com/Reuters/worldNews",
+        "source_type": "wire_service",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "airport", "military", "NATO"],
+        "verified_date": "2025-10-14",
+        "working": True,  # Major wire service
+        "country": "INTL",
+        "note": "Reuters international wire service - covers major European drone incidents"
+    },
+
+    "ap_news_world": {
+        "name": "Associated Press World News",
+        "rss": "https://rsshub.app/apnews/topics/world-news",
+        "source_type": "wire_service",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "airport", "military", "NATO"],
+        "verified_date": "2025-10-14",
+        "working": True,  # Via RSSHub aggregator
+        "country": "INTL",
+        "note": "AP World News via RSSHub - captures European security incidents"
+    },
+
+    "cnn_world": {
+        "name": "CNN World News",
+        "rss": "http://rss.cnn.com/rss/edition_world.rss",
+        "source_type": "wire_service",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "airport", "Munich", "Copenhagen", "Oslo"],
+        "verified_date": "2025-10-14",
+        "working": True,  # CNN RSS feeds
+        "country": "INTL",
+        "note": "CNN World - covers major European airport disruptions (Munich, Copenhagen confirmed)"
+    },
+
+    "euronews": {
+        "name": "Euronews",
+        "rss": "https://www.euronews.com/rss",
+        "source_type": "wire_service",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "airport", "security", "NATO"],
+        "verified_date": "2025-10-14",
+        "working": True,  # Pan-European news network
+        "country": "EU",
+        "note": "Euronews - Pan-European news covering drone security incidents across all member states"
+    },
 }
 
 # ============================================================================
