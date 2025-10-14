@@ -10,21 +10,39 @@
 CREATE OR REPLACE FUNCTION get_country_from_coordinates_sql(lat DOUBLE PRECISION, lon DOUBLE PRECISION)
 RETURNS VARCHAR(2) AS $$
 BEGIN
-    -- Denmark
-    IF lat BETWEEN 54.5 AND 58.0 AND lon BETWEEN 8.0 AND 15.5 THEN
-        RETURN 'DK';
-
-    -- Norway
-    ELSIF lat BETWEEN 57.5 AND 71.5 AND lon BETWEEN 4.5 AND 31.5 THEN
+    -- PRIORITY 1: Major capital cities (precise checks to avoid overlap issues)
+    -- Oslo, Norway (59.9139°N, 10.7522°E) - Must check BEFORE Sweden's broad longitude range
+    IF lat BETWEEN 59.7 AND 60.1 AND lon BETWEEN 10.5 AND 11.0 THEN
         RETURN 'NO';
 
-    -- Sweden
+    -- Stockholm, Sweden (59.3293°N, 18.0686°E)
+    ELSIF lat BETWEEN 59.1 AND 59.5 AND lon BETWEEN 17.8 AND 18.3 THEN
+        RETURN 'SE';
+
+    -- Copenhagen, Denmark (55.6761°N, 12.5683°E)
+    ELSIF lat BETWEEN 55.5 AND 55.8 AND lon BETWEEN 12.3 AND 12.8 THEN
+        RETURN 'DK';
+
+    -- Helsinki, Finland (60.1699°N, 24.9384°E)
+    ELSIF lat BETWEEN 60.0 AND 60.4 AND lon BETWEEN 24.7 AND 25.2 THEN
+        RETURN 'FI';
+
+    -- PRIORITY 2: Country boundaries (checked after capitals)
+    -- Denmark (Northern limit adjusted to 57.6° to exclude Gothenburg)
+    ELSIF lat BETWEEN 54.5 AND 57.6 AND lon BETWEEN 8.0 AND 15.5 THEN
+        RETURN 'DK';
+
+    -- Sweden (Check BEFORE Norway to avoid overlap)
     ELSIF lat BETWEEN 55.0 AND 69.5 AND lon BETWEEN 10.5 AND 24.5 THEN
         RETURN 'SE';
 
-    -- Finland
+    -- Finland (Check BEFORE Norway to avoid overlap)
     ELSIF lat BETWEEN 59.5 AND 70.5 AND lon BETWEEN 19.0 AND 32.0 THEN
         RETURN 'FI';
+
+    -- Norway (Checked last among Nordics due to wide longitude range)
+    ELSIF lat BETWEEN 57.5 AND 71.5 AND lon BETWEEN 4.5 AND 31.5 THEN
+        RETURN 'NO';
 
     -- United Kingdom
     ELSIF lat BETWEEN 49.5 AND 61.0 AND lon BETWEEN -8.5 AND 2.0 THEN

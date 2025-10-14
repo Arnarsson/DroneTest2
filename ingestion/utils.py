@@ -26,21 +26,39 @@ def get_country_from_coordinates(lat: float, lon: float) -> str:
     Returns:
         Country code (DK, NO, SE, FI, UK, DE, FR, ES, IT, PL, NL, BE, AT, CH, IE, LV, EE, LT) or 'XX' for unknown
     """
-    # Denmark (approximate boundaries)
-    if 54.5 <= lat <= 58.0 and 8.0 <= lon <= 15.5:
-        return 'DK'
-
-    # Norway (approximate boundaries)
-    elif 57.5 <= lat <= 71.5 and 4.5 <= lon <= 31.5:
+    # PRIORITY 1: Major capital cities (precise checks to avoid overlap issues)
+    # Oslo, Norway (59.9139°N, 10.7522°E) - Must check BEFORE Sweden's broad longitude range
+    if 59.7 <= lat <= 60.1 and 10.5 <= lon <= 11.0:
         return 'NO'
 
-    # Sweden (approximate boundaries)
+    # Stockholm, Sweden (59.3293°N, 18.0686°E)
+    elif 59.1 <= lat <= 59.5 and 17.8 <= lon <= 18.3:
+        return 'SE'
+
+    # Copenhagen, Denmark (55.6761°N, 12.5683°E)
+    elif 55.5 <= lat <= 55.8 and 12.3 <= lon <= 12.8:
+        return 'DK'
+
+    # Helsinki, Finland (60.1699°N, 24.9384°E)
+    elif 60.0 <= lat <= 60.4 and 24.7 <= lon <= 25.2:
+        return 'FI'
+
+    # PRIORITY 2: Country boundaries (checked after capitals)
+    # Denmark (approximate boundaries) - Northern limit adjusted to 57.6° to exclude Gothenburg (57.7°N)
+    elif 54.5 <= lat <= 57.6 and 8.0 <= lon <= 15.5:
+        return 'DK'
+
+    # Sweden (approximate boundaries) - Check BEFORE Norway to avoid overlap
     elif 55.0 <= lat <= 69.5 and 10.5 <= lon <= 24.5:
         return 'SE'
 
-    # Finland (approximate boundaries)
+    # Finland (approximate boundaries) - Check BEFORE Norway to avoid overlap
     elif 59.5 <= lat <= 70.5 and 19.0 <= lon <= 32.0:
         return 'FI'
+
+    # Norway (approximate boundaries) - Checked last among Nordics due to wide longitude range
+    elif 57.5 <= lat <= 71.5 and 4.5 <= lon <= 31.5:
+        return 'NO'
 
     # United Kingdom (approximate boundaries)
     elif 49.5 <= lat <= 61.0 and -8.5 <= lon <= 2.0:
