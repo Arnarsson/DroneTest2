@@ -4,11 +4,7 @@
       "command": "npx",
       "args": [
         "chrome-devtools-mcp@latest",
-        "--executable-path=/usr/bin/chromium",
-        "--headless=new",
-        "--disable-gpu",
-        "--no-sandbox",
-        "--disable-dev-shm-usage"
+        "--browser-url=http://localhost:9222"
       ]
     }
   }
