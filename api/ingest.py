@@ -159,11 +159,11 @@ async def insert_incident(incident_data):
                     domain = urlparse(source.get('source_url', '')).netloc or 'unknown'
 
                     # First, get or create source in sources table
-                    # Schema: UNIQUE (domain, source_type, homepage_url)
+                    # Schema: UNIQUE (domain, source_type) - see sql/supabase_schema_v2.sql line 45
                     source_id = await conn.fetchval("""
                         INSERT INTO public.sources (name, domain, source_type, homepage_url, trust_weight)
                         VALUES ($1, $2, $3, $4, $5)
-                        ON CONFLICT (domain, source_type, homepage_url)
+                        ON CONFLICT (domain, source_type)
                         DO UPDATE SET
                             name = EXCLUDED.name,
                             trust_weight = GREATEST(sources.trust_weight, EXCLUDED.trust_weight)

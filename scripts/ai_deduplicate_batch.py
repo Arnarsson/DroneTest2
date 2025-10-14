@@ -363,6 +363,7 @@ class BatchDeduplicator:
                 # For each duplicate, create source entry in primary
                 for dup in duplicates:
                     # Step 1: Create or get source entry in sources table
+                    # Schema: UNIQUE (domain, source_type) - see sql/supabase_schema_v2.sql line 45
                     source_id = await self.conn.fetchval("""
                         INSERT INTO public.sources (
                             name,
@@ -371,7 +372,7 @@ class BatchDeduplicator:
                             homepage_url,
                             trust_weight
                         ) VALUES ($1, $2, $3, $4, $5)
-                        ON CONFLICT (domain, source_type, homepage_url)
+                        ON CONFLICT (domain, source_type)
                         DO UPDATE SET name = EXCLUDED.name
                         RETURNING id
                     """,

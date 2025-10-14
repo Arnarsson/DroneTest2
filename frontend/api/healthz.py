@@ -45,14 +45,18 @@ class handler(BaseHTTPRequestHandler):
                     "debug_url": url_masked
                 }
             except Exception as e:
+                # SECURITY: Log full error server-side, don't expose to client
+                import traceback
+                print(f"Health check error: {type(e).__name__}: {str(e)}", file=sys.stderr)
+                traceback.print_exc()  # Server-side logging for debugging
+
+                # Return generic error - no internal details
                 return {
                     "ok": False,
                     "service": "dronewatch-api",
                     "database": "error",
-                    "error": str(e),
-                    "type": type(e).__name__,
-                    "has_env": bool(DATABASE_URL),
-                    "using_pooler": 'pooler.supabase.com' in (DATABASE_URL or '') and ':6543' in (DATABASE_URL or '')
+                    "error": "Database connection failed",
+                    "detail": "Check server logs for details"
                 }
 
         result = run_async(check_db())
@@ -60,32 +64,38 @@ class handler(BaseHTTPRequestHandler):
 
         self.send_header('Content-Type', 'application/json')
 
-        # Add CORS headers
+        # Handle CORS - whitelist specific origins only
+        ALLOWED_ORIGINS = [
+            'https://www.dronemap.cc',
+            'https://dronewatch.cc',
+            'http://localhost:3000',
+            'http://localhost:3001'
+        ]
+
         origin = self.headers.get('Origin', '')
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
+        if origin in ALLOWED_ORIGINS:
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
 
         self.end_headers()
         self.wfile.write(json.dumps(result).encode())
 
     def do_OPTIONS(self):
-        # Handle CORS preflight
+        # Handle CORS preflight - whitelist specific origins only
+        ALLOWED_ORIGINS = [
+            'https://www.dronemap.cc',
+            'https://dronewatch.cc',
+            'http://localhost:3000',
+            'http://localhost:3001'
+        ]
+
         origin = self.headers.get('Origin', '')
         self.send_response(200)
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
+
+        if origin in ALLOWED_ORIGINS:
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+
         self.end_headers()

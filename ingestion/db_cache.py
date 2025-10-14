@@ -3,11 +3,16 @@ Database-backed cache for scraper deduplication
 Replaces file-based processed_incidents.json
 """
 import os
+import sys
 import asyncio
-import asyncpg
 import logging
 from typing import Set, Optional
 from datetime import datetime
+
+# Add parent directory to path to import from frontend.api
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from frontend.api.db_utils import get_connection
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +29,6 @@ class ScraperCache:
             self._memory_cache = None
             self._use_db = True
 
-    async def _get_connection(self):
-        """Get database connection"""
-        if 'supabase.co' in self.database_url or 'supabase.com' in self.database_url:
-            clean_url = self.database_url.split('?')[0] if '?' in self.database_url else self.database_url
-            return await asyncpg.connect(clean_url, ssl='require', statement_cache_size=0)
-        else:
-            return await asyncpg.connect(self.database_url)
-
     async def load(self) -> Set[str]:
         """Load processed incident hashes from database"""
         if not self._use_db:
@@ -39,7 +36,7 @@ class ScraperCache:
             return self._memory_cache
 
         try:
-            conn = await self._get_connection()
+            conn = await get_connection()
             try:
                 # Load hashes from last 30 days
                 query = """
@@ -67,7 +64,7 @@ class ScraperCache:
             return
 
         try:
-            conn = await self._get_connection()
+            conn = await get_connection()
             try:
                 query = """
                 INSERT INTO public.scraper_cache (incident_hash, title, occurred_at, source_name)
@@ -88,7 +85,7 @@ class ScraperCache:
             return
 
         try:
-            conn = await self._get_connection()
+            conn = await get_connection()
             try:
                 result = await conn.execute("SELECT public.cleanup_old_scraper_cache()")
                 logger.info("Cleaned up old cache entries")
@@ -122,14 +119,6 @@ class ScraperMetrics:
         self.completed_at = None
         self.database_url = os.getenv("DATABASE_URL")
 
-    async def _get_connection(self):
-        """Get database connection"""
-        if 'supabase.co' in self.database_url or 'supabase.com' in self.database_url:
-            clean_url = self.database_url.split('?')[0] if '?' in self.database_url else self.database_url
-            return await asyncpg.connect(clean_url, ssl='require', statement_cache_size=0)
-        else:
-            return await asyncpg.connect(self.database_url)
-
     async def save(self):
         """Save metrics to database"""
         if not self.database_url:
@@ -140,7 +129,7 @@ class ScraperMetrics:
         execution_time_ms = int((self.completed_at - self.started_at).total_seconds() * 1000)
 
         try:
-            conn = await self._get_connection()
+            conn = await get_connection()
             try:
                 query = """
                 INSERT INTO public.scraper_metrics

@@ -25,12 +25,16 @@ async def test_connection():
         }
 
     except Exception as e:
+        # SECURITY: Log full error server-side only, never expose to client
         import traceback
+        traceback.print_exc()  # Server-side logging for debugging
+        print(f"Connection test error: {type(e).__name__}: {str(e)}", file=sys.stderr)
+
+        # Return generic error to client - no internal details
         return {
             "success": False,
-            "error": str(e),
-            "type": type(e).__name__,
-            "traceback": traceback.format_exc()
+            "error": "Connection test failed",
+            "detail": "Check server logs for details."
         }
 
 class handler(BaseHTTPRequestHandler):

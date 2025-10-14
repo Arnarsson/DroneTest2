@@ -51,12 +51,18 @@ async def simple_query():
         }
 
     except Exception as e:
+        # SECURITY: Log full error server-side only, never expose to client
+        # Exposing tracebacks reveals internal file paths, database schema,
+        # and implementation details that can aid attackers
         import traceback
+        traceback.print_exc()  # Server-side logging for debugging
+        print(f"Simple test error: {type(e).__name__}: {str(e)}", file=sys.stderr)
+
+        # Return generic error to client - no internal details
         return {
             "success": False,
-            "error": str(e),
-            "type": type(e).__name__,
-            "traceback": traceback.format_exc()
+            "error": "Internal server error",
+            "detail": "Failed to fetch incidents. Check server logs for details."
         }
 
 class handler(BaseHTTPRequestHandler):

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ThemeToggle } from './ThemeToggle'
 import { DroneWatchLogo } from './DroneWatchLogo'
 import { AboutModal, useAboutModal } from './AboutModal'
+import { logger } from '@/lib/logger'
 
 interface HeaderProps {
   incidentCount: number
@@ -13,8 +14,8 @@ interface HeaderProps {
 }
 
 export function Header({ incidentCount, isLoading, currentView, onViewChange }: HeaderProps) {
-  console.log('[Header] Rendered with incidentCount:', incidentCount)
-  console.log('[Header] isLoading:', isLoading)
+  logger.debug('[Header] Rendered with incidentCount:', incidentCount)
+  logger.debug('[Header] isLoading:', isLoading)
 
   const { isOpen, openModal, closeModal } = useAboutModal()
 

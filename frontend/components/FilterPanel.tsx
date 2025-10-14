@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { FilterState } from '@/types'
 import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'
+import { logger } from '@/lib/logger'
 
 interface FilterPanelProps {
   filters: FilterState
@@ -15,10 +16,10 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle }: FilterPanelProps) {
-  console.log('[FilterPanel] Rendered')
-  console.log('[FilterPanel] incidentCount:', incidentCount)
-  console.log('[FilterPanel] filters:', filters)
-  console.log('[FilterPanel] isOpen:', isOpen)
+  logger.debug('[FilterPanel] Rendered')
+  logger.debug('[FilterPanel] incidentCount:', incidentCount)
+  logger.debug('[FilterPanel] filters:', filters)
+  logger.debug('[FilterPanel] isOpen:', isOpen)
 
   const [expandedSections, setExpandedSections] = useState({
     evidence: true,

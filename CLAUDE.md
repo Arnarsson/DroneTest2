@@ -698,9 +698,11 @@ npm run dev                           # http://localhost:3000
 - `frontend/components/DroneWatchLogo.tsx` - Brand logo component
 
 **Database**:
-- `migrations/011_source_verification.sql` - Multi-source schema (PENDING execution)
-- `migrations/012_flight_correlation.sql` - OpenSky integration (PENDING execution)
+- `migrations/017_migration_tracking.sql` - Migration tracking system (NEW October 14, 2025)
 - `migrations/016_prevent_duplicate_incidents.sql` - Duplicate prevention (EXECUTED October 9, 2025)
+- `migrations/015_expand_to_european_coverage.sql` - European coverage expansion (EXECUTED October 9, 2025)
+- `migrations/011_source_verification.sql` - Multi-source schema (PENDING execution)
+- `migrations/012_flight_correlation.sql` - OpenSky integration (MISSING - gap in numbering)
 - `frontend/api/db.py` - PostGIS query builders
 - `frontend/api/ingest.py` - API ingestion with source URL duplicate checking
 
@@ -754,11 +756,73 @@ OPENROUTER_MODEL="openai/gpt-3.5-turbo"
 5. **Vercel**: Auto-deploys to production
 6. **Validation**: Check deployment logs, test live site
 
-**Migration Deployment**:
-1. Test locally: `psql "..." -f migrations/XXX.sql --dry-run`
-2. Backup database: Use Supabase dashboard
-3. Execute: `psql "...@...supabase.com:5432/postgres" -f migrations/XXX.sql`
-4. Validate: Check schema, test queries, verify frontend
+**Migration Deployment** (with tracking):
+
+**IMPORTANT**: Always check migration tracking before running new migrations (since October 14, 2025)
+
+```bash
+# Step 1: Check if migration already executed
+psql "postgresql://...@...pooler.supabase.com:5432/postgres" \
+  -c "SELECT * FROM public.check_migration_executed('017');"
+
+# Step 2: If NOT executed, run migration
+# Test locally first (optional):
+psql "..." -f migrations/017_migration_tracking.sql --dry-run
+
+# Step 3: Backup database
+# Use Supabase dashboard: Database → Backups
+
+# Step 4: Execute migration
+psql "postgresql://...@...pooler.supabase.com:5432/postgres" \
+  -f migrations/017_migration_tracking.sql
+
+# Step 5: Verify execution
+psql "postgresql://...@...pooler.supabase.com:5432/postgres" \
+  -c "SELECT version, description, executed_at FROM public.schema_migrations ORDER BY version;"
+
+# Step 6: Validate application
+# - Check schema changes applied correctly
+# - Test queries that use new schema
+# - Verify frontend still works
+```
+
+**Migration Tracking System** (Migration 017):
+- Table `public.schema_migrations` tracks all executed migrations
+- Prevents duplicate executions
+- Documents migration history with git commit SHAs
+- Helper functions:
+  - `check_migration_executed(version)` - Check before running
+  - `record_migration(version, description, ...)` - Record after running
+
+**View Migration History**:
+```sql
+-- All executed migrations
+SELECT version, description, executed_at, executed_by
+FROM public.schema_migrations
+ORDER BY version;
+
+-- Check for gaps in numbering
+-- (useful for identifying missing/duplicate migrations)
+WITH numbered AS (
+  SELECT version::INTEGER AS num
+  FROM public.schema_migrations
+  WHERE version ~ '^\d+$'
+),
+expected AS (
+  SELECT generate_series(1, (SELECT MAX(num) FROM numbered)) AS num
+)
+SELECT e.num AS missing_migration_number
+FROM expected e
+LEFT JOIN numbered n ON e.num = n.num
+WHERE n.num IS NULL
+ORDER BY e.num;
+```
+
+**Current Migration Status** (October 14, 2025):
+- Total migrations: 17 (001-017, with 012 missing)
+- Backfilled migrations: 001-016 with git timestamps
+- Duplicate files identified: 014 (2 files), 015 (3 files)
+- Migration tracking: ✅ Active (since migration 017)
 
 ---
 
@@ -783,7 +847,118 @@ This will:
 
 ---
 
-**Last Updated**: October 9, 2025
+## Comprehensive Code Review - October 14, 2025
+
+### Review Summary
+
+**Status**: Comprehensive full-stack code review completed
+**Document**: See `CODE_REVIEW_2025_10_14.md` for complete findings
+**Overall Score**: 6.7/10 - Production-ready with critical fixes needed
+
+### Key Findings
+
+**✅ Database Already Consolidated in Supabase**
+- All database operations use Supabase (port 6543 transaction pooler)
+- No local PostgreSQL dependencies
+- Migration tracking needed, but architecture is sound
+
+**🚨 Critical Issues Identified (12 total)**
+
+1. **Schema Constraint Mismatch** - `ingest.py:166` conflicts with database (CRITICAL)
+2. **<5% Test Coverage** - No frontend tests, minimal backend tests (CRITICAL)
+3. **645-line Map Component** - Performance bottleneck, needs refactoring (HIGH)
+4. **Traceback Exposure** - Security risk exposing internal paths (CRITICAL)
+5. **Missing Migration Tracking** - No way to know which migrations executed (MEDIUM)
+6. **Duplicate Connection Logic** - DRY violation across 3 files (HIGH)
+7. **Missing source_url Index** - O(n) lookups on every ingest (HIGH)
+8. **N+1 Query Pattern** - Sources aggregation inefficient (MEDIUM)
+9. **Debug Logs in Production** - 30+ console.log statements (MEDIUM)
+10. **No Error Handling** - Scraper main loop can crash (HIGH)
+11. **Config File Too Large** - 930 lines, needs splitting (MEDIUM)
+12. **CORS Allows All Origins** - Security risk (MEDIUM)
+
+### Codebase Metrics
+
+- **Total Lines**: ~10,000 (3,500 frontend TypeScript, 6,000 backend Python, 500 SQL)
+- **Components**: 14 React components
+- **API Endpoints**: 2 (incidents, ingest)
+- **Migrations**: 17 files (with duplicates/conflicts)
+- **Test Coverage**: <5% (CRITICAL GAP)
+- **RSS Sources**: 45+ verified feeds across 15 European countries
+
+### Action Plan & Timeline
+
+**Week 1: Critical Fixes (1 day)**
+1. Fix schema constraint mismatch (`ingest.py:166`) - 30 min
+2. Add migration tracking system (migration 017) - 1 hour
+3. Extract shared connection logic (`db_utils.py`) - 2 hours
+4. Remove traceback exposure in errors - 1 hour
+5. Add `source_url` index - 15 min
+
+**Week 2-3: High Priority (5 days)**
+6. Refactor Map.tsx into modules - 1 day
+7. Optimize sources query (filtered CTE) - 2 hours
+8. Remove debug logs (add logger utility) - 2 hours
+9. Fix CORS policy (whitelist origins) - 30 min
+10. Add basic test coverage (API + components) - 3 days
+
+**Month 2: Enhancements (2 weeks)**
+11. API documentation (OpenAPI spec) - 1 day
+12. Marker diffing for performance - 1 day
+13. Component documentation (Storybook) - 2 days
+14. Full test coverage (80%+) - 1 week
+15. Monitoring dashboard - 2 days
+
+### Estimated Total Effort
+
+- **Critical fixes**: 1 week
+- **Testing + performance**: 2-3 weeks
+- **Polish + documentation**: 1-2 weeks
+- **Total to production-grade**: 4-6 weeks
+
+### Current System Status (October 14, 2025)
+
+**Working Well:**
+- ✅ Database architecture (Supabase + PostGIS)
+- ✅ Multi-layer defense system (5 validation layers)
+- ✅ Evidence scoring system
+- ✅ Geographic filtering (European coverage)
+- ✅ AI verification (OpenRouter integration)
+- ✅ Duplicate prevention (4 layers)
+- ✅ Sentry monitoring integration
+- ✅ Documentation (CLAUDE.md)
+
+**Needs Attention:**
+- ⚠️ Test coverage (<5% - biggest gap)
+- ⚠️ Frontend performance (Map component)
+- ⚠️ Security hardening (error exposure, CORS)
+- ⚠️ Code quality (DRY violations)
+- ⚠️ Migration tracking
+- ⚠️ API documentation
+
+### Recommendations
+
+**Top 3 Priorities:**
+1. **Testing Infrastructure** - Biggest gap, highest risk
+2. **Performance Optimization** - Map component + query optimization
+3. **Security Hardening** - Remove traceback exposure, fix CORS
+
+**Long-Term Vision:**
+Make DroneWatch 2.0 a reference implementation for geospatial incident tracking with:
+- Full test coverage (80%+)
+- Sub-200ms API response times
+- Comprehensive API documentation
+- Production-grade error handling
+- Monitoring and alerting
+
+### Next Review
+
+**Scheduled**: After Week 1 fixes (estimated October 21, 2025)
+**Focus**: Verify critical issues resolved, plan testing infrastructure
+
+---
+
+**Last Updated**: October 14, 2025
 **Version**: 2.3.0 (DroneWatch 2.0 - European Coverage Expansion)
 **Repository**: https://github.com/Arnarsson/DroneWatch2.0
 

@@ -159,11 +159,11 @@ async def insert_incident(incident_data):
                     domain = urlparse(source.get('source_url', '')).netloc or 'unknown'
 
                     # First, get or create source in sources table
-                    # Schema: UNIQUE (domain, source_type, homepage_url)
+                    # Schema: UNIQUE (domain, source_type) - see sql/supabase_schema_v2.sql line 45
                     source_id = await conn.fetchval("""
                         INSERT INTO public.sources (name, domain, source_type, homepage_url, trust_weight)
                         VALUES ($1, $2, $3, $4, $5)
-                        ON CONFLICT (domain, source_type, homepage_url)
+                        ON CONFLICT (domain, source_type)
                         DO UPDATE SET
                             name = EXCLUDED.name,
                             trust_weight = GREATEST(sources.trust_weight, EXCLUDED.trust_weight)
@@ -207,13 +207,17 @@ async def insert_incident(incident_data):
 
     except Exception as e:
         import traceback
-        error_details = {
-            "error": str(e),
-            "type": type(e).__name__,
-            "traceback": traceback.format_exc()
+        # SECURITY: Log full traceback server-side only, never expose to client
+        # Exposing tracebacks reveals internal file paths, database schema,
+        # and implementation details that can aid attackers
+        traceback.print_exc()  # Server-side logging for debugging
+        logger.error(f"Database error: {type(e).__name__}: {str(e)}")
+
+        # Return generic error to client - no internal details
+        return {
+            "error": "Internal server error",
+            "detail": "Failed to process incident. Check server logs for details."
         }
-        print(f"Database error: {error_details}", file=sys.stderr)
-        return error_details
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -259,7 +263,14 @@ class handler(BaseHTTPRequestHandler):
         # Insert into database
         result = run_async(insert_incident(incident_data))
 
-        # Handle CORS
+        # Handle CORS - whitelist specific origins only
+        ALLOWED_ORIGINS = [
+            'https://www.dronemap.cc',
+            'https://dronewatch.cc',
+            'http://localhost:3000',
+            'http://localhost:3001'
+        ]
+
         origin = self.headers.get('Origin', '')
 
         if 'error' in result:
@@ -270,25 +281,38 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.send_header('Location', f'/api/incidents/{result["id"]}')
 
-        if origin and ('.vercel.app' in origin or origin in [
-            "https://dronewatch.cc",
-            "https://www.dronewatch.cc",
-            "https://dronewatchv2.vercel.app",
-            "http://localhost:3000"
-        ]):
+        # Only allow whitelisted origins
+        if origin in ALLOWED_ORIGINS:
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', '*')
+            self.send_header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+        elif origin:
+            # Origin provided but not allowed - reject
+            logger.warning(f"Blocked CORS request from unauthorized origin: {origin}")
 
         self.end_headers()
         self.wfile.write(json.dumps(result).encode())
 
     def do_OPTIONS(self):
-        # Handle CORS preflight
+        # Handle CORS preflight - whitelist specific origins only
+        ALLOWED_ORIGINS = [
+            'https://www.dronemap.cc',
+            'https://dronewatch.cc',
+            'http://localhost:3000',
+            'http://localhost:3001'
+        ]
+
         origin = self.headers.get('Origin', '')
         self.send_response(200)
-        if origin:
+
+        # Only allow whitelisted origins
+        if origin in ALLOWED_ORIGINS:
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
             self.send_header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+        elif origin:
+            # Origin provided but not allowed - reject with 403
+            logger.warning(f"Blocked CORS preflight from unauthorized origin: {origin}")
+            self.send_response(403)
+
         self.end_headers()

@@ -64,11 +64,16 @@ async def debug_incidents():
         }
 
     except Exception as e:
+        # SECURITY: Log full error server-side only, never expose to client
+        # Even admin endpoints should not expose tracebacks (defense in depth)
         import traceback
+        traceback.print_exc()  # Server-side logging for debugging
+        print(f"Debug endpoint error: {type(e).__name__}: {str(e)}", file=sys.stderr)
+
+        # Return generic error to client - no internal details
         return {
-            "error": str(e),
-            "type": type(e).__name__,
-            "traceback": traceback.format_exc()
+            "error": "Failed to retrieve debug information",
+            "detail": "Check server logs for details."
         }
 
 class handler(BaseHTTPRequestHandler):

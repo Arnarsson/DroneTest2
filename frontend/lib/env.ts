@@ -14,6 +14,8 @@ export const ENV = {
 } as const;
 
 // Build-time validation (server-side only)
+// Note: These warnings are kept as console.warn because they need to appear
+// in build logs even in production, and we don't have logger available at build time
 if (typeof window === 'undefined') {
   if (!process.env.NEXT_PUBLIC_API_URL && process.env.NODE_ENV === 'production') {
     console.warn('⚠️  NEXT_PUBLIC_API_URL not set - using fallback');
