@@ -2231,3 +2231,4 @@ mcp__chrome-devtools__new_page("https://www.dronemap.cc")
 **Version**: 2.6.1 (Chrome DevTools MCP Fixed)
 **Next Action**: User restarts Claude Code to verify fix works
 **Wave 12 Status**: ✅ PRODUCTION READY
+- mcp3
