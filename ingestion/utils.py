@@ -612,8 +612,9 @@ def is_drone_incident(title: str, content: str) -> bool:
         # English/Danish/Norwegian
         "observed", "spotted", "sighted", "set", "opdaget", "filmed", "recorded",
         "detected", "detekteret", "mistænk", "suspect",
+        "unidentified", "uidentificeret",  # NEW: Captures "unidentified drones"
         # Swedish
-        "observerad", "upptäckt", "filmad", "identifierad",
+        "observerad", "upptäckt", "filmad", "identifierad", "oidentifierad",
         # Finnish
         "havaittu", "tunnistettu", "kuvattu"
     ])
@@ -622,7 +623,10 @@ def is_drone_incident(title: str, content: str) -> bool:
         "closed", "closure", "lukket", "lukning",
         "diverted", "omdirigeret",
         "suspended", "suspenderet", "grounded",
-        "evacuated", "evacuated"
+        "evacuated", "evacuated",
+        "disrupt", "disrupted", "disruption", "störning",  # NEW: Captures "drones disrupt"
+        "halted", "stopped", "ceased",  # NEW: Additional action words
+        "delay", "delayed", "delays", "forsinket"  # NEW: Delay indicators
     ])
 
     has_response = any(word in full_text for word in [
@@ -683,15 +687,16 @@ def is_drone_incident(title: str, content: str) -> bool:
     ])
 
     # Exclude defense/security deployment articles (not actual incidents)
+    # IMPORTANT: Only block deployment news, NOT incidents involving military assets
     is_defense = any(phrase in full_text for phrase in [
-        "rushed to", "sent to", "deployed to",
+        "rushed to defend", "sent to defend", "deployed to defend",  # Deployment actions
         "defend against", "forsvare mod", "forsvare imod",
-        "military assets", "militære aktiver",
-        "frigate", "fregat", "troops", "tropper", "styrker",
-        "radars", "radar", "increased security",
+        "troops rushed to", "troops sent to", "troops deployed to",  # Military deployment
+        "military assets deployed", "militære aktiver",
         "bolster defense", "styrke forsvar", "øge sikkerheden",
-        "navy ship", "naval vessel", "warship",
-        "military equipment", "militært udstyr"
+        "increased security measures", "øget sikkerhed",  # Security announcements
+        "navy ship sent", "naval vessel deployed", "warship deployed",
+        "military equipment deployed", "militært udstyr"
     ])
 
     return has_drone and has_incident and not is_excluded and not is_policy and not is_international and not is_defense
