@@ -1,0 +1,227 @@
+
+======================================================================
+DRONEWATCH FAKE DETECTION TEST SUITE
+Testing 30 known fake incidents across 4 quality control layers
+======================================================================
+
+======================================================================
+LAYER 1: SATIRE DOMAIN DETECTION (10 TESTS)
+======================================================================
+
+✅ Test 1: BLOCKED satire domain
+   Title: Aliens Use Drones to Monitor Earth Leaders
+   Reason: Satire domain: der-postillon.com
+   Description: German satire site - absurd claim
+
+✅ Test 2: BLOCKED satire domain
+   Title: Government Announces Mandatory Drone Helmets for All Citizen
+   Reason: Satire domain: speld.nl
+   Description: Dutch satire site - absurd regulation
+
+✅ Test 3: BLOCKED satire domain
+   Title: Pope's Blessing Drone Malfunctions During Vatican Ceremony
+   Reason: Satire domain: lercio.it
+   Description: Italian satire site - absurd incident
+
+✅ Test 4: BLOCKED satire domain
+   Title: Danish Minister Proposes Drone Tax Based on Wing Size
+   Reason: Satire domain: rokokoposten.dk
+   Description: Danish satire site - absurd policy
+
+✅ Test 5: BLOCKED satire domain
+   Title: Irish Leprechauns Using Drones to Protect Gold
+   Reason: Satire domain: waterfordwhispersnews.com
+   Description: Irish satire site - folklore parody
+
+✅ Test 6: BLOCKED satire domain
+   Title: Austrian Government Bans Drones from Making Eye Contact
+   Reason: Satire domain: tagespresse.com
+   Description: Austrian satire site - absurd law
+
+✅ Test 7: BLOCKED satire domain
+   Title: Polish Scientists Teach Drones to Speak
+   Reason: Satire domain: aszdziennik.pl
+   Description: Polish satire site - fake technology
+
+✅ Test 8: BLOCKED satire domain
+   Title: UK Pub Owner Uses Drone to Deliver Pints to Customers
+   Reason: Satire domain: newsthump.com
+   Description: British satire site - absurd business
+
+✅ Test 9: BLOCKED satire domain
+   Title: Spanish Bull Fighting Drones Introduced in Barcelona
+   Reason: Satire domain: elmundotoday.com
+   Description: Spanish satire site - cultural parody
+
+✅ Test 10: BLOCKED satire domain
+   Title: French Government Requires Drones to Carry Baguettes
+   Reason: Satire domain: legorafi.fr
+   Description: French satire site - cultural stereotype
+
+Satire Detection: 10/10 passed (100%)
+
+
+======================================================================
+LAYER 2: SIMULATION/DRILL DETECTION (10 TESTS)
+======================================================================
+
+✅ Test 1: BLOCKED simulation/drill
+   Title: NATO Conducts Counter-Drone Exercise at Oslo Airport
+   Confidence: 0.90
+   Keywords detected: planned
+   Description: Military exercise with multiple simulation keywords
+
+✅ Test 2: BLOCKED simulation/drill
+   Title: Frankfurt Airport Holds Anti-Drone Training Drill
+   Confidence: 0.90
+   Keywords detected: simulated
+   Description: Airport drill with simulation language
+
+✅ Test 3: BLOCKED simulation/drill
+   Title: Swedish Military Tests New Drone Defense System
+   Confidence: 0.90
+   Keywords detected: 
+   Description: Defense system test with demonstration
+
+✅ Test 4: BLOCKED simulation/drill
+   Title: Copenhagen Airport Lufthavnsøvelse - Counter-Drone Practice
+   Confidence: 0.90
+   Keywords detected: 
+   Description: Danish drill with native keywords
+
+✅ Test 5: BLOCKED simulation/drill
+   Title: Helsinki Airport Drone Detection Harjoitus
+   Confidence: 0.90
+   Keywords detected: 
+   Description: Finnish exercise with native keywords
+
+✅ Test 6: BLOCKED simulation/drill
+   Title: Polish Air Force Ćwiczenia Wojskowe - Drone Defense
+   Confidence: 0.90
+   Keywords detected: 
+   Description: Polish military exercise with native keywords
+
+✅ Test 7: BLOCKED simulation/drill
+   Title: Dutch Airport Oefening - Emergency Response Practice
+   Confidence: 0.90
+   Keywords detected: simulatie
+   Description: Dutch drill with native keywords
+
+✅ Test 8: BLOCKED simulation/drill
+   Title: Military Manöver Tests Drone Interception Übung
+   Confidence: 0.90
+   Keywords detected: 
+   Description: German exercise with native keywords
+
+✅ Test 9: BLOCKED simulation/drill
+   Title: Paris Airport Exercice Militaire - Drone Defense
+   Confidence: 0.90
+   Keywords detected: entraînement, simulation
+   Description: French exercise with native keywords
+
+✅ Test 10: BLOCKED simulation/drill
+   Title: Mock Drone Attack Planned for London Heathrow Rehearsal
+   Confidence: 0.90
+   Keywords detected: practice
+   Description: British rehearsal with multiple simulation terms
+
+Simulation Detection: 10/10 passed (100%)
+
+
+======================================================================
+LAYER 3: POLICY ANNOUNCEMENT DETECTION (5 TESTS)
+======================================================================
+
+✅ Test 1: BLOCKED policy announcement
+   Title: Copenhagen Municipality Announces New Drone Ban for City Cen
+   Confidence: 0.90
+   Keywords detected: ban, prohibited, restriction
+   Description: Municipal drone ban announcement
+
+✅ Test 2: BLOCKED policy announcement
+   Title: Norway Introduces Stricter Drone Regulations
+   Confidence: 0.90
+   Keywords detected: regulations, legislation, law
+   Description: National regulatory announcement
+
+✅ Test 3: BLOCKED policy announcement
+   Title: Germany Plans Temporary Flight Restriction for Upcoming Summ
+   Confidence: 0.90
+   Keywords detected: restriction, no-fly zone, temporary
+   Description: Temporary restriction announcement
+
+✅ Test 4: BLOCKED policy announcement
+   Title: EU Drone Rules to be Harmonized Across Member States
+   Confidence: 0.90
+   Keywords detected: rules, regulatory, framework
+   Description: International policy coordination
+
+✅ Test 5: BLOCKED policy announcement
+   Title: Swedish Aviation Authority Issues Drone Advisory for Winter
+   Confidence: 0.90
+   Keywords detected: advisory, guidelines, recommends
+   Description: Safety advisory announcement
+
+Policy Detection: 5/5 passed (100%)
+
+
+======================================================================
+LAYER 4: TEMPORAL VALIDATION (5 TESTS)
+======================================================================
+
+✅ Test 1: BLOCKED temporal issue
+   Title: Gatwick Airport Drone Incident - December 2018
+   Date: 2018-12-20
+   Reason: Historical article: 2490 days ago (6 years)
+   Description: Famous 2018 Gatwick incident - too old
+
+✅ Test 2: BLOCKED temporal issue
+   Title: 2017 Swedish Nuclear Power Plant Drone Incident
+   Date: 2017-08-15
+   Reason: Historical article: 2981 days ago (8 years)
+   Description: 2017 nuclear plant incident - too old
+
+✅ Test 3: BLOCKED temporal issue
+   Title: Future Drone Conference Scheduled for Next Year
+   Date: 2026-03-15
+   Reason: Future date: 2026-03-15T09:00:00+00:00
+   Description: Future event - invalid date
+
+✅ Test 4: BLOCKED temporal issue
+   Title: Last Year's Oslo Airport Closure - Anniversary Report
+   Date: 2024-09-09
+   Reason: Historical article: 400 days ago (1 years)
+   Description: Anniversary report - too old
+
+✅ Test 5: BLOCKED temporal issue
+   Title: 2019 Frankfurt Airport Drone Sighting
+   Date: 2019-07-10
+   Reason: Historical article: 2287 days ago (6 years)
+   Description: 2019 incident - too old
+
+Temporal Validation: 5/5 passed (100%)
+
+
+======================================================================
+FINAL RESULTS
+======================================================================
+
+Total Tests: 30
+Passed: 30
+Failed: 0
+Success Rate: 100.0%
+
+Breakdown by Layer:
+  Layer 1 (Satire Domains):    10/10 (100%)
+  Layer 2 (Simulations):       10/10 (100%)
+  Layer 3 (Policy):            5/5 (100%)
+  Layer 4 (Temporal):          5/5 (100%)
+
+======================================================================
+
+✅ ALL TESTS PASSED - ZERO FAKES WOULD BE INGESTED!
+
+Quality Control Status: 100% EFFECTIVE
+All fake news, simulations, policy announcements, and historical
+articles would be successfully blocked from DroneWatch database.
+

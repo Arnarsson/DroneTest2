@@ -4,6 +4,7 @@
       "command": "npx",
       "args": [
         "chrome-devtools-mcp@latest",
+        "--executable-path=/usr/bin/chromium",
         "--headless=true",
         "--isolated=true"
       ]
