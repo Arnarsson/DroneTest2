@@ -17,6 +17,8 @@ class handler(BaseHTTPRequestHandler):
         # Handle CORS preflight - whitelist specific origins only
         ALLOWED_ORIGINS = [
             'https://www.dronemap.cc',
+            'https://dronemap.cc',
+            'https://www.dronewatch.cc',
             'https://dronewatch.cc',
             'http://localhost:3000',
             'http://localhost:3001'
@@ -85,6 +87,8 @@ class handler(BaseHTTPRequestHandler):
         # Handle CORS - whitelist specific origins only
         ALLOWED_ORIGINS = [
             'https://www.dronemap.cc',
+            'https://dronemap.cc',
+            'https://www.dronewatch.cc',
             'https://dronewatch.cc',
             'http://localhost:3000',
             'http://localhost:3001'
