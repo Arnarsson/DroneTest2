@@ -1,6 +1,7 @@
 import type { Incident } from '@/types'
 import { formatDistance } from 'date-fns/formatDistance'
 import { EVIDENCE_SYSTEM } from '@/constants/evidence'
+import { formatLocation, formatIncidentDate, getShortNarrative } from '@/lib/formatters'
 
 /**
  * Theme-aware color tokens for popup styling
@@ -104,21 +105,47 @@ function getTrustStyles(trustWeight: number): { bgClass: string; borderClass: st
 /**
  * Creates popup content HTML for a single incident
  *
+ * CEPA-style format:
+ * - Location: [City], [Country]
+ * - Date: [Month Day] or [Month Day, Year]
+ * - Details: Clean narrative (2-3 sentences)
+ * - Evidence badge
+ * - Sources (collapsed by default)
+ *
  * @param incident - Incident data
  * @param isDark - Whether dark mode is active
  * @returns HTML string for popup content
  */
 export function createPopupContent(incident: Incident, isDark: boolean = false): string {
-  const timeAgo = formatDistance(new Date(incident.occurred_at), new Date(), { addSuffix: true })
+  const location = formatLocation(incident)
+  const date = formatIncidentDate(incident.occurred_at)
+  const details = getShortNarrative(incident.narrative || incident.title, 150)
   const config = EVIDENCE_SYSTEM[incident.evidence_score as 1 | 2 | 3 | 4]
   const theme = getPopupTheme(isDark)
 
   return `
-    <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
-      <h3 style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: ${theme.textPrimary}; line-height: 1.3;">
-        ${incident.title}
-      </h3>
+    <div style="font-family: system-ui, -apple-system, sans-serif; padding: 8px; max-width: 320px;">
+      <!-- CEPA-style Location Header -->
+      <div style="margin-bottom: 6px;">
+        <span style="color: ${theme.textMuted}; font-size: 13px; font-weight: 600;">Location: </span>
+        <span style="color: ${theme.textPrimary}; font-size: 14px; font-weight: 700;">${location}</span>
+      </div>
 
+      <!-- CEPA-style Date -->
+      <div style="margin-bottom: 8px;">
+        <span style="color: ${theme.textMuted}; font-size: 13px; font-weight: 600;">Date: </span>
+        <span style="color: ${theme.textPrimary}; font-size: 13px; font-weight: 600;">${date}</span>
+      </div>
+
+      <!-- CEPA-style Details -->
+      ${details ? `
+        <div style="margin-bottom: 10px; line-height: 1.5;">
+          <span style="color: ${theme.textMuted}; font-size: 13px; font-weight: 600;">Details: </span>
+          <span style="color: ${theme.textSecondary}; font-size: 13px;">${details}</span>
+        </div>
+      ` : ''}
+
+      <!-- Evidence Badge and Asset Type -->
       <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
         <span style="
           background: ${config.gradient};
@@ -147,16 +174,7 @@ export function createPopupContent(incident: Incident, isDark: boolean = false):
             ${incident.asset_type}
           </span>
         ` : ''}
-        <span style="color: ${theme.textMuted}; font-size: 11px; font-weight: 500;">
-          ${timeAgo}
-        </span>
       </div>
-
-      ${incident.narrative ? `
-        <p style="margin: 0 0 14px 0; color: ${theme.textSecondary}; font-size: 13px; line-height: 1.6;">
-          ${incident.narrative}
-        </p>
-      ` : ''}
 
       ${incident.sources && incident.sources.length > 0 ? `
         <div style="border-top: 1px solid ${theme.borderColor}; padding-top: 12px; margin-top: 12px;">
@@ -292,6 +310,12 @@ export function createPopupContent(incident: Incident, isDark: boolean = false):
 /**
  * Creates popup content HTML for a facility with multiple incidents
  *
+ * CEPA-style format for each incident:
+ * - Location: [Facility Name]
+ * - Date: [Month Day]
+ * - Details: Brief summary
+ * - Evidence badge
+ *
  * @param incidents - Array of incidents at this facility
  * @param facilityName - Name of the facility
  * @param emoji - Emoji representing facility type
@@ -311,14 +335,19 @@ export function createFacilityPopup(
     new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
   )
 
-  return `
-    <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
-      <h3 style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: ${theme.textPrimary}; line-height: 1.3;">
-        ${emoji} ${facilityName}
-      </h3>
+  // Get country from first incident
+  const country = sortedIncidents[0]?.country || ''
 
-      <div style="margin-bottom: 12px; padding: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px;">
-        <div style="color: white; font-size: 13px; font-weight: 600; text-align: center;">
+  return `
+    <div style="font-family: system-ui, -apple-system, sans-serif; padding: 8px; max-width: 360px;">
+      <!-- Facility Header -->
+      <div style="margin-bottom: 6px;">
+        <span style="color: ${theme.textMuted}; font-size: 13px; font-weight: 600;">Location: </span>
+        <span style="color: ${theme.textPrimary}; font-size: 14px; font-weight: 700;">${emoji} ${facilityName}</span>
+      </div>
+
+      <div style="margin-bottom: 12px; padding: 6px 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 6px;">
+        <div style="color: white; font-size: 12px; font-weight: 600; text-align: center;">
           ${incidents.length} incident${incidents.length !== 1 ? 's' : ''} at this location
         </div>
       </div>
@@ -326,42 +355,53 @@ export function createFacilityPopup(
       <div style="max-height: 300px; overflow-y: auto;">
         ${sortedIncidents.map((incident) => {
           const config = EVIDENCE_SYSTEM[incident.evidence_score as 1 | 2 | 3 | 4]
-          const timeAgo = formatDistance(new Date(incident.occurred_at), new Date(), { addSuffix: true })
+          const date = formatIncidentDate(incident.occurred_at)
+          const details = getShortNarrative(incident.narrative || incident.title, 100)
 
           return `
             <div style="
-              padding: 10px;
+              padding: 8px;
               margin-bottom: 8px;
               border: 1px solid ${theme.borderColor};
-              border-radius: 8px;
+              border-radius: 6px;
               background: ${theme.cardBg};
             ">
-              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+              <!-- Date -->
+              <div style="margin-bottom: 4px;">
+                <span style="color: ${theme.textMuted}; font-size: 12px; font-weight: 600;">Date: </span>
+                <span style="color: ${theme.textPrimary}; font-size: 12px; font-weight: 600;">${date}</span>
+              </div>
+
+              <!-- Details -->
+              ${details ? `
+                <div style="margin-bottom: 6px; line-height: 1.4;">
+                  <span style="color: ${theme.textSecondary}; font-size: 12px;">${details}</span>
+                </div>
+              ` : ''}
+
+              <!-- Evidence Badge -->
+              <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="
                   background: ${config.gradient};
                   color: white;
-                  padding: 4px 10px;
-                  border-radius: 14px;
-                  font-size: 11px;
+                  padding: 3px 8px;
+                  border-radius: 12px;
+                  font-size: 10px;
                   font-weight: 700;
                   text-shadow: 0 1px 2px rgba(0,0,0,0.2);
                 ">
                   ${config.label}
                 </span>
-                <span style="color: ${theme.textSecondary}; font-size: 11px; font-weight: 500;">
-                  ${timeAgo}
-                </span>
+                ${incident.asset_type ? `
+                  <span style="
+                    color: ${theme.textMuted};
+                    font-size: 10px;
+                    font-weight: 600;
+                  ">
+                    ${incident.asset_type}
+                  </span>
+                ` : ''}
               </div>
-
-              <div style="font-size: 13px; color: ${theme.textPrimary}; font-weight: 600; margin-bottom: 4px;">
-                ${incident.title}
-              </div>
-
-              ${incident.narrative ? `
-                <div style="font-size: 12px; color: ${theme.textSecondary}; line-height: 1.4;">
-                  ${incident.narrative.substring(0, 120)}${incident.narrative.length > 120 ? '...' : ''}
-                </div>
-              ` : ''}
             </div>
           `
         }).join('')}
