@@ -1,7 +1,7 @@
 """
 DroneWatch Source Configuration - VERIFIED SOURCES ONLY
 Generated: 2025-10-05
-Updated: 2025-10-14 - European Tier 1 expansion completed
+Updated: 2025-10-15 - CEPA Map Coverage Expansion
 
 Validation: ALL URLs tested and confirmed working
 
@@ -17,7 +17,7 @@ Anti-Hallucination Measures:
 - Broken URLs removed completely
 - Verification date documented
 
-Recent Additions (2025-10-14):
+Recent Additions (2025-10-15):
 - Wave 2: 14 Swedish police regions (Västra Götaland, Södermanland, Östergötland, etc.)
 - Wave 4: 3 Norwegian media sources (TV2, Nettavisen, NRK Regional)
 - Wave 5: 9 European Tier 1 sources (Netherlands police + UK/DE/FR media)
@@ -32,7 +32,14 @@ Recent Additions (2025-10-14):
   * Poland: 1 source (Notes From Poland)
   * Austria: 1 source (The Local Austria)
   * Switzerland: 1 source (The Local Switzerland)
-- Total working sources: 74 RSS feeds + 3 HTML scrapers (77 total sources)
+- Wave 20: CEPA Map Coverage (7 working sources, 2 removed)
+  * Baltic States: 3 public broadcasters (ERR Estonia, LSM Latvia, LRT Lithuania) ✅
+  * Defense/Security: 1 outlet (Politico Europe) ✅
+  * International: 1 wire service (Guardian World) ✅
+  * UK/Ireland: 2 sources (Irish Times, Sky News UK) ✅
+  * Removed: Janes Defence (paywall), Reuters Europe (auth required)
+- Total working sources: 88 RSS feeds + 3 HTML scrapers (91 total sources)
+- Geographic Coverage: Matches CEPA map (all Baltic + Nordic + Western Europe)
 """
 
 import os
@@ -944,6 +951,125 @@ SOURCES = {
         "working": True,  # Pan-European news network
         "country": "EU",
         "note": "Euronews - Pan-European news covering drone security incidents across all member states"
+    },
+
+    # === TIER 5: BALTIC STATES PUBLIC BROADCASTERS ===
+    # Estonia, Latvia, Lithuania - CEPA map priority countries
+    # Public broadcasters with English-language RSS feeds
+
+    "err_news": {
+        "name": "ERR News (Estonia)",
+        "rss": "https://news.err.ee/rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "military", "NATO", "airspace"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "EE",
+        "note": "Estonian Public Broadcasting English news - covers Baltic security incidents"
+    },
+
+    "lsm_latvia": {
+        "name": "LSM Latvia English",
+        "rss": "https://eng.lsm.lv/rss/",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "military", "NATO", "airspace"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "LV",
+        "note": "Latvian Public Media English news - Baltic security coverage"
+    },
+
+    "lrt_lithuania": {
+        "name": "LRT Lithuania English",
+        "rss": "https://www.lrt.lt/en/news-in-english?rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "military", "NATO", "airspace"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "LT",
+        "note": "Lithuanian National Radio/TV English news - Baltic region coverage"
+    },
+
+    # === TIER 6: ADDITIONAL DEFENSE & SECURITY OUTLETS ===
+    # Specialized defense reporting for European incidents
+
+    # Janes Defence - RSS feed requires subscription, removed
+    # "janes_defence_news": {
+    #     "name": "Janes Defence News",
+    #     "rss": "https://www.janes.com/feeds/news",
+    #     "source_type": "media",
+    #     "trust_weight": 3,
+    #     "keywords": ["drone", "UAV", "unmanned", "Europe", "NATO", "military"],
+    #     "verified_date": "2025-10-15",
+    #     "working": False,  # 404 - subscription required
+    #     "country": "INTL",
+    #     "note": "Jane's Defence - RSS feed not publicly accessible (subscription required)"
+    # },
+
+    "politico_eu_security": {
+        "name": "Politico Europe Security",
+        "rss": "https://www.politico.eu/feed/",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "UAV", "security", "defense", "NATO"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "EU",
+        "note": "Politico Europe - EU/NATO security and defense coverage"
+    },
+
+    "guardian_world": {
+        "name": "The Guardian World News",
+        "rss": "https://www.theguardian.com/world/rss",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "Europe", "security"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "UK",
+        "note": "The Guardian world news - covers major European security incidents"
+    },
+
+    # Reuters Europe - returns 401 for RSS feed, already have Reuters World
+    # "reuters_europe": {
+    #     "name": "Reuters Europe News",
+    #     "rss": "https://www.reuters.com/world/europe/",
+    #     "source_type": "wire_service",
+    #     "trust_weight": 3,
+    #     "keywords": ["drone", "drones", "unmanned", "UAV", "security", "military"],
+    #     "verified_date": "2025-10-15",
+    #     "working": False,  # 401 - authentication required
+    #     "country": "INTL",
+    #     "note": "Reuters Europe-specific feed - requires authentication (already have Reuters World)"
+    # },
+
+    # === TIER 7: ADDITIONAL UK/IRELAND SOURCES ===
+
+    "irish_times": {
+        "name": "The Irish Times",
+        "rss": "https://www.irishtimes.com/cmlink/news-1.1319192",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "airport", "military"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "IE",
+        "note": "Irish Times - covers Irish and UK drone incidents"
+    },
+
+    "sky_news_uk": {
+        "name": "Sky News UK",
+        "rss": "https://feeds.skynews.com/feeds/rss/uk.xml",
+        "source_type": "media",
+        "trust_weight": 3,
+        "keywords": ["drone", "drones", "unmanned", "UAV", "airport", "Gatwick", "Heathrow"],
+        "verified_date": "2025-10-15",
+        "working": True,
+        "country": "UK",
+        "note": "Sky News UK - covers UK airport drone incidents"
     },
 }
 
