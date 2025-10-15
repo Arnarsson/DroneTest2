@@ -754,8 +754,8 @@ def is_recent_incident(occurred_at: datetime, max_age_days: int = 7) -> Tuple[bo
     if age_days > 365:
         return (False, f"Historical article: {age_days} days ago ({age_days // 365} years)")
 
-    # Check: Too old (within 1 year but older than max_age_days)
-    if age_days > max_age_days:
+    # Check: Too old (within 1 year but older than or equal to max_age_days)
+    if age_days >= max_age_days:
         return (False, f"Too old: {age_days} days ago (max {max_age_days})")
 
     return (True, "Recent incident")
