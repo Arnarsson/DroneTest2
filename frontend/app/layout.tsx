@@ -5,8 +5,8 @@ import { Providers } from './providers'
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.dronemap.cc'),
   title: 'DroneWatch - Real-time Drone Incident Tracking',
-  description: 'Live tracking and verification of drone incidents across the Nordics with evidence-based reporting',
-  keywords: 'drone, incidents, tracking, nordics, denmark, security, airports',
+  description: 'Live tracking and verification of drone incidents across all of Europe with evidence-based reporting',
+  keywords: 'drone, incidents, tracking, europe, nordics, denmark, security, airports',
   authors: [{ name: 'DroneWatch' }],
   icons: {
     icon: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'DroneWatch - Real-time Drone Incident Tracking',
-    description: 'Live tracking and verification of drone incidents across the Nordics',
+    description: 'Live tracking and verification of drone incidents across all of Europe',
     type: 'website',
     locale: 'en_US',
     images: ['/og-image.png'],
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'DroneWatch',
-    description: 'Live tracking of drone incidents across the Nordics',
+    description: 'Live tracking of drone incidents across all of Europe',
   },
 }
 

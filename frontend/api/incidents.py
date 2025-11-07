@@ -8,6 +8,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from db import fetch_incidents, run_async
+from rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -37,6 +38,41 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def handle_get(self):
+        # Rate limiting check
+        client_ip = get_client_ip(dict(self.headers))
+        allowed, remaining, reset_after = check_rate_limit(client_ip)
+        
+        if not allowed:
+            # Rate limit exceeded
+            self.send_response(429)
+            self.send_header('Content-Type', 'application/json')
+            
+            # Add rate limit headers
+            for key, value in get_rate_limit_headers(remaining, reset_after).items():
+                self.send_header(key, value)
+            
+            # Handle CORS
+            ALLOWED_ORIGINS = [
+                'https://www.dronemap.cc',
+                'https://dronemap.cc',
+                'https://www.dronewatch.cc',
+                'https://dronewatch.cc',
+                'http://localhost:3000',
+                'http://localhost:3001'
+            ]
+            origin = self.headers.get('Origin', '')
+            if origin in ALLOWED_ORIGINS:
+                self.send_header('Access-Control-Allow-Origin', origin)
+            
+            self.end_headers()
+            error_response = {
+                'error': 'Rate limit exceeded',
+                'message': f'Too many requests. Please try again in {reset_after} seconds.',
+                'retry_after': reset_after
+            }
+            self.wfile.write(json.dumps(error_response).encode())
+            return
+        
         # Parse query parameters
         parsed_url = urlparse(self.path)
         query_params = parse_qs(parsed_url.query)
@@ -100,6 +136,10 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Cache-Control', 'public, max-age=15')
+        
+        # Add rate limit headers
+        for key, value in get_rate_limit_headers(remaining, reset_after).items():
+            self.send_header(key, value)
 
         # Only allow whitelisted origins
         if origin in ALLOWED_ORIGINS:

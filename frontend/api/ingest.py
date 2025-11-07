@@ -276,8 +276,10 @@ async def insert_incident(incident_data):
                 'other': 500        # 500m - default for unknown
             }.get(asset_type, 500)
 
+            # Check for existing incident within radius AND within 7 days
+            # This prevents merging incidents that are weeks/months apart
             existing_incident = await conn.fetchrow("""
-                SELECT id, evidence_score, title, asset_type
+                SELECT id, evidence_score, title, asset_type, occurred_at
                 FROM public.incidents
                 WHERE ST_DWithin(
                     location::geography,
@@ -285,9 +287,11 @@ async def insert_incident(incident_data):
                     $3  -- Dynamic radius based on asset type
                 )
                 AND asset_type = $4  -- Must be same asset type
+                AND occurred_at >= $5 - INTERVAL '7 days'  -- Within 7 days
+                AND occurred_at <= $5 + INTERVAL '7 days'   -- Within 7 days
                 ORDER BY occurred_at ASC
                 LIMIT 1
-            """, lon, lat, search_radius, asset_type)
+            """, lon, lat, search_radius, asset_type, occurred_at)
 
             if existing_incident:
                 incident_id = existing_incident['id']
@@ -392,9 +396,20 @@ async def insert_incident(incident_data):
         if incident_data.get('sources'):
             for source in incident_data['sources']:
                 try:
-                    # Extract domain from source_url
+                    # Extract domain from source_url (already validated above)
                     from urllib.parse import urlparse
-                    domain = urlparse(source.get('source_url', '')).netloc or 'unknown'
+                    source_url = source.get('source_url', '').strip()
+                    if not source_url:
+                        logger.warning("Skipping source with empty URL")
+                        continue
+                    
+                    parsed = urlparse(source_url)
+                    domain = parsed.netloc or 'unknown'
+                    
+                    # Ensure domain is valid (not 'unknown' or empty)
+                    if domain == 'unknown' or not domain:
+                        logger.error(f"Invalid source URL domain: {source_url}")
+                        continue
 
                     # First, get or create source in sources table
                     # Schema: UNIQUE (domain, source_type) - see sql/supabase_schema_v2.sql line 45
@@ -463,7 +478,22 @@ class handler(BaseHTTPRequestHandler):
         import secrets
         expected_token = os.getenv('INGEST_TOKEN')
         if not expected_token:
-            self.send_error(500, "Server configuration error: INGEST_TOKEN not set")
+            error_msg = (
+                "Server configuration error: INGEST_TOKEN not set. "
+                "Set it in Vercel: Settings → Environment Variables"
+            )
+            logger.error(error_msg)
+            self.send_error(500, error_msg)
+            return
+        
+        # Validate token format (minimum security requirement)
+        if len(expected_token) < 16:
+            error_msg = (
+                "Server configuration error: INGEST_TOKEN too short. "
+                "Minimum 16 characters required for security."
+            )
+            logger.error(error_msg)
+            self.send_error(500, error_msg)
             return
 
         auth_header = self.headers.get('Authorization', '')
@@ -497,6 +527,22 @@ class handler(BaseHTTPRequestHandler):
         if missing:
             self.send_error(400, f"Missing required fields: {', '.join(missing)}")
             return
+
+        # Validate source URLs are real and verifiable (CRITICAL for journalists)
+        if incident_data.get('sources'):
+            from source_validation import validate_all_sources
+            
+            all_valid, validation_errors = validate_all_sources(incident_data['sources'])
+            
+            if not all_valid:
+                error_msg = (
+                    "Invalid source URLs detected. All sources must be real, verifiable URLs "
+                    "for journalist verification:\n" +
+                    "\n".join(f"  - {msg}" for msg in validation_errors)
+                )
+                logger.error(f"Source validation failed: {error_msg}")
+                self.send_error(400, error_msg)
+                return
 
         # Insert into database
         result = run_async(insert_incident(incident_data))

@@ -7,8 +7,9 @@ Live map of verified drone incidents across **ALL OF EUROPE** with evidence-base
 **📚 Full Documentation**: [docs/README.md](docs/README.md)
 
 📍 **Geographic Coverage**: 35-71°N, -10-31°E (Nordic + UK + Ireland + Germany + France + Spain + Italy + Poland + Benelux + Baltics)
-🔗 **Version**: 2.3.0 (European Coverage Expansion)
+🔗 **Version**: 2.5.0 (Production Optimized)
 📊 **Sources**: 45+ verified RSS feeds from 15+ countries
+🔒 **Production Ready**: Security headers, rate limiting, error boundaries, monitoring
 
 ---
 
@@ -176,6 +177,19 @@ curl https://www.dronemap.cc/api/healthz
 
 ### Scraper Status
 Check GitHub Actions: https://github.com/Arnarsson/DroneWatch2.0/actions
+
+### Production Monitoring
+- **Sentry Dashboard**: https://sentry.io/organizations/svc-cc/projects/dronewatch/
+- **Monitoring Guide**: [docs/MONITORING.md](docs/MONITORING.md)
+- **Production Readiness**: [PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md)
+
+### Production Features
+- ✅ Security headers (CSP, HSTS, X-Frame-Options)
+- ✅ API rate limiting (100 req/min per IP)
+- ✅ Error boundaries with Sentry integration
+- ✅ Environment variable validation
+- ✅ Optimized Sentry monitoring (10% sample rate)
+- ✅ **Source verification system** - All sources are real, verifiable URLs for journalists ([docs/JOURNALIST_SOURCE_VERIFICATION.md](docs/JOURNALIST_SOURCE_VERIFICATION.md))
 
 ---
 

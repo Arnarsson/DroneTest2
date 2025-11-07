@@ -5,6 +5,8 @@ const RELEASE = process.env.SENTRY_RELEASE ||
   process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ||
   `dronewatch@${process.env.npm_package_version || '0.1.0'}`;
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 Sentry.init({
   dsn: "https://75bf792b5a278c54e98f72d59d2a7ff5@o4508847842131969.ingest.de.sentry.io/4510181567037520",
 
@@ -12,11 +14,12 @@ Sentry.init({
   release: RELEASE,
   environment: process.env.NODE_ENV || 'development',
 
-  // Adjust this value in production
-  tracesSampleRate: 1.0,
+  // Production: 10% sample rate to reduce noise and cost
+  // Development: 100% for debugging
+  tracesSampleRate: isProduction ? 0.1 : 1.0,
 
-  // Enable debug mode in development
-  debug: process.env.NODE_ENV === 'development',
+  // Disable debug mode in production
+  debug: !isProduction,
 
   // Enable logs
   _experiments: {
@@ -33,8 +36,8 @@ Sentry.init({
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   beforeSend(event, hint) {
-    // Log all errors being sent to Sentry for debugging
-    if (process.env.NODE_ENV === 'development') {
+    // Log all errors being sent to Sentry for debugging (dev only)
+    if (!isProduction) {
       console.log('[Sentry] Capturing event:', event);
       console.log('[Sentry] Release:', RELEASE);
     }

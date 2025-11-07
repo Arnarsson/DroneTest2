@@ -42,7 +42,21 @@ async def get_connection() -> asyncpg.Connection:
     """
     DATABASE_URL = os.getenv("DATABASE_URL")
     if not DATABASE_URL:
-        raise ValueError("DATABASE_URL environment variable not configured")
+        error_msg = (
+            "DATABASE_URL environment variable not configured. "
+            "Set it in Vercel: Settings → Environment Variables"
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+    
+    # Validate DATABASE_URL format
+    if not DATABASE_URL.startswith(('postgresql://', 'postgres://')):
+        error_msg = (
+            f"Invalid DATABASE_URL format. Expected postgresql:// or postgres://, "
+            f"got: {DATABASE_URL[:20]}..."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     # Parse and optimize connection string for serverless
     connection_params: Dict[str, Any] = {}

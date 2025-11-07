@@ -92,7 +92,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <section className="mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Our Mission</h3>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  DroneWatch provides real-time tracking and verification of drone incidents across the Nordic region.
+                  DroneWatch provides real-time tracking and verification of drone incidents across all of Europe.
                   We aggregate data from official sources, news outlets, and aviation authorities to deliver transparent,
                   evidence-based reporting on drone activity near critical infrastructure.
                 </p>
@@ -140,7 +140,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <section className="mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Geographic Coverage</h3>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
-                  DroneWatch monitors drone incidents across the Nordic region (54-71°N, 4-31°E), covering:
+                  DroneWatch monitors drone incidents across all of Europe (35-71°N, -10-31°E), covering Nordic countries, UK, Ireland, Germany, France, Spain, Italy, Poland, Benelux, and the Baltics.
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -159,6 +159,22 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <span className="text-lg">🇫🇮</span>
                     <span className="text-gray-700 dark:text-gray-300">Finland</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🇬🇧</span>
+                    <span className="text-gray-700 dark:text-gray-300">United Kingdom</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🇩🇪</span>
+                    <span className="text-gray-700 dark:text-gray-300">Germany</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🇫🇷</span>
+                    <span className="text-gray-700 dark:text-gray-300">France</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🇵🇱</span>
+                    <span className="text-gray-700 dark:text-gray-300">Poland</span>
+                  </div>
                 </div>
               </section>
 
@@ -173,7 +189,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Nordic police departments and law enforcement agencies
+                    European police departments and law enforcement agencies
                   </li>
                   <li className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -197,7 +213,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   Built with Next.js, TypeScript, and Supabase. Real-time data ingestion with multi-source
                   consolidation, fake news detection, and PostGIS geospatial queries. Open development on{' '}
                   <a
-                    href="https://github.com/Arnarsson/DroneTest2"
+                    href="https://github.com/Arnarsson/DroneWatch2.0"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 dark:text-blue-400 hover:underline font-medium"

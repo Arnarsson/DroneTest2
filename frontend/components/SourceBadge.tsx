@@ -21,9 +21,17 @@ export function SourceBadge({ url, type = 'other', title, className = '' }: Sour
 
   const getDomain = (url: string) => {
     try {
+      // Validate URL is real (not test/placeholder)
+      const urlLower = url.toLowerCase()
+      const blockedPatterns = ['test', 'example', 'localhost', 'placeholder', 'dummy', 'fake']
+      if (blockedPatterns.some(pattern => urlLower.includes(pattern))) {
+        console.warn(`[SourceBadge] Suspicious URL detected: ${url}`)
+      }
+      
       return new URL(url).hostname.replace('www.', '')
     } catch {
-      return 'Unknown Source'
+      console.error(`[SourceBadge] Invalid URL: ${url}`)
+      return 'Invalid Source'
     }
   }
 
@@ -95,10 +103,11 @@ export function SourceBadge({ url, type = 'other', title, className = '' }: Sour
         </svg>
       </motion.a>
 
-      {/* Tooltip with full URL */}
+      {/* Tooltip with full URL - Critical for journalist verification */}
       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 max-w-xs">
         <div className="font-bold mb-1">{type.charAt(0).toUpperCase() + type.slice(1)} Source</div>
-        <div className="truncate">{url}</div>
+        <div className="break-all font-mono text-[10px] mb-1">{url}</div>
+        <div className="text-[9px] opacity-75 italic">Click to verify source</div>
         <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
       </div>
     </div>
