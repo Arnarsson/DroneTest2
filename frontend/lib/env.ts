@@ -7,12 +7,30 @@
 const isProduction = process.env.NODE_ENV === 'production';
 const isServer = typeof window === 'undefined';
 
+// Get API URL - use relative URL in browser, absolute in server
+function getApiUrl(): string {
+  // If explicitly set, use that
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // In browser, use relative URL (works for both domains)
+  if (typeof window !== 'undefined') {
+    return '/api';
+  }
+  
+  // Server-side: use production fallback
+  if (isProduction) {
+    return 'https://www.dronemap.cc/api';
+  }
+  
+  // Development fallback
+  return 'http://localhost:3000/api';
+}
+
 export const ENV = {
-  // API endpoint - REQUIRED in production
-  API_URL: process.env.NEXT_PUBLIC_API_URL ||
-    (isProduction
-      ? 'https://www.dronemap.cc/api'  // production fallback
-      : 'http://localhost:3000/api'),  // development fallback
+  // API endpoint - uses relative URL in browser for same-origin requests
+  API_URL: getApiUrl(),
 
   NODE_ENV: process.env.NODE_ENV || 'development',
 } as const;

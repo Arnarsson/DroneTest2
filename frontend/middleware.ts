@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://www.dronemap.cc https://dronemap.cc https://*.vercel.app https://o4508847842131969.ingest.de.sentry.io",
+    "connect-src 'self' https://www.dronemap.cc https://dronemap.cc https://www.dronewatch.cc https://dronewatch.cc https://*.vercel.app https://o4508847842131969.ingest.de.sentry.io",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",
