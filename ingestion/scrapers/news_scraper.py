@@ -88,6 +88,7 @@ class NewsScraper:
     def fetch_news_rss(self, source_key: str) -> List[Dict]:
         """
         Fetch and parse news RSS feed with improved content extraction
+        Includes BeautifulSoup fallback for malformed XML
         """
         source = SOURCES.get(source_key)
         if not source or 'rss' not in source:
@@ -95,10 +96,29 @@ class NewsScraper:
             return []
 
         incidents = []
+        rss_url = source['rss']
 
         try:
             logger.info(f"Fetching RSS feed from {source['name']}")
-            feed = feedparser.parse(source['rss'])
+            feed = feedparser.parse(rss_url)
+
+            # BeautifulSoup fallback for malformed XML
+            if not feed.entries or feed.bozo:
+                logger.warning(f"feedparser failed for {source_key} (bozo={feed.bozo}), trying BeautifulSoup fallback...")
+                try:
+                    response = self._retry_request(self.session.get, rss_url, timeout=10)
+                    # Use lxml parser for lenient XML parsing
+                    soup = BeautifulSoup(response.content, 'xml')
+
+                    # Re-parse with feedparser using cleaned XML
+                    feed = feedparser.parse(str(soup))
+
+                    if feed.entries:
+                        logger.info(f"✓ BeautifulSoup fallback successful for {source_key} - found {len(feed.entries)} entries")
+                    else:
+                        logger.warning(f"BeautifulSoup fallback found no entries for {source_key}")
+                except Exception as e:
+                    logger.error(f"BeautifulSoup fallback failed for {source_key}: {e}")
 
             if not feed.entries:
                 logger.info(f"No entries found in RSS feed for {source_key}")

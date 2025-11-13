@@ -63,6 +63,7 @@ class PoliceScraper:
     def fetch_police_rss(self, source_key: str) -> List[Dict]:
         """
         Fetch and parse police RSS feed with retry logic
+        Includes rate limiting for Norwegian police API and BeautifulSoup fallback for malformed XML
         """
         source = SOURCES.get(source_key)
         if not source or 'rss' not in source:
@@ -70,11 +71,38 @@ class PoliceScraper:
             return []
 
         incidents = []
+        rss_url = source['rss']
+
+        # Detect Norwegian police API (rate limited)
+        is_norwegian_police_api = 'api.politiet.no' in rss_url
 
         try:
             # Parse RSS feed with timeout
             logger.info(f"Fetching RSS feed from {source['name']}")
-            feed = feedparser.parse(source['rss'])
+            feed = feedparser.parse(rss_url)
+
+            # BeautifulSoup fallback for malformed XML
+            if not feed.entries or feed.bozo:
+                logger.warning(f"feedparser failed for {source_key} (bozo={feed.bozo}), trying BeautifulSoup fallback...")
+                try:
+                    response = self._retry_request(self.session.get, rss_url, timeout=10)
+                    # Use lxml parser for lenient XML parsing
+                    soup = BeautifulSoup(response.content, 'xml')
+
+                    # Re-parse with feedparser using cleaned XML
+                    feed = feedparser.parse(str(soup))
+
+                    if feed.entries:
+                        logger.info(f"✓ BeautifulSoup fallback successful for {source_key} - found {len(feed.entries)} entries")
+                    else:
+                        logger.warning(f"BeautifulSoup fallback found no entries for {source_key}")
+                except Exception as e:
+                    logger.error(f"BeautifulSoup fallback failed for {source_key}: {e}")
+
+            # Rate limiting for Norwegian police API (prevent HTTP 429)
+            if is_norwegian_police_api:
+                logger.info(f"⏱️  Norwegian police API detected - applying 2-second rate limit delay")
+                time.sleep(2.0)
 
             if not feed.entries:
                 logger.info(f"No entries found in RSS feed for {source_key}")
