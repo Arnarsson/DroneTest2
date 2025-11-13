@@ -1,164 +1,301 @@
-# Wave 12 Source Verification - Cron Setup
-
-## Automated Hourly Source Monitoring
-
-This guide explains how to set up automated hourly verification of all 77 RSS feeds.
+# DroneWatch Source Verification - Automated Cron Setup
+**Wave 12 Implementation | Version 1.1.0**
 
 ---
 
-## Prerequisites
+## Overview
 
-1. **Virtual Environment**:
-   ```bash
-   cd /home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+Automated hourly monitoring of all 77 RSS feeds with critical failure alerting.
 
-2. **Test Manual Run**:
-   ```bash
-   ./cron_verify_sources.sh
-   ```
-   Should complete successfully and create log in `logs/cron_verify.log`
+**Features**:
+- ✅ Hourly verification of all RSS sources
+- ✅ Automatic alerting on critical failures (10+ sources down)
+- ✅ Log rotation (7-day retention)
+- ✅ Multi-channel alert support (email, Slack, file-based)
+- ✅ Virtual environment auto-activation
+- ✅ Exit code monitoring for CI/CD integration
 
 ---
 
-## Cron Installation
+## Quick Start
 
-### Option 1: Hourly Verification (Recommended)
+### 1. Prerequisites
 
+**Install Python dependencies**:
 ```bash
-# Edit crontab
+cd /path/to/DroneWatch2.0/ingestion
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+**Verify script is executable**:
+```bash
+chmod +x verify_sources_cron.sh
+```
+
+**Test manual run**:
+```bash
+./verify_sources_cron.sh
+```
+
+Expected output in `logs/cron_verify.log`:
+```
+========================================
+Source Verification Run: 2025-10-14 12:00:00
+========================================
+✅ SUCCESS: All sources verified successfully
+Exit code: 0
+========================================
+```
+
+---
+
+## Installation
+
+### Option 1: Crontab (Recommended)
+
+**Add hourly verification**:
+```bash
+# Edit your crontab
 crontab -e
 
-# Add this line (runs at minute 0 of every hour)
-0 * * * * /home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/cron_verify_sources.sh
+# Add this line (replace /path/to/ with your actual path)
+0 * * * * /path/to/DroneWatch2.0/ingestion/verify_sources_cron.sh
+
+# Example with absolute path:
+# 0 * * * * /home/user/DroneWatch2.0/ingestion/verify_sources_cron.sh
 ```
 
-**Schedule**: Every hour on the hour (00:00, 01:00, 02:00, etc.)
-
-### Option 2: Custom Schedule
-
+**Schedule Options**:
 ```bash
-# Every 30 minutes
-*/30 * * * * /home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/cron_verify_sources.sh
+# Every hour on the hour (recommended)
+0 * * * * /path/to/verify_sources_cron.sh
 
-# Every 6 hours
-0 */6 * * * /home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/cron_verify_sources.sh
+# Every 30 minutes (more frequent monitoring)
+*/30 * * * * /path/to/verify_sources_cron.sh
 
-# Daily at 6 AM
-0 6 * * * /home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/cron_verify_sources.sh
+# Every 6 hours (less frequent, lower resource usage)
+0 */6 * * * /path/to/verify_sources_cron.sh
+
+# Daily at 6 AM only
+0 6 * * * /path/to/verify_sources_cron.sh
 ```
 
-### Option 3: Systemd Timer (Advanced)
+**Verify installation**:
+```bash
+# List your cron jobs
+crontab -l
 
-For more control and better logging, use systemd:
-
-1. Create service file: `/etc/systemd/system/dronewatch-verify.service`
-   ```ini
-   [Unit]
-   Description=DroneWatch Source Verification
-   After=network.target
-
-   [Service]
-   Type=oneshot
-   User=svenni
-   WorkingDirectory=/home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion
-   ExecStart=/home/svenni/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/cron_verify_sources.sh
-   StandardOutput=journal
-   StandardError=journal
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-
-2. Create timer file: `/etc/systemd/system/dronewatch-verify.timer`
-   ```ini
-   [Unit]
-   Description=Run DroneWatch Source Verification Hourly
-   Requires=dronewatch-verify.service
-
-   [Timer]
-   OnBootSec=5min
-   OnUnitActiveSec=1h
-   Unit=dronewatch-verify.service
-
-   [Install]
-   WantedBy=timers.target
-   ```
-
-3. Enable and start:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable dronewatch-verify.timer
-   sudo systemctl start dronewatch-verify.timer
-   sudo systemctl status dronewatch-verify.timer
-   ```
+# Check cron service is running
+sudo systemctl status cron
+```
 
 ---
 
-## What the Cron Job Does
+### Option 2: Systemd Timer (Advanced)
 
-1. **Activates Python virtual environment** (if exists)
-2. **Runs source verification** on all 77 feeds
-3. **Logs output** to `logs/cron_verify.log`
-4. **Generates markdown reports** when failures detected
-5. **Rotates old logs** (keeps last 30 days)
-6. **Returns exit code** for monitoring
+For more control and better logging integration.
+
+**1. Create service file**:
+```bash
+sudo nano /etc/systemd/system/dronewatch-verify.service
+```
+
+```ini
+[Unit]
+Description=DroneWatch Source Verification
+After=network.target
+
+[Service]
+Type=oneshot
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/DroneWatch2.0/ingestion
+ExecStart=/path/to/DroneWatch2.0/ingestion/verify_sources_cron.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dronewatch-verify
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**2. Create timer file**:
+```bash
+sudo nano /etc/systemd/system/dronewatch-verify.timer
+```
+
+```ini
+[Unit]
+Description=Run DroneWatch Source Verification Hourly
+Requires=dronewatch-verify.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+Unit=dronewatch-verify.service
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+```
+
+**3. Enable and start**:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable dronewatch-verify.timer
+sudo systemctl start dronewatch-verify.timer
+sudo systemctl status dronewatch-verify.timer
+```
+
+**Monitor execution**:
+```bash
+# View timer status
+sudo systemctl list-timers | grep dronewatch
+
+# View service logs
+sudo journalctl -u dronewatch-verify.service -f
+
+# View last run
+sudo journalctl -u dronewatch-verify.service -n 50
+```
+
+---
+
+## Alert Configuration
+
+The script supports three alert mechanisms for critical failures (10+ sources down):
+
+### 1. Email Alerts
+
+**Configure email**:
+```bash
+# Edit verify_sources_cron.sh
+nano verify_sources_cron.sh
+
+# Uncomment and configure these lines (around line 57):
+ALERT_EMAIL="your-email@example.com"
+echo "$ALERT_MSG" | mail -s "DroneWatch Alert: Source Verification Failed" "$ALERT_EMAIL"
+```
+
+**Prerequisites**:
+- `mail` or `mailx` must be installed and configured
+- SMTP server configured on the system
+
+### 2. Slack Notifications
+
+**Configure Slack webhook**:
+```bash
+# Edit verify_sources_cron.sh
+nano verify_sources_cron.sh
+
+# Uncomment and configure these lines (around line 63):
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+curl -X POST -H 'Content-type: application/json' \
+  --data "{\"text\":\"$ALERT_MSG\"}" \
+  "$SLACK_WEBHOOK_URL" 2>/dev/null
+```
+
+**Setup Slack webhook**:
+1. Go to https://api.slack.com/apps
+2. Create new app → Incoming Webhooks
+3. Activate webhooks and add to workspace
+4. Copy webhook URL
+
+### 3. File-Based Alerts (Default)
+
+**Always enabled** - writes to `logs/ALERT_CRITICAL_FAILURE.txt`
+
+External monitoring systems can watch this file:
+```bash
+# Example: Monitor for alerts
+watch -n 60 'cat logs/ALERT_CRITICAL_FAILURE.txt 2>/dev/null | tail -5'
+```
 
 ---
 
 ## Monitoring
 
-### Check Last Run
+### View Recent Runs
 
 ```bash
-# View recent cron runs
-tail -n 50 ~/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/logs/cron_verify.log
+cd /path/to/DroneWatch2.0/ingestion
 
-# Check for failures
-grep "⚠️" ~/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/logs/cron_verify.log
+# Last 50 lines of cron log
+tail -n 50 logs/cron_verify.log
 
-# View latest markdown report
-ls -lt ~/Downloads/claudecode-template-plugin/DroneWatch2.0/ingestion/logs/verification_report_*.md | head -1
+# Last 100 lines of detailed verification log
+tail -n 100 logs/source_verification.log
+
+# Search for failures
+grep "⚠️" logs/cron_verify.log
+
+# Search for critical alerts
+grep "🚨" logs/cron_verify.log
+
+# View latest markdown report (if failures occurred)
+ls -lt logs/verification_report_*.md | head -1
+cat $(ls -t logs/verification_report_*.md | head -1)
 ```
 
-### Cron Status
+### Check Cron Status
 
 ```bash
-# Check if cron job is scheduled
+# Verify cron job is scheduled
 crontab -l | grep verify_sources
 
-# View cron execution logs (system-wide)
-grep CRON /var/log/syslog | grep verify_sources
+# View cron execution logs (Debian/Ubuntu)
+grep CRON /var/log/syslog | grep verify_sources | tail -20
 
-# Systemd timer status (if using systemd)
+# View cron execution logs (RHEL/CentOS)
+grep CRON /var/log/cron | grep verify_sources | tail -20
+
+# Check for systemd timer (if using systemd)
 sudo systemctl status dronewatch-verify.timer
-sudo journalctl -u dronewatch-verify.service -f
+sudo systemctl list-timers | grep dronewatch
+```
+
+### Performance Metrics
+
+```bash
+# Count successful runs in last 24 hours
+grep "✅ SUCCESS" logs/cron_verify.log | grep "$(date +%Y-%m-%d)" | wc -l
+
+# Count failed runs in last 24 hours
+grep "⚠️  FAILURE" logs/cron_verify.log | grep "$(date +%Y-%m-%d)" | wc -l
+
+# View critical alerts
+cat logs/ALERT_CRITICAL_FAILURE.txt 2>/dev/null
 ```
 
 ---
 
-## Alert Integration (Optional)
+## Logs and Reports
 
-### Email Alerts on Failure
+### Log Files
 
-Add to cron job:
+All logs stored in `ingestion/logs/`:
+
+| File | Purpose | Retention |
+|------|---------|-----------|
+| `cron_verify.log` | Cron execution history | 7 days |
+| `source_verification.log` | Detailed verification output | 7 days |
+| `verification_report_YYYYMMDD_HHMMSS.md` | Failure reports | 7 days |
+| `ALERT_CRITICAL_FAILURE.txt` | Critical failure alerts | 7 days |
+
+### Log Rotation
+
+**Automatic**: Runs after each verification
+- Deletes files older than 7 days
+- Keeps directory size manageable
+
+**Manual cleanup**:
 ```bash
-MAILTO=your-email@example.com
-0 * * * * /path/to/cron_verify_sources.sh || echo "DroneWatch source verification failed" | mail -s "Alert: Source Verification Failure" your-email@example.com
-```
+# Delete all logs older than 7 days
+find logs/ -type f -mtime +7 -delete
 
-### Slack Integration
-
-Modify `cron_verify_sources.sh` to add at the end:
-```bash
-if [ $EXIT_CODE -ne 0 ]; then
-    curl -X POST -H 'Content-type: application/json' \
-    --data "{\"text\":\"⚠️ DroneWatch source verification found failures\"}" \
-    https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-fi
+# Delete all logs (fresh start)
+rm -f logs/*.log logs/*.md logs/*.txt
 ```
 
 ---
@@ -167,21 +304,42 @@ fi
 
 ### Cron Job Not Running
 
-**Check**:
-1. Cron service status: `sudo systemctl status cron`
-2. User permissions: Script must be executable (`chmod +x cron_verify_sources.sh`)
-3. Path correctness: Use absolute paths in crontab
-4. Cron environment: Cron has limited PATH, specify full paths
+**Symptoms**:
+- No new entries in `logs/cron_verify.log`
+- No recent timestamps
 
-**Debug**:
-```bash
-# Test script manually
-cd ingestion
-./cron_verify_sources.sh
+**Solutions**:
 
-# Check cron logs
-grep CRON /var/log/syslog | tail -20
-```
+1. **Check cron service**:
+   ```bash
+   sudo systemctl status cron  # Debian/Ubuntu
+   sudo systemctl status crond # RHEL/CentOS
+   ```
+
+2. **Verify crontab entry**:
+   ```bash
+   crontab -l | grep verify_sources
+   ```
+
+3. **Check script permissions**:
+   ```bash
+   ls -l verify_sources_cron.sh
+   # Should show: -rwxr-xr-x (executable)
+   ```
+
+4. **Test manual execution**:
+   ```bash
+   cd /path/to/DroneWatch2.0/ingestion
+   ./verify_sources_cron.sh
+   ```
+
+5. **Check cron logs**:
+   ```bash
+   grep CRON /var/log/syslog | tail -20  # Debian/Ubuntu
+   grep CRON /var/log/cron | tail -20    # RHEL/CentOS
+   ```
+
+---
 
 ### Python Environment Issues
 
@@ -189,69 +347,185 @@ grep CRON /var/log/syslog | tail -20
 
 **Solution**:
 ```bash
-cd ingestion
+cd /path/to/DroneWatch2.0/ingestion
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Permission Denied
+**Error**: `python3: command not found`
 
-**Error**: `Permission denied: ./cron_verify_sources.sh`
-
-**Solution**:
+**Solution**: Install Python 3 or specify full path in script
 ```bash
-chmod +x ingestion/cron_verify_sources.sh
+# Option 1: Install Python 3
+sudo apt-get install python3 python3-venv  # Debian/Ubuntu
+sudo yum install python3                    # RHEL/CentOS
+
+# Option 2: Modify script to use full path
+which python3  # Find Python location
+# Edit script and replace 'python3' with full path
 ```
 
 ---
 
-## Logs and Reports
+### Permission Denied
 
-**Log Files** (in `ingestion/logs/`):
-- `cron_verify.log` - Cron execution history
-- `source_verification.log` - Detailed verification results
-- `verification_report_YYYYMMDD_HHMMSS.md` - Markdown reports (when failures occur)
+**Error**: `Permission denied: ./verify_sources_cron.sh`
 
-**Log Rotation**:
-- Automatic cleanup after 30 days
-- Manual cleanup: `find logs/ -type f -mtime +30 -delete`
+**Solution**:
+```bash
+chmod +x verify_sources_cron.sh
+```
+
+**Error**: `Permission denied: logs/cron_verify.log`
+
+**Solution**:
+```bash
+# Ensure log directory is writable
+mkdir -p logs
+chmod 755 logs
+```
 
 ---
 
-## Performance
+### Cron Environment Issues
 
-**Expected Execution Time**: 3-6 seconds for 77 sources
-**Resource Usage**: ~50 MB RAM, negligible CPU
-**Network**: ~1-2 MB traffic per run
+**Problem**: Script works manually but fails in cron
+
+**Cause**: Cron has minimal PATH environment
+
+**Solution**: Use absolute paths in script (already implemented)
+
+**Debug**:
+```bash
+# Add to crontab for debugging
+* * * * * env > /tmp/cron-env.txt
+
+# Compare to your shell environment
+env > /tmp/shell-env.txt
+diff /tmp/cron-env.txt /tmp/shell-env.txt
+```
+
+---
+
+## Performance Expectations
+
+| Metric | Value |
+|--------|-------|
+| **Execution Time** | 3-6 seconds |
+| **Sources Verified** | 77 RSS feeds |
+| **Memory Usage** | ~50 MB |
+| **CPU Usage** | Negligible (<1%) |
+| **Network Traffic** | ~1-2 MB per run |
+| **Disk I/O** | ~10 KB (logs) |
+
+**Hourly Resource Usage**:
+- 24 runs per day
+- ~150 seconds total execution time
+- ~50 MB traffic per day
+- Minimal impact on system performance
 
 ---
 
 ## Uninstall
 
-```bash
-# Remove from crontab
-crontab -e
-# Delete the line with verify_sources
+### Remove Cron Job
 
-# Or disable systemd timer
+```bash
+# Edit crontab
+crontab -e
+
+# Delete the line with verify_sources_cron.sh
+# Save and exit
+```
+
+### Remove Systemd Timer
+
+```bash
 sudo systemctl stop dronewatch-verify.timer
 sudo systemctl disable dronewatch-verify.timer
+sudo rm /etc/systemd/system/dronewatch-verify.service
+sudo rm /etc/systemd/system/dronewatch-verify.timer
+sudo systemctl daemon-reload
+```
+
+### Clean Up Logs
+
+```bash
+cd /path/to/DroneWatch2.0/ingestion
+rm -rf logs/
+```
+
+---
+
+## Advanced Configuration
+
+### Custom Log Retention
+
+Edit `verify_sources_cron.sh`:
+```bash
+RETENTION_DAYS=7  # Change to desired number of days
+```
+
+### Custom Verification Schedule
+
+```bash
+# Edit verify_sources_cli.py arguments in cron script
+python3 verify_sources_cli.py --github-actions --workers 20 --timeout 15
+```
+
+### Integration with External Monitoring
+
+**Prometheus exporter** (example):
+```bash
+# Parse logs and expose metrics
+cat logs/source_verification.log | grep "Working:" | tail -1 | \
+  awk '{print "dronewatch_sources_working " $2}'
+```
+
+**Nagios/Icinga check** (example):
+```bash
+#!/bin/bash
+# Check if verification ran in last 2 hours
+LAST_RUN=$(stat -c %Y logs/cron_verify.log)
+NOW=$(date +%s)
+AGE=$((NOW - LAST_RUN))
+
+if [ $AGE -gt 7200 ]; then
+    echo "CRITICAL: Last verification run $((AGE / 3600)) hours ago"
+    exit 2
+else
+    echo "OK: Last verification $((AGE / 60)) minutes ago"
+    exit 0
+fi
 ```
 
 ---
 
 ## Summary
 
-✅ **Hourly verification** of all 77 RSS feeds
-✅ **Automatic alerts** when sources fail
-✅ **Detailed reports** with failure analysis
-✅ **Log rotation** (30-day retention)
-✅ **Low resource usage** (~3-6 seconds per run)
+✅ **Automated Monitoring**: Hourly verification of all 77 RSS feeds  
+✅ **Smart Alerting**: Multi-channel notifications on critical failures  
+✅ **Log Management**: 7-day retention with automatic cleanup  
+✅ **Low Resource Usage**: 3-6 seconds per run, minimal impact  
+✅ **Production Ready**: Battle-tested error handling and recovery  
 
-**Recommended Schedule**: Hourly (`0 * * * *`)
+**Recommended Configuration**:
+- **Schedule**: Hourly (`0 * * * *`)
+- **Alerts**: Enable at least one channel (email or Slack)
+- **Monitoring**: Check logs weekly for trends
 
 ---
 
-**Last Updated**: October 14, 2025
-**Version**: Wave 12 v1.0
-**Maintained by**: DroneWatch Development Team
+## Support
+
+**Issues**: Check logs first (`logs/cron_verify.log`)  
+**Documentation**: See `WAVE12_DESIGN.md` for architecture details  
+**Testing**: Run `./verify_sources_cron.sh` manually to debug  
+
+---
+
+**Last Updated**: 2025-11-13  
+**Version**: Wave 12 v1.1.0  
+**Maintained by**: DroneWatch Development Team  
+**Repository**: https://github.com/Arnarsson/DroneWatch2.0

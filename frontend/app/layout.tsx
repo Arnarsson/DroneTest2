@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   description: 'Live tracking and verification of drone incidents across the Nordics with evidence-based reporting',
   keywords: 'drone, incidents, tracking, nordics, denmark, security, airports',
   authors: [{ name: 'DroneWatch' }],
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'DroneWatch - Real-time Drone Incident Tracking',
     description: 'Live tracking and verification of drone incidents across the Nordics',
