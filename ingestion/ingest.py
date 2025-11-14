@@ -33,14 +33,14 @@ except ImportError:
 from scrapers.news_scraper import NewsScraper
 from scrapers.police_scraper import PoliceScraper
 from scrapers.twitter_scraper import TwitterScraper
-from utils import generate_incident_hash, is_recent_incident, format_age
+from utils import generate_incident_hash, is_recent_incident, format_age, is_drone_incident
 from verification import (calculate_confidence_score, get_verification_status,
                           requires_manual_review)
 from non_incident_filter import NonIncidentFilter
 from satire_domains import is_satire_domain, get_satire_reason
 
 # Scraper version for tracking deployments
-SCRAPER_VERSION = "2.3.0"  # European coverage expansion (35-71°N, -10-31°E)
+SCRAPER_VERSION = "2.3.1"  # Fixed Istanbul Convention bug - added Layer 2A/2B filters
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -67,6 +67,18 @@ class DroneWatchIngester:
         self.processed_hashes = self.cache.load_sync()
         self.run_id = str(uuid.uuid4())
         self._openai_client = None
+
+        # Filter statistics tracking
+        self.stats = {
+            'layer_2a_blocked': 0,  # Drone keyword filter
+            'layer_2b_blocked': 0,  # Non-incident filter
+            'satire_blocked': 0,    # Satire domain
+            'geographic_blocked': 0, # Geographic filter
+            'ai_blocked': 0,         # AI verification
+            'temporal_blocked': 0,   # Temporal validation
+            'duplicates_skipped': 0, # Duplicate hash
+        }
+
         logger.info(f"Initialized ingester (run_id: {self.run_id})")
 
     def load_processed_hashes(self) -> set:
@@ -88,12 +100,48 @@ class DroneWatchIngester:
                 logger.warning(f"🚫 Blocking test incident: {incident['title'][:50]}")
                 return False
 
+            # === LAYER 2A: Basic Drone Keyword Check ===
+            if not is_drone_incident(incident['title'], incident.get('narrative', '')):
+                self.stats['layer_2a_blocked'] += 1
+                logger.warning(
+                    f"🚫 BLOCKED (Not a drone incident): {incident['title'][:60]}",
+                    extra={
+                        'title': incident['title'],
+                        'reason': 'No drone keywords found or excluded category',
+                        'layer': 'keyword_filter'
+                    }
+                )
+                return False
+
+            logger.info(f"✓ Drone keyword validation passed: {incident['title'][:50]}")
+
+            # === LAYER 2B: Non-Incident Filter (Policy/Simulation/Discussion) ===
+            non_incident_filter = NonIncidentFilter()
+            is_non, confidence, reasons = non_incident_filter.is_non_incident(incident)
+
+            if is_non and confidence >= 0.5:
+                self.stats['layer_2b_blocked'] += 1
+                logger.warning(
+                    f"🚫 BLOCKED (Non-Incident Filter): {incident['title'][:60]}",
+                    extra={
+                        'title': incident['title'],
+                        'category': 'policy/simulation/discussion',
+                        'confidence': confidence,
+                        'reasons': reasons,
+                        'layer': 'non_incident_filter'
+                    }
+                )
+                return False
+
+            logger.info(f"✓ Non-incident filter passed: {incident['title'][:50]}")
+
             # === SATIRE DOMAIN BLOCKING (Layer 1 - Domain Blacklist) ===
             # Check all sources for satire domains
             sources = incident.get('sources', [])
             for source in sources:
                 source_url = source.get('source_url', '')
                 if is_satire_domain(source_url):
+                    self.stats['satire_blocked'] += 1
                     reason_short, reason_detail = get_satire_reason(source_url)
                     logger.warning(f"🚫 BLOCKED (Satire Domain): {incident['title'][:60]}")
                     logger.warning(f"   Reason: {reason_detail}")
@@ -110,6 +158,7 @@ class DroneWatchIngester:
             )
 
             if not geo_analysis['is_nordic']:
+                self.stats['geographic_blocked'] += 1
                 logger.warning(f"🚫 BLOCKED (Geographic): {incident['title'][:60]}")
                 logger.warning(f"   Reason: {geo_analysis['reason']}")
                 logger.warning(f"   Confidence: {geo_analysis['confidence']}")
@@ -134,6 +183,7 @@ class DroneWatchIngester:
                     )
 
                     if not ai_verification['is_incident']:
+                        self.stats['ai_blocked'] += 1
                         logger.warning(f"🚫 BLOCKED (AI Verification): {incident['title'][:60]}")
                         logger.warning(f"   Category: {ai_verification['category']}")
                         logger.warning(f"   Reasoning: {ai_verification['reasoning']}")
@@ -160,6 +210,7 @@ class DroneWatchIngester:
             )
 
             if not is_valid:
+                self.stats['temporal_blocked'] += 1
                 logger.warning(f"🚫 BLOCKED (Temporal): {incident['title'][:60]}")
                 logger.warning(f"   Reason: {reason}")
                 return False
@@ -178,6 +229,7 @@ class DroneWatchIngester:
 
             # Skip if already processed
             if incident_hash in self.processed_hashes:
+                self.stats['duplicates_skipped'] += 1
                 logger.info(
                     f"⏭️  Skipping duplicate: {incident['title'][:50]}")
                 return False
@@ -373,6 +425,16 @@ class DroneWatchIngester:
         print(f"❌ Errors: {error_count}")
         print(
             f"⏭️  Skipped: {len(all_incidents) - success_count - error_count}")
+        print(f"\n🔍 Filter Statistics:")
+        print(f"   Layer 2A (Drone Keywords):  {self.stats['layer_2a_blocked']} blocked")
+        print(f"   Layer 2B (Non-Incident):    {self.stats['layer_2b_blocked']} blocked")
+        print(f"   Satire Domains:             {self.stats['satire_blocked']} blocked")
+        print(f"   Geographic Filter:          {self.stats['geographic_blocked']} blocked")
+        print(f"   AI Verification:            {self.stats['ai_blocked']} blocked")
+        print(f"   Temporal Validation:        {self.stats['temporal_blocked']} blocked")
+        print(f"   Duplicate Hashes:           {self.stats['duplicates_skipped']} skipped")
+        total_blocked = sum(self.stats.values())
+        print(f"   Total Filtered:             {total_blocked} incidents")
         print(f"{'='*60}\n")
 
         return success_count, error_count
