@@ -158,8 +158,8 @@ RETURNS TABLE (
   tier INTEGER,
   current_threshold FLOAT,
   recommended_threshold FLOAT,
-  precision FLOAT,
-  recall FLOAT,
+  tier_precision FLOAT,
+  tier_recall FLOAT,
   f1_score FLOAT,
   sample_size INTEGER,
   status TEXT
@@ -170,6 +170,7 @@ BEGIN
   -- which analyzes feedback patterns and returns recommendations
 
   -- Get feedback sample size for each tier
+  RETURN QUERY
   WITH tier_stats AS (
     SELECT
       ai_tier,
@@ -190,13 +191,12 @@ BEGIN
     WHERE ai_similarity_score IS NOT NULL
     GROUP BY ai_tier
   )
-  RETURN QUERY
   SELECT
     1 as tier,
     1.0 as current_threshold,  -- Tier 1: Exact hash match (threshold = 1.0)
     1.0 as recommended_threshold,
-    COALESCE(ts.tier_precision, 0.95) as precision,
-    COALESCE(ts.tier_recall, 0.80) as recall,
+    COALESCE(ts.tier_precision, 0.95) as tier_precision,
+    COALESCE(ts.tier_recall, 0.80) as tier_recall,
     -- F1 Score = 2 * (precision * recall) / (precision + recall)
     ROUND(
       2 * COALESCE(ts.tier_precision, 0.95) * COALESCE(ts.tier_recall, 0.80) /
@@ -215,8 +215,8 @@ BEGIN
     2 as tier,
     0.85 as current_threshold,  -- Tier 2: Embedding similarity (threshold = 0.85)
     0.85 as recommended_threshold,  -- TODO: Implement optimization in Python
-    COALESCE(ts.tier_precision, 0.92) as precision,
-    COALESCE(ts.tier_recall, 0.90) as recall,
+    COALESCE(ts.tier_precision, 0.92) as tier_precision,
+    COALESCE(ts.tier_recall, 0.90) as tier_recall,
     ROUND(
       2 * COALESCE(ts.tier_precision, 0.92) * COALESCE(ts.tier_recall, 0.90) /
       NULLIF(COALESCE(ts.tier_precision, 0.92) + COALESCE(ts.tier_recall, 0.90), 0),
@@ -234,8 +234,8 @@ BEGIN
     3 as tier,
     0.80 as current_threshold,  -- Tier 3: LLM confidence (threshold = 0.80)
     0.80 as recommended_threshold,  -- TODO: Implement optimization in Python
-    COALESCE(ts.tier_precision, 0.98) as precision,
-    COALESCE(ts.tier_recall, 0.95) as recall,
+    COALESCE(ts.tier_precision, 0.98) as tier_precision,
+    COALESCE(ts.tier_recall, 0.95) as tier_recall,
     ROUND(
       2 * COALESCE(ts.tier_precision, 0.98) * COALESCE(ts.tier_recall, 0.95) /
       NULLIF(COALESCE(ts.tier_precision, 0.98) + COALESCE(ts.tier_recall, 0.95), 0),

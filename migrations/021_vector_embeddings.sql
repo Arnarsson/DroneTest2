@@ -100,7 +100,7 @@ CREATE OR REPLACE FUNCTION find_similar_incidents(
   similarity_score FLOAT,
   title TEXT,
   occurred_at TIMESTAMP,
-  distance_km FLOAT,
+  calculated_distance FLOAT,
   lat FLOAT,
   lon FLOAT
 ) AS $$
@@ -121,7 +121,7 @@ BEGIN
           ST_SetSRID(ST_MakePoint(query_lon, query_lat), 4326)::geography
         ) / 1000  -- Convert meters to kilometers
       ELSE 0
-    END as distance_km,
+    END as calculated_distance,
     ST_Y(i.location::geometry) as lat,
     ST_X(i.location::geometry) as lon
   FROM incident_embeddings e
