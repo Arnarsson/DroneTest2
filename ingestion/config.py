@@ -38,8 +38,9 @@ Recent Additions (2025-10-15):
   * International: 1 wire service (Guardian World) ✅
   * UK/Ireland: 2 sources (Irish Times, Sky News UK) ✅
   * Removed: Janes Defence (paywall), Reuters Europe (auth required)
-- Total working sources: 88 RSS feeds + 3 HTML scrapers (91 total sources)
+- Total working sources: 89 RSS feeds + 3 HTML scrapers (92 total sources)
 - Geographic Coverage: Matches CEPA map (all Baltic + Nordic + Western Europe)
+- Latest addition: DR Nordjylland regional feed (2025-11-17)
 """
 
 import os
@@ -66,6 +67,17 @@ SOURCES = {
         "keywords": ["drone", "dron", "lufthavn", "forsvar", "uav"],
         "verified_date": "2025-10-05",
         "working": True
+    },
+
+    "dr_nordjylland": {
+        "name": "DR Nordjylland (Regional)",
+        "rss": "https://www.dr.dk/nyheder/service/feeds/regionale/nord",
+        "source_type": "verified_media",
+        "trust_weight": 3,
+        "keywords": ["drone", "dron", "aalborg", "nordjylland", "lufthavn", "uav"],
+        "verified_date": "2025-11-17",
+        "working": True,
+        "note": "Regional coverage for Northern Jutland including Aalborg Airport"
     },
 
     "tv2_lorry": {
