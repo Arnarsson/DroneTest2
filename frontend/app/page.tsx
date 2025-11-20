@@ -51,9 +51,10 @@ export default function Home() {
     let filtered = allIncidents;
 
     // Apply date range filter (client-side fallback)
-    if (filters.dateRange !== "all") {
+    if (filters.dateRange && filters.dateRange !== "all") {
       const now = new Date();
       const since = new Date();
+      let shouldFilter = true;
 
       switch (filters.dateRange) {
         case "day":
@@ -65,11 +66,15 @@ export default function Home() {
         case "month":
           since.setMonth(now.getMonth() - 1);
           break;
+        default:
+          shouldFilter = false;
       }
 
-      filtered = filtered.filter(
-        (inc: Incident) => new Date(inc.occurred_at) >= since
-      );
+      if (shouldFilter) {
+        filtered = filtered.filter(
+          (inc: Incident) => new Date(inc.occurred_at) >= since
+        );
+      }
     }
 
     // Apply timeline filtering
