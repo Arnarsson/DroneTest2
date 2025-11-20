@@ -30,6 +30,8 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
       }
 
       // Add date range
+      // Client-side filtering is handled in page.tsx to prevent API 500 errors with 'since' param
+      /* 
       const now = new Date()
       if (filters.dateRange !== 'all') {
         const since = new Date()
@@ -46,6 +48,7 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
         }
         params.append('since', since.toISOString())
       }
+      */
 
       const url = `${API_URL}/incidents?${params}`
 
