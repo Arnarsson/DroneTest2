@@ -115,9 +115,16 @@ export default function Home() {
                 exit={{ opacity: 0, y: -20 }}
                 className="absolute top-0 left-0 right-0 z-10 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-2"
               >
-                <p className="text-sm text-red-800 dark:text-red-200">
-                  Error loading incidents. Retrying...
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-red-800 dark:text-red-200">
+                    {error.message || 'Error loading incidents. Retrying...'}
+                  </p>
+                  {isLoading && (
+                    <span className="text-xs text-red-600 dark:text-red-400 ml-2">
+                      Retrying...
+                    </span>
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
