@@ -61,3 +61,4 @@ frontend/.env.production
 *.env.production
 .coverage
 htmlcov/
+.env*.local
