@@ -717,7 +717,7 @@ def is_drone_incident(title: str, content: str) -> bool:
     ])
 
     # Final check: must have drone keywords AND incident indicators, and not be excluded
-    return has_drone and has_incident and not is_excluded and not is_policy and not is_international and not is_defense
+    return has_drone and has_incident and not is_excluded_commercial and not is_policy and not is_international and not is_defense
 
 def clean_html(html_text: str) -> str:
     """
