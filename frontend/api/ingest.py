@@ -24,18 +24,17 @@ except ImportError:
     logger.warning("utils module not available - drone validation disabled")
     is_drone_incident = None
 
-# Import 3-tier duplicate detection system
-try:
-    from fuzzy_matcher import FuzzyMatcher
-    from openrouter_deduplicator import OpenRouterEmbeddingDeduplicator
-    from openrouter_llm_deduplicator import OpenRouterLLMDeduplicator
-    DEDUP_AVAILABLE = True
-except ImportError as e:
-    logging.warning(f"Deduplication modules not available: {e}")
-    DEDUP_AVAILABLE = False
-    FuzzyMatcher = None
-    OpenRouterEmbeddingDeduplicator = None
-    OpenRouterLLMDeduplicator = None
+# DEPRECATED: 3-tier deduplication moved to database triggers (migration 023)
+# The database trigger handles deduplication via:
+# - Content hash uniqueness constraint
+# - Spatial deduplication (ST_DWithin by asset_type)
+# - Evidence score auto-recalculation
+# Keeping basic source URL check only (Tier 1)
+DEDUP_AVAILABLE = False
+FuzzyMatcher = None
+OpenRouterEmbeddingDeduplicator = None
+OpenRouterLLMDeduplicator = None
+logging.info("Using database-first deduplication (migration 023 trigger)")
 
 logger = logging.getLogger(__name__)
 

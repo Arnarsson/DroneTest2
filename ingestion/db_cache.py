@@ -9,12 +9,23 @@ import logging
 from typing import Set, Optional
 from datetime import datetime
 
-# Add parent directory to path to import from frontend.api
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from frontend.api.db_utils import get_connection
-
 logger = logging.getLogger(__name__)
+
+# Lazy import of database connection to avoid import failures when asyncpg not installed
+_get_connection = None
+
+def get_db_connection():
+    """Lazy import of database connection function"""
+    global _get_connection
+    if _get_connection is None:
+        try:
+            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+            from frontend.api.db_utils import get_connection
+            _get_connection = get_connection
+        except ImportError as e:
+            logger.warning(f"Database connection not available: {e}")
+            _get_connection = lambda: None
+    return _get_connection
 
 class ScraperCache:
     """Database-backed cache for tracking processed incidents"""
@@ -36,6 +47,7 @@ class ScraperCache:
             return self._memory_cache
 
         try:
+            get_connection = get_db_connection()
             conn = await get_connection()
             try:
                 # Load hashes from last 30 days
@@ -64,6 +76,7 @@ class ScraperCache:
             return
 
         try:
+            get_connection = get_db_connection()
             conn = await get_connection()
             try:
                 query = """
@@ -85,6 +98,7 @@ class ScraperCache:
             return
 
         try:
+            get_connection = get_db_connection()
             conn = await get_connection()
             try:
                 result = await conn.execute("SELECT public.cleanup_old_scraper_cache()")
@@ -129,6 +143,7 @@ class ScraperMetrics:
         execution_time_ms = int((self.completed_at - self.started_at).total_seconds() * 1000)
 
         try:
+            get_connection = get_db_connection()
             conn = await get_connection()
             try:
                 query = """
