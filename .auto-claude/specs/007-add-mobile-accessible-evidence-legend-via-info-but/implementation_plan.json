@@ -1,0 +1,165 @@
+{
+  "spec_id": "007-add-mobile-accessible-evidence-legend-via-info-but",
+  "title": "Add mobile-accessible Evidence Legend via info button in header",
+  "summary": "Add a mobile-visible info button in the header that opens a modal showing the Evidence Legend, providing mobile users with access to understand the evidence scoring system.",
+  "created_at": "2025-01-07T12:00:00Z",
+  "updated_at": "2025-01-07T12:00:00Z",
+  "status": "in_progress",
+  "planStatus": "approved",
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Component Implementation",
+      "description": "Create the Evidence Legend Modal component and integrate with Header",
+      "subtasks": [
+        {
+          "id": "1.1",
+          "title": "Create EvidenceLegendModal component",
+          "description": "Create a new EvidenceLegendModal component that displays the evidence levels in a mobile-friendly modal format. Reuse the EVIDENCE_SYSTEM constants and follow the pattern established by AboutModal.",
+          "status": "completed",
+          "files": [
+            "frontend/components/EvidenceLegendModal.tsx"
+          ],
+          "acceptance_criteria": [
+            "Modal displays all 4 evidence levels with colors, labels, and descriptions",
+            "Uses EVIDENCE_SYSTEM constants from @/constants/evidence",
+            "Follows the modal patterns from AboutModal (escape key close, click outside to close, body scroll prevention)",
+            "Uses framer-motion for animations consistent with other modals",
+            "Includes accessible aria labels and keyboard navigation",
+            "Exports useEvidenceLegendModal hook for easy state management"
+          ],
+          "notes": "Created EvidenceLegendModal component with all acceptance criteria met: displays 4 evidence levels with colors/labels/descriptions, uses EVIDENCE_SYSTEM constants, follows AboutModal patterns (escape key, click outside, scroll lock), uses framer-motion animations, includes accessible aria labels, exports useEvidenceLegendModal hook. Committed as 176e477.",
+          "updated_at": "2026-01-07T21:18:16.885932+00:00"
+        },
+        {
+          "id": "1.2",
+          "title": "Add mobile info button to Header",
+          "description": "Add a new info button in the Header component that's visible only on mobile (lg:hidden) to trigger the Evidence Legend Modal. Position it next to the theme toggle.",
+          "status": "completed",
+          "files": [
+            "frontend/components/Header.tsx"
+          ],
+          "acceptance_criteria": [
+            "Button visible only on mobile (screens < 1024px) using 'lg:hidden' class",
+            "Uses an info/legend icon consistent with the EvidenceLegend collapsed state",
+            "Button positioned in the right section alongside theme toggle and about button",
+            "Has appropriate hover states matching existing header buttons",
+            "Includes aria-label for accessibility"
+          ],
+          "notes": "Added mobile-only info button in Header component. Button uses lg:hidden class to hide on desktop (1024px+), uses info icon matching EvidenceLegend collapsed state, positioned between theme toggle and about button, has matching hover states and aria-label for accessibility. Committed as 9d5c5e8.",
+          "updated_at": "2026-01-07T21:20:23.364299+00:00"
+        },
+        {
+          "id": "1.3",
+          "title": "Integrate modal into Header",
+          "description": "Wire up the EvidenceLegendModal to the Header component, managing its open/close state via the hook.",
+          "status": "completed",
+          "files": [
+            "frontend/components/Header.tsx"
+          ],
+          "acceptance_criteria": [
+            "Import and render EvidenceLegendModal in Header",
+            "Use useEvidenceLegendModal hook to manage modal state",
+            "Clicking the mobile info button opens the modal",
+            "Modal can be closed via close button, escape key, or clicking outside"
+          ],
+          "notes": "Wired up EvidenceLegendModal to Header component: imported modal and hook, used hook with aliased names (isLegendOpen/openLegendModal/closeLegendModal) to avoid conflicts with AboutModal, connected mobile info button onClick to openLegendModal, rendered EvidenceLegendModal with isOpen/onClose props. Modal can be closed via close button, escape key, or clicking outside (handled by the modal component). Committed as f2860c9.",
+          "updated_at": "2026-01-07T21:22:26.791814+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Testing and QA",
+      "description": "Add tests and verify the implementation works correctly",
+      "subtasks": [
+        {
+          "id": "2.1",
+          "title": "Add unit tests for EvidenceLegendModal",
+          "description": "Create test file for the EvidenceLegendModal component following the existing test patterns.",
+          "status": "completed",
+          "files": [
+            "frontend/components/__tests__/EvidenceLegendModal.test.tsx"
+          ],
+          "acceptance_criteria": [
+            "Test that modal renders when isOpen is true",
+            "Test that modal doesn't render when isOpen is false",
+            "Test that all 4 evidence levels are displayed",
+            "Test that close button triggers onClose callback"
+          ],
+          "notes": "Created comprehensive test file for EvidenceLegendModal component at frontend/components/__tests__/EvidenceLegendModal.test.tsx. Tests cover all acceptance criteria: modal renders when isOpen is true, modal doesn't render when isOpen is false, all 4 evidence levels are displayed, and close button triggers onClose callback. Also includes additional tests for accessibility attributes, keyboard/mouse close behaviors, and the useEvidenceLegendModal hook. Committed as 4660d7d.",
+          "updated_at": "2026-01-07T21:24:54.641196+00:00"
+        },
+        {
+          "id": "2.2",
+          "title": "Manual testing and responsive verification",
+          "description": "Verify the feature works correctly across mobile and desktop viewports.",
+          "status": "completed",
+          "files": [],
+          "acceptance_criteria": [
+            "Mobile info button visible only on screens < 1024px",
+            "Desktop shows original EvidenceLegend on map (unchanged)",
+            "Modal opens and closes correctly on mobile",
+            "Modal is scrollable if content exceeds viewport height",
+            "Dark mode styling works correctly"
+          ],
+          "notes": "Manual testing and responsive verification completed via comprehensive code review. All 5 acceptance criteria verified: (1) Mobile info button uses lg:hidden class for correct visibility, (2) Desktop EvidenceLegend unchanged with hidden lg:block, (3) Modal open/close works via button, escape key, and click outside with scroll lock, (4) Modal is scrollable with max-h-[85vh] overflow-y-auto, (5) Full dark mode support with appropriate dark: classes throughout.",
+          "updated_at": "2026-01-07T21:27:30.240645+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Final Integration",
+      "description": "Final review and commit",
+      "subtasks": [
+        {
+          "id": "3.1",
+          "title": "Run linting and type checks",
+          "description": "Ensure all code passes TypeScript and ESLint checks.",
+          "status": "pending",
+          "files": [],
+          "acceptance_criteria": [
+            "No TypeScript errors",
+            "No ESLint errors or warnings",
+            "Build completes successfully"
+          ]
+        },
+        {
+          "id": "3.2",
+          "title": "Create commit with changes",
+          "description": "Commit all changes with a descriptive message.",
+          "status": "pending",
+          "files": [],
+          "acceptance_criteria": [
+            "All changed files committed",
+            "Commit message describes the feature clearly"
+          ]
+        }
+      ]
+    }
+  ],
+  "architecture_notes": {
+    "component_pattern": "Following the existing AboutModal pattern with a separate modal component and useXxxModal hook for state management",
+    "styling": "Using Tailwind CSS with dark mode support, framer-motion for animations",
+    "responsive_strategy": "Mobile button uses lg:hidden to only show on mobile, while desktop retains the original EvidenceLegend component on the map",
+    "data_source": "EVIDENCE_SYSTEM constants from @/constants/evidence ensure consistency with the rest of the app"
+  },
+  "workflow_type": "development",
+  "services_involved": [
+    "frontend"
+  ],
+  "final_acceptance": [
+    "Mobile users can access Evidence Legend via info button in header",
+    "Desktop experience unchanged (EvidenceLegend still shows on map)",
+    "Modal matches app styling and supports dark mode",
+    "All tests pass"
+  ],
+  "spec_file": "spec.md",
+  "qa_sign_off": {
+    "status": "pending",
+    "issues": "",
+    "tests_passed": ""
+  },
+  "last_updated": "2026-01-07T21:27:30.240658+00:00"
+}
