@@ -1,0 +1,566 @@
+name: Dependency Security Scanning
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  # Python dependency vulnerability scanning using pip-audit
+  python-security-scan:
+    name: Python Dependency Scan (pip-audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Initialize scan results
+        run: |
+          echo "PYTHON_SCAN_FAILED=false" >> $GITHUB_ENV
+          echo "PYTHON_VULN_COUNT=0" >> $GITHUB_ENV
+          mkdir -p scan-results
+
+      - name: Scan root requirements.txt
+        id: scan-root
+        continue-on-error: true
+        run: |
+          # Run pip-audit with JSON output for parsing
+          pip-audit -r requirements.txt --format=json > scan-results/root.json 2>&1 || true
+
+          # Parse JSON results for summary
+          VULN_COUNT=$(cat scan-results/root.json | python3 -c "
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              # pip-audit JSON format: list of dicts with 'vulns' key
+              vulns = data.get('dependencies', [])
+              count = sum(len(d.get('vulns', [])) for d in vulns)
+              print(count)
+          except:
+              print(0)
+          " 2>/dev/null || echo "0")
+
+          if [ "$VULN_COUNT" = "0" ]; then
+            echo "✅ No vulnerabilities found in root requirements.txt" >> scan-results/root-summary.txt
+          else
+            echo "⚠️ $VULN_COUNT vulnerabilities found in root requirements.txt" >> scan-results/root-summary.txt
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+            TOTAL=$((PYTHON_VULN_COUNT + VULN_COUNT))
+            echo "PYTHON_VULN_COUNT=$TOTAL" >> $GITHUB_ENV
+          fi
+
+          # Also generate human-readable output
+          pip-audit -r requirements.txt --format=columns > scan-results/root.txt 2>&1 || true
+
+      - name: Scan api/requirements.txt
+        id: scan-api
+        continue-on-error: true
+        run: |
+          pip-audit -r api/requirements.txt --format=json > scan-results/api.json 2>&1 || true
+
+          VULN_COUNT=$(cat scan-results/api.json | python3 -c "
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              vulns = data.get('dependencies', [])
+              count = sum(len(d.get('vulns', [])) for d in vulns)
+              print(count)
+          except:
+              print(0)
+          " 2>/dev/null || echo "0")
+
+          if [ "$VULN_COUNT" = "0" ]; then
+            echo "✅ No vulnerabilities found in api/requirements.txt" >> scan-results/api-summary.txt
+          else
+            echo "⚠️ $VULN_COUNT vulnerabilities found in api/requirements.txt" >> scan-results/api-summary.txt
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+            TOTAL=$((PYTHON_VULN_COUNT + VULN_COUNT))
+            echo "PYTHON_VULN_COUNT=$TOTAL" >> $GITHUB_ENV
+          fi
+
+          pip-audit -r api/requirements.txt --format=columns > scan-results/api.txt 2>&1 || true
+
+      - name: Scan ingestion/requirements.txt
+        id: scan-ingestion
+        continue-on-error: true
+        run: |
+          pip-audit -r ingestion/requirements.txt --format=json > scan-results/ingestion.json 2>&1 || true
+
+          VULN_COUNT=$(cat scan-results/ingestion.json | python3 -c "
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              vulns = data.get('dependencies', [])
+              count = sum(len(d.get('vulns', [])) for d in vulns)
+              print(count)
+          except:
+              print(0)
+          " 2>/dev/null || echo "0")
+
+          if [ "$VULN_COUNT" = "0" ]; then
+            echo "✅ No vulnerabilities found in ingestion/requirements.txt" >> scan-results/ingestion-summary.txt
+          else
+            echo "⚠️ $VULN_COUNT vulnerabilities found in ingestion/requirements.txt" >> scan-results/ingestion-summary.txt
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+            TOTAL=$((PYTHON_VULN_COUNT + VULN_COUNT))
+            echo "PYTHON_VULN_COUNT=$TOTAL" >> $GITHUB_ENV
+          fi
+
+          pip-audit -r ingestion/requirements.txt --format=columns > scan-results/ingestion.txt 2>&1 || true
+
+      - name: Scan frontend/requirements.txt
+        id: scan-frontend
+        continue-on-error: true
+        run: |
+          pip-audit -r frontend/requirements.txt --format=json > scan-results/frontend.json 2>&1 || true
+
+          VULN_COUNT=$(cat scan-results/frontend.json | python3 -c "
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              vulns = data.get('dependencies', [])
+              count = sum(len(d.get('vulns', [])) for d in vulns)
+              print(count)
+          except:
+              print(0)
+          " 2>/dev/null || echo "0")
+
+          if [ "$VULN_COUNT" = "0" ]; then
+            echo "✅ No vulnerabilities found in frontend/requirements.txt" >> scan-results/frontend-summary.txt
+          else
+            echo "⚠️ $VULN_COUNT vulnerabilities found in frontend/requirements.txt" >> scan-results/frontend-summary.txt
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+            TOTAL=$((PYTHON_VULN_COUNT + VULN_COUNT))
+            echo "PYTHON_VULN_COUNT=$TOTAL" >> $GITHUB_ENV
+          fi
+
+          pip-audit -r frontend/requirements.txt --format=columns > scan-results/frontend.txt 2>&1 || true
+
+      - name: Scan frontend/api/requirements.txt
+        id: scan-frontend-api
+        continue-on-error: true
+        run: |
+          pip-audit -r frontend/api/requirements.txt --format=json > scan-results/frontend-api.json 2>&1 || true
+
+          VULN_COUNT=$(cat scan-results/frontend-api.json | python3 -c "
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              vulns = data.get('dependencies', [])
+              count = sum(len(d.get('vulns', [])) for d in vulns)
+              print(count)
+          except:
+              print(0)
+          " 2>/dev/null || echo "0")
+
+          if [ "$VULN_COUNT" = "0" ]; then
+            echo "✅ No vulnerabilities found in frontend/api/requirements.txt" >> scan-results/frontend-api-summary.txt
+          else
+            echo "⚠️ $VULN_COUNT vulnerabilities found in frontend/api/requirements.txt" >> scan-results/frontend-api-summary.txt
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+            TOTAL=$((PYTHON_VULN_COUNT + VULN_COUNT))
+            echo "PYTHON_VULN_COUNT=$TOTAL" >> $GITHUB_ENV
+          fi
+
+          pip-audit -r frontend/api/requirements.txt --format=columns > scan-results/frontend-api.txt 2>&1 || true
+
+      - name: Generate Python summary
+        id: python-summary
+        run: |
+          echo "# 🐍 Python Dependency Security Scan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [ "$PYTHON_SCAN_FAILED" = "true" ]; then
+            echo "## ⚠️ Vulnerabilities Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Total Python vulnerabilities found: $PYTHON_VULN_COUNT**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ✅ All Clear" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**No vulnerabilities found in Python dependencies.**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Per-project summary table
+          echo "### Scan Results by Project" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Project | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          for summary_file in scan-results/*-summary.txt; do
+            if [ -f "$summary_file" ]; then
+              cat "$summary_file" | while read line; do
+                project=$(echo "$line" | sed 's/.*in //' | sed 's/✅ No vulnerabilities found in //' | sed 's/⚠️ .* vulnerabilities found in //')
+                if echo "$line" | grep -q "✅"; then
+                  echo "| $project | ✅ Clean |" >> $GITHUB_STEP_SUMMARY
+                else
+                  count=$(echo "$line" | grep -oE '[0-9]+' | head -1)
+                  echo "| $project | ⚠️ $count vulnerabilities |" >> $GITHUB_STEP_SUMMARY
+                fi
+              done
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Detailed vulnerability information with CVE links
+          echo "### Vulnerability Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          python3 << 'PYTHON_SCRIPT'
+          import json
+          import os
+          import glob
+
+          severity_counts = {"critical": 0, "high": 0, "moderate": 0, "low": 0, "unknown": 0}
+          vuln_details = []
+
+          for json_file in glob.glob("scan-results/*.json"):
+              project = os.path.basename(json_file).replace(".json", "")
+              try:
+                  with open(json_file, 'r') as f:
+                      data = json.load(f)
+
+                  deps = data.get('dependencies', [])
+                  for dep in deps:
+                      pkg_name = dep.get('name', 'Unknown')
+                      pkg_version = dep.get('version', 'Unknown')
+                      vulns = dep.get('vulns', [])
+
+                      for vuln in vulns:
+                          vuln_id = vuln.get('id', 'Unknown')
+                          fix_versions = vuln.get('fix_versions', [])
+                          fix_str = ", ".join(fix_versions) if fix_versions else "No fix available"
+
+                          # Determine CVE link
+                          if vuln_id.startswith('CVE-'):
+                              link = f"https://nvd.nist.gov/vuln/detail/{vuln_id}"
+                          elif vuln_id.startswith('PYSEC-'):
+                              link = f"https://osv.dev/vulnerability/{vuln_id}"
+                          elif vuln_id.startswith('GHSA-'):
+                              link = f"https://github.com/advisories/{vuln_id}"
+                          else:
+                              link = f"https://osv.dev/vulnerability/{vuln_id}"
+
+                          # pip-audit doesn't provide severity, mark as unknown
+                          severity_counts["unknown"] += 1
+
+                          vuln_details.append({
+                              "project": project,
+                              "package": pkg_name,
+                              "version": pkg_version,
+                              "vuln_id": vuln_id,
+                              "link": link,
+                              "fix": fix_str
+                          })
+              except (json.JSONDecodeError, KeyError, FileNotFoundError):
+                  pass
+
+          # Write to summary file
+          with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/null'), 'a') as summary:
+              if vuln_details:
+                  summary.write("| Package | Version | Vulnerability | Fix Available |\n")
+                  summary.write("|---------|---------|---------------|---------------|\n")
+                  for v in vuln_details:
+                      summary.write(f"| {v['package']} ({v['project']}) | {v['version']} | [{v['vuln_id']}]({v['link']}) | {v['fix']} |\n")
+                  summary.write("\n")
+
+                  # Note about severity
+                  summary.write("> **Note:** pip-audit does not provide severity ratings. See the linked advisories for severity information.\n")
+              else:
+                  summary.write("No vulnerabilities to display.\n")
+              summary.write("\n")
+          PYTHON_SCRIPT
+
+          echo "---" >> $GITHUB_STEP_SUMMARY
+
+      - name: Save Python scan outputs
+        run: |
+          echo "python_failed=$PYTHON_SCAN_FAILED" >> $GITHUB_OUTPUT
+          echo "python_count=$PYTHON_VULN_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Upload Python vulnerability reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-vulnerability-reports
+          path: |
+            scan-results/*.json
+            scan-results/*.txt
+          retention-days: 30
+          if-no-files-found: warn
+
+  # JavaScript dependency vulnerability scanning using npm audit
+  javascript-security-scan:
+    name: JavaScript Dependency Scan (npm audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Initialize scan results
+        run: |
+          echo "JS_SCAN_FAILED=false" >> $GITHUB_ENV
+          echo "JS_VULN_COUNT=0" >> $GITHUB_ENV
+          echo "JS_CRITICAL=0" >> $GITHUB_ENV
+          echo "JS_HIGH=0" >> $GITHUB_ENV
+          echo "JS_MODERATE=0" >> $GITHUB_ENV
+          echo "JS_LOW=0" >> $GITHUB_ENV
+          mkdir -p scan-results
+
+      - name: Scan frontend/package.json
+        id: scan-frontend
+        continue-on-error: true
+        working-directory: frontend
+        run: |
+          # Install dependencies to generate package-lock.json if needed
+          npm install --package-lock-only 2>/dev/null || true
+
+          # Run npm audit with JSON output for parsing
+          npm audit --json > ../scan-results/frontend-npm.json 2>&1 || true
+
+          # Parse JSON for vulnerability counts by severity
+          node -e "
+          const fs = require('fs');
+          try {
+            const data = JSON.parse(fs.readFileSync('../scan-results/frontend-npm.json', 'utf8'));
+            const metadata = data.metadata || {};
+            const vulns = metadata.vulnerabilities || {};
+            console.log('FRONTEND_CRITICAL=' + (vulns.critical || 0));
+            console.log('FRONTEND_HIGH=' + (vulns.high || 0));
+            console.log('FRONTEND_MODERATE=' + (vulns.moderate || 0));
+            console.log('FRONTEND_LOW=' + (vulns.low || 0));
+            const total = (vulns.critical || 0) + (vulns.high || 0) + (vulns.moderate || 0) + (vulns.low || 0);
+            console.log('FRONTEND_TOTAL=' + total);
+          } catch(e) {
+            console.log('FRONTEND_CRITICAL=0');
+            console.log('FRONTEND_HIGH=0');
+            console.log('FRONTEND_MODERATE=0');
+            console.log('FRONTEND_LOW=0');
+            console.log('FRONTEND_TOTAL=0');
+          }
+          " >> $GITHUB_ENV
+
+          # Also generate human-readable output
+          npm audit --audit-level=moderate > ../scan-results/frontend-npm.txt 2>&1 || true
+
+      - name: Process frontend results
+        run: |
+          TOTAL=$((FRONTEND_CRITICAL + FRONTEND_HIGH + FRONTEND_MODERATE))
+          if [ "$TOTAL" -gt 0 ]; then
+            echo "⚠️ $TOTAL moderate+ vulnerabilities found in frontend/package.json" >> scan-results/frontend-npm-summary.txt
+            echo "JS_SCAN_FAILED=true" >> $GITHUB_ENV
+            echo "JS_VULN_COUNT=$((JS_VULN_COUNT + FRONTEND_TOTAL))" >> $GITHUB_ENV
+            echo "JS_CRITICAL=$((JS_CRITICAL + FRONTEND_CRITICAL))" >> $GITHUB_ENV
+            echo "JS_HIGH=$((JS_HIGH + FRONTEND_HIGH))" >> $GITHUB_ENV
+            echo "JS_MODERATE=$((JS_MODERATE + FRONTEND_MODERATE))" >> $GITHUB_ENV
+            echo "JS_LOW=$((JS_LOW + FRONTEND_LOW))" >> $GITHUB_ENV
+          else
+            echo "✅ No moderate+ vulnerabilities found in frontend/package.json" >> scan-results/frontend-npm-summary.txt
+          fi
+
+      - name: Scan tests/package.json
+        id: scan-tests
+        continue-on-error: true
+        working-directory: tests
+        run: |
+          # Install dependencies to generate package-lock.json if needed
+          npm install --package-lock-only 2>/dev/null || true
+
+          # Run npm audit with JSON output for parsing
+          npm audit --json > ../scan-results/tests-npm.json 2>&1 || true
+
+          # Parse JSON for vulnerability counts by severity
+          node -e "
+          const fs = require('fs');
+          try {
+            const data = JSON.parse(fs.readFileSync('../scan-results/tests-npm.json', 'utf8'));
+            const metadata = data.metadata || {};
+            const vulns = metadata.vulnerabilities || {};
+            console.log('TESTS_CRITICAL=' + (vulns.critical || 0));
+            console.log('TESTS_HIGH=' + (vulns.high || 0));
+            console.log('TESTS_MODERATE=' + (vulns.moderate || 0));
+            console.log('TESTS_LOW=' + (vulns.low || 0));
+            const total = (vulns.critical || 0) + (vulns.high || 0) + (vulns.moderate || 0) + (vulns.low || 0);
+            console.log('TESTS_TOTAL=' + total);
+          } catch(e) {
+            console.log('TESTS_CRITICAL=0');
+            console.log('TESTS_HIGH=0');
+            console.log('TESTS_MODERATE=0');
+            console.log('TESTS_LOW=0');
+            console.log('TESTS_TOTAL=0');
+          }
+          " >> $GITHUB_ENV
+
+          # Also generate human-readable output
+          npm audit --audit-level=moderate > ../scan-results/tests-npm.txt 2>&1 || true
+
+      - name: Process tests results
+        run: |
+          TOTAL=$((TESTS_CRITICAL + TESTS_HIGH + TESTS_MODERATE))
+          if [ "$TOTAL" -gt 0 ]; then
+            echo "⚠️ $TOTAL moderate+ vulnerabilities found in tests/package.json" >> scan-results/tests-npm-summary.txt
+            echo "JS_SCAN_FAILED=true" >> $GITHUB_ENV
+            echo "JS_VULN_COUNT=$((JS_VULN_COUNT + TESTS_TOTAL))" >> $GITHUB_ENV
+            echo "JS_CRITICAL=$((JS_CRITICAL + TESTS_CRITICAL))" >> $GITHUB_ENV
+            echo "JS_HIGH=$((JS_HIGH + TESTS_HIGH))" >> $GITHUB_ENV
+            echo "JS_MODERATE=$((JS_MODERATE + TESTS_MODERATE))" >> $GITHUB_ENV
+            echo "JS_LOW=$((JS_LOW + TESTS_LOW))" >> $GITHUB_ENV
+          else
+            echo "✅ No moderate+ vulnerabilities found in tests/package.json" >> scan-results/tests-npm-summary.txt
+          fi
+
+      - name: Generate JavaScript summary
+        id: js-summary
+        run: |
+          echo "# 📦 JavaScript Dependency Security Scan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [ "$JS_SCAN_FAILED" = "true" ]; then
+            echo "## ⚠️ Vulnerabilities Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Total JavaScript vulnerabilities found: $JS_VULN_COUNT**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Severity breakdown
+            echo "### Severity Breakdown" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| 🔴 Critical | $JS_CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟠 High | $JS_HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟡 Moderate | $JS_MODERATE |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟢 Low | $JS_LOW |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ✅ All Clear" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**No moderate+ vulnerabilities found in JavaScript dependencies.**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Per-project summary table
+          echo "### Scan Results by Project" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Project | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          for summary_file in scan-results/*-npm-summary.txt; do
+            if [ -f "$summary_file" ]; then
+              cat "$summary_file" | while read line; do
+                project=$(echo "$line" | sed 's/.*in //')
+                if echo "$line" | grep -q "✅"; then
+                  echo "| $project | ✅ Clean |" >> $GITHUB_STEP_SUMMARY
+                else
+                  count=$(echo "$line" | grep -oE '[0-9]+' | head -1)
+                  echo "| $project | ⚠️ $count vulnerabilities |" >> $GITHUB_STEP_SUMMARY
+                fi
+              done
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Detailed vulnerability information with GHSA links
+          echo "### Vulnerability Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          node << 'NODE_SCRIPT'
+          const fs = require('fs');
+          const path = require('path');
+          const glob = require('child_process').execSync('ls scan-results/*-npm.json 2>/dev/null || true').toString().trim().split('\n').filter(Boolean);
+
+          const vulnDetails = [];
+
+          for (const jsonFile of glob) {
+            const project = path.basename(jsonFile).replace('-npm.json', '');
+            try {
+              const data = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
+              const vulnerabilities = data.vulnerabilities || {};
+
+              for (const [pkgName, vulnData] of Object.entries(vulnerabilities)) {
+                const severity = vulnData.severity || 'unknown';
+                const via = vulnData.via || [];
+
+                for (const v of via) {
+                  if (typeof v === 'object') {
+                    const ghsaId = v.url ? v.url.split('/').pop() : '';
+                    const link = v.url || `https://www.npmjs.com/advisories`;
+
+                    vulnDetails.push({
+                      project,
+                      package: pkgName,
+                      severity: v.severity || severity,
+                      title: v.title || 'Unknown',
+                      ghsaId: ghsaId,
+                      link: link,
+                      range: vulnData.range || 'Unknown'
+                    });
+                  }
+                }
+              }
+            } catch (e) {
+              // Skip invalid JSON files
+            }
+          }
+
+          // Write to summary file
+          const summaryPath = process.env.GITHUB_STEP_SUMMARY || '/dev/null';
+          let summary = '';
+
+          if (vulnDetails.length > 0) {
+            summary += '| Package | Severity | Vulnerability | Affected Versions |\n';
+            summary += '|---------|----------|---------------|-------------------|\n';
+
+            const severityEmoji = {
+              critical: '🔴',
+              high: '🟠',
+              moderate: '🟡',
+              low: '🟢',
+              info: '🔵'
+            };
+
+            for (const v of vulnDetails) {
+              const emoji = severityEmoji[v.severity] || '⚪';
+              summary += `| ${v.package} (${v.project}) | ${emoji} ${v.severity} | [${v.title}](${v.link}) | ${v.range} |\n`;
+            }
+            summary += '\n';
+          } else {
+            summary += 'No vulnerabilities to display.\n';
+          }
+          summary += '\n';
+
+          fs.appendFileSync(summaryPath, summary);
+          NODE_SCRIPT
+
+          echo "---" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload JavaScript vulnerability reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-vulnerability-reports
+          path: |
+            scan-results/*-npm.json
+            scan-results/*-npm.txt
+          retention-days: 30
+          if-no-files-found: warn
