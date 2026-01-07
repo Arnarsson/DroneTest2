@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DroneWatchLogo } from './DroneWatchLogo'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 interface AboutModalProps {
   isOpen: boolean
@@ -11,6 +12,14 @@ interface AboutModalProps {
 
 export function AboutModal({ isOpen, onClose }: AboutModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Trap focus within modal when open, set initial focus to close button
+  useFocusTrap(modalRef, {
+    isActive: isOpen,
+    initialFocusRef: closeButtonRef,
+    returnFocus: true,
+  })
 
   // Close on Escape key
   useEffect(() => {
@@ -72,6 +81,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
           >
             {/* Close button */}
             <button
+              ref={closeButtonRef}
               onClick={onClose}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               aria-label="Close modal"
