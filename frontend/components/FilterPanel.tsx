@@ -326,7 +326,7 @@ function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionP
     <div>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between mb-3 group"
+        className="w-full flex items-center justify-between mb-3 group rounded focus-ring"
       >
         <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
           {title}
