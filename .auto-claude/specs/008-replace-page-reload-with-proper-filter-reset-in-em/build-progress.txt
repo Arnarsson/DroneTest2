@@ -1,0 +1,32 @@
+# Build Progress: Replace page reload with proper filter reset in empty state
+
+## Status: PLANNED
+Last Updated: 2026-01-07
+
+---
+
+## Summary
+Replace `window.location.reload()` in IncidentList empty state with a proper filter reset callback passed from the parent component.
+
+## Problem Analysis
+- **Current Issue:** `IncidentList.tsx` line 65-68 uses `window.location.reload()` for filter reset
+- **Impact:** Full page reload is jarring, slow, and loses user context
+- **Root Cause:** The empty state component doesn't have access to the filter reset function
+
+## Solution Design
+1. Add `onResetFilters?: () => void` prop to IncidentList component
+2. Replace `window.location.reload()` with the callback
+3. Add a "Reset Filters" button to the empty state UI
+4. Wire up the callback from `page.tsx`
+
+## Files to Modify
+1. `frontend/components/IncidentList.tsx` - Add prop, update function, add button
+2. `frontend/app/page.tsx` - Create and pass reset callback
+
+## Implementation Phases
+- **Phase 1:** Update IncidentList Component Interface (3 subtasks)
+- **Phase 2:** Wire Up Reset Callback in Parent Component (2 subtasks)
+- **Phase 3:** Testing and Verification (2 subtasks)
+
+## Progress Log
+- [2026-01-07] Created implementation plan with 3 phases and 7 subtasks

@@ -10,6 +10,7 @@ import { SourceBadge } from './SourceBadge'
 interface IncidentListProps {
   incidents: Incident[]
   isLoading: boolean
+  onResetFilters?: () => void
 }
 
 export function IncidentList({ incidents, isLoading }: IncidentListProps) {

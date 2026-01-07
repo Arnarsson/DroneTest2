@@ -1,0 +1,15 @@
+{
+  "discovered_files": {
+    "frontend/components/IncidentList.tsx": {
+      "description": "The handleResetFilters function at line 65-68 uses window.location.reload() with a TODO comment noting it should be passed from parent. The empty state UI (lines 70-94) shows filter suggestions but lacks a Reset button.",
+      "category": "code_smell",
+      "discovered_at": "2026-01-07T21:15:03.903222+00:00"
+    },
+    "frontend/components/FilterPanel.tsx": {
+      "description": "Contains the proper resetFilters() function at lines 43-51 that sets all filters to defaults: minEvidence: 1, country: 'all', status: 'all', assetType: null, dateRange: 'all'. This pattern should be reused in page.tsx.",
+      "category": "pattern",
+      "discovered_at": "2026-01-07T21:15:03.911933+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:15:03.911939+00:00"
+}

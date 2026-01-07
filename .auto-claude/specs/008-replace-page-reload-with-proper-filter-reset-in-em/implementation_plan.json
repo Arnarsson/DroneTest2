@@ -1,0 +1,97 @@
+{
+  "feature": "Replace page reload with proper filter reset in empty state",
+  "description": "The IncidentList empty state 'Reset Filters' functionality uses window.location.reload() instead of calling the filter reset function, causing a full page refresh and losing user context. This change will pass a reset callback from the parent component to enable smooth, instant filter resets.",
+  "created_at": "2026-01-07T21:08:18.836Z",
+  "updated_at": "2026-01-07T21:20:00.000Z",
+  "status": "planned",
+  "planStatus": "approved",
+  "workflow_type": "development",
+  "services_involved": ["frontend"],
+  "phases": [
+    {
+      "phase": 1,
+      "title": "Update IncidentList Component Interface",
+      "description": "Add onResetFilters prop to IncidentListProps interface and update the component to use it",
+      "subtasks": [
+        {
+          "id": "1.1",
+          "task": "Add onResetFilters prop to IncidentListProps interface",
+          "file": "frontend/components/IncidentList.tsx",
+          "status": "pending",
+          "details": "Add optional onResetFilters callback prop to the IncidentListProps interface. Type: () => void",
+          "notes": ""
+        },
+        {
+          "id": "1.2",
+          "task": "Update handleResetFilters function to use callback instead of reload",
+          "file": "frontend/components/IncidentList.tsx",
+          "status": "pending",
+          "details": "Replace window.location.reload() with the onResetFilters callback. Keep the function name for semantic clarity.",
+          "notes": ""
+        },
+        {
+          "id": "1.3",
+          "task": "Add Reset Filters button to empty state UI",
+          "file": "frontend/components/IncidentList.tsx",
+          "status": "pending",
+          "details": "Add a styled 'Reset Filters' button below the suggestion list in the empty state. Only show if onResetFilters prop is provided. Use existing styling patterns from FilterPanel.",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "phase": 2,
+      "title": "Wire Up Reset Callback in Parent Component",
+      "description": "Pass the filter reset callback from page.tsx to IncidentList",
+      "subtasks": [
+        {
+          "id": "2.1",
+          "task": "Create resetFilters callback in page.tsx",
+          "file": "frontend/app/page.tsx",
+          "status": "pending",
+          "details": "Create a memoized resetFilters callback that sets filters to default values. Match the default values used in FilterPanel.tsx (minEvidence: 1, country: 'all', status: 'all', assetType: null, dateRange: 'all')",
+          "notes": ""
+        },
+        {
+          "id": "2.2",
+          "task": "Pass onResetFilters prop to IncidentList",
+          "file": "frontend/app/page.tsx",
+          "status": "pending",
+          "details": "Add onResetFilters={resetFilters} prop to the IncidentList component in the list view section",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "phase": 3,
+      "title": "Testing and Verification",
+      "description": "Verify the implementation works correctly and no regressions exist",
+      "subtasks": [
+        {
+          "id": "3.1",
+          "task": "Manual verification of filter reset functionality",
+          "file": "",
+          "status": "pending",
+          "details": "Test: 1) Apply filters that result in no incidents, 2) Click Reset Filters button, 3) Verify filters are reset and incidents appear, 4) Verify no page reload occurs",
+          "notes": ""
+        },
+        {
+          "id": "3.2",
+          "task": "Run existing tests to ensure no regressions",
+          "file": "",
+          "status": "pending",
+          "details": "Run npm test and npm run lint to ensure no regressions in the codebase",
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "final_acceptance": [
+    "Clicking 'Reset Filters' button in empty state does NOT trigger page reload",
+    "Clicking 'Reset Filters' button resets all filters to default values",
+    "Incident list updates immediately after reset without full page refresh",
+    "User context (scroll position, UI state) is preserved",
+    "No TypeScript errors or linting issues"
+  ],
+  "spec_file": "spec.md"
+}
