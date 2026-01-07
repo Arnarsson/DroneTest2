@@ -29,7 +29,7 @@
           "subtask_id": "1.2",
           "title": "Document environment variables",
           "description": "Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to .env.local.example files",
-          "status": "pending",
+          "status": "completed",
           "files": ["frontend/.env.local.example", ".env.local.example"],
           "acceptance_criteria": [
             "UPSTASH_REDIS_REST_URL documented with description",
@@ -49,7 +49,7 @@
           "subtask_id": "2.1",
           "title": "Create distributed rate limiter module",
           "description": "Create frontend/api/distributed_rate_limit.py with Upstash Redis implementation using sliding window algorithm",
-          "status": "pending",
+          "status": "completed",
           "files": ["frontend/api/distributed_rate_limit.py"],
           "acceptance_criteria": [
             "Uses Upstash Redis REST API (no persistent connections)",
@@ -64,7 +64,7 @@
           "subtask_id": "2.2",
           "title": "Add fallback for local development",
           "description": "Implement fallback to in-memory rate limiting when Upstash credentials not configured (local dev)",
-          "status": "pending",
+          "status": "completed",
           "files": ["frontend/api/distributed_rate_limit.py"],
           "acceptance_criteria": [
             "Falls back to in-memory rate limiting if Redis unavailable",
