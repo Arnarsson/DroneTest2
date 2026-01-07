@@ -50,6 +50,15 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
     })
   }
 
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success('Link copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy link')
+    }
+  }
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
   }
@@ -141,19 +150,31 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
           <AnimatePresence>
             {activeFilterCount > 0 && (
               <motion.div
-                className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  {activeFilterCount} active filter{activeFilterCount !== 1 ? 's' : ''}
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                    {activeFilterCount} active filter{activeFilterCount !== 1 ? 's' : ''}
+                  </span>
+                  <button
+                    onClick={resetFilters}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                  >
+                    Clear all
+                  </button>
+                </div>
                 <button
-                  onClick={resetFilters}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                  onClick={handleCopyLink}
+                  className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  aria-label="Copy link with current filters"
                 >
-                  Clear all
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                  Copy Link
                 </button>
               </motion.div>
             )}
