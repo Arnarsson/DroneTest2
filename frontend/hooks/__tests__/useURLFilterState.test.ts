@@ -7,21 +7,44 @@ import type { FilterState } from '@/types'
 const mockReplace = jest.fn()
 const mockGet = jest.fn()
 
+// Store mock searchParams to simulate URL changes
+let mockSearchParams: { get: jest.Mock }
+
 jest.mock('next/navigation', () => ({
-  useSearchParams: () => ({
-    get: mockGet,
-  }),
+  useSearchParams: () => mockSearchParams,
   useRouter: () => ({
     replace: mockReplace,
   }),
   usePathname: () => '/',
 }))
 
+// Mock window.location.search for popstate tests
+const originalLocation = window.location
+let mockLocationSearch = ''
+
+beforeAll(() => {
+  delete (window as any).location
+  window.location = {
+    ...originalLocation,
+    get search() {
+      return mockLocationSearch
+    },
+  } as Location
+})
+
+afterAll(() => {
+  window.location = originalLocation
+})
+
 describe('useURLFilterState', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     // Default to returning null for all params (uses defaults)
     mockGet.mockReturnValue(null)
+    // Initialize mock searchParams
+    mockSearchParams = { get: mockGet }
+    // Reset mock location search
+    mockLocationSearch = ''
   })
 
   describe('initial state from URL', () => {
@@ -423,6 +446,147 @@ describe('useURLFilterState', () => {
         assetType: null, // Default
         dateRange: DEFAULT_FILTER_STATE.dateRange, // Defaulted
       })
+    })
+  })
+
+  describe('browser back/forward navigation', () => {
+    it('updates filter state when popstate event fires', () => {
+      const { result } = renderHook(() => useURLFilterState())
+
+      // Verify initial state
+      expect(result.current.filters).toEqual(DEFAULT_FILTER_STATE)
+
+      // Simulate browser navigation to a URL with filter params
+      mockLocationSearch = '?country=DK&min_evidence=3&date_range=week'
+
+      // Dispatch popstate event (simulates browser back/forward)
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+
+      // Filter state should update to match URL
+      expect(result.current.filters.country).toBe('DK')
+      expect(result.current.filters.minEvidence).toBe(3)
+      expect(result.current.filters.dateRange).toBe('week')
+    })
+
+    it('restores filters when navigating back to URL with params', () => {
+      // Start with some filter params in URL
+      mockGet.mockImplementation((key: string) => {
+        const values: Record<string, string> = {
+          country: 'SE',
+          min_evidence: '2',
+        }
+        return values[key] || null
+      })
+      mockLocationSearch = '?country=SE&min_evidence=2'
+
+      const { result } = renderHook(() => useURLFilterState())
+
+      // Verify initial state from URL
+      expect(result.current.filters.country).toBe('SE')
+      expect(result.current.filters.minEvidence).toBe(2)
+
+      // Simulate navigating to a page with different filters (via popstate)
+      mockLocationSearch = '?country=NO&min_evidence=4&status=active'
+
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+
+      // Filter state should update
+      expect(result.current.filters.country).toBe('NO')
+      expect(result.current.filters.minEvidence).toBe(4)
+      expect(result.current.filters.status).toBe('active')
+    })
+
+    it('restores default filters when navigating back to URL without params', () => {
+      // Start with filter params in URL
+      mockGet.mockImplementation((key: string) => {
+        if (key === 'country') return 'DK'
+        return null
+      })
+      mockLocationSearch = '?country=DK'
+
+      const { result } = renderHook(() => useURLFilterState())
+
+      expect(result.current.filters.country).toBe('DK')
+
+      // Navigate back to URL without params
+      mockLocationSearch = ''
+
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+
+      // Should restore to defaults
+      expect(result.current.filters).toEqual(DEFAULT_FILTER_STATE)
+    })
+
+    it('cleans up popstate event listener on unmount', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+
+      const { unmount } = renderHook(() => useURLFilterState())
+
+      // Verify event listener was added
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'popstate',
+        expect.any(Function)
+      )
+
+      // Get the handler that was registered
+      const handler = addEventListenerSpy.mock.calls.find(
+        (call) => call[0] === 'popstate'
+      )?.[1]
+
+      unmount()
+
+      // Verify event listener was removed with the same handler
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('popstate', handler)
+
+      addEventListenerSpy.mockRestore()
+      removeEventListenerSpy.mockRestore()
+    })
+
+    it('handles multiple consecutive popstate events correctly', () => {
+      const { result } = renderHook(() => useURLFilterState())
+
+      // First navigation
+      mockLocationSearch = '?country=DK'
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+      expect(result.current.filters.country).toBe('DK')
+
+      // Second navigation
+      mockLocationSearch = '?country=SE&date_range=month'
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+      expect(result.current.filters.country).toBe('SE')
+      expect(result.current.filters.dateRange).toBe('month')
+
+      // Third navigation - back to defaults
+      mockLocationSearch = ''
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+      expect(result.current.filters).toEqual(DEFAULT_FILTER_STATE)
+    })
+
+    it('does not call router.replace on popstate events', () => {
+      const { result } = renderHook(() => useURLFilterState())
+
+      mockLocationSearch = '?country=DK'
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+
+      // popstate should NOT trigger router.replace (would cause navigation loop)
+      expect(mockReplace).not.toHaveBeenCalled()
+      // But filters should still update
+      expect(result.current.filters.country).toBe('DK')
     })
   })
 })

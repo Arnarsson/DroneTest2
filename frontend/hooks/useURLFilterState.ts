@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import type { FilterState } from '@/types'
 import {
@@ -15,8 +15,11 @@ export { DEFAULT_FILTER_STATE }
 /**
  * Hook that syncs FilterState with URL search parameters
  *
+ * Handles browser back/forward navigation by listening to popstate events
+ * in addition to using Next.js's useSearchParams for programmatic navigation.
+ *
  * @returns Object containing:
- *   - filters: Current filter state (derived from URL)
+ *   - filters: Current filter state (synced with URL)
  *   - setFilters: Function to update both state and URL
  *
  * @example
@@ -37,14 +40,35 @@ export function useURLFilterState() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Derive filter state from URL search params
-  const filters = useMemo(() => {
-    return parseFilterParams(searchParams)
+  // Local state that syncs with URL - allows immediate updates on navigation
+  const [filters, setLocalFilters] = useState<FilterState>(() =>
+    parseFilterParams(searchParams)
+  )
+
+  // Update local state when searchParams changes (Next.js programmatic navigation)
+  useEffect(() => {
+    setLocalFilters(parseFilterParams(searchParams))
   }, [searchParams])
 
-  // Setter that updates URL search params
+  // Handle browser back/forward navigation via popstate event
+  // This ensures filter state updates even when Next.js doesn't fully detect URL changes
+  useEffect(() => {
+    const handlePopState = () => {
+      // Read directly from window.location.search for immediate update
+      const currentParams = new URLSearchParams(window.location.search)
+      setLocalFilters(parseFilterParams(currentParams))
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  // Setter that updates both local state and URL search params
   const setFilters = useCallback(
     (newFilters: FilterState) => {
+      // Update local state immediately for responsive UI
+      setLocalFilters(newFilters)
+
       const params = serializeFilterParams(newFilters)
       const queryString = params.toString()
 
