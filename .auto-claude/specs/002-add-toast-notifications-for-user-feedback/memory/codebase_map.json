@@ -1,0 +1,15 @@
+{
+  "discovered_files": {
+    "frontend/components/FilterPanel.tsx": {
+      "description": "toast is imported from sonner (line 5) but never called - ready for use in resetFilters function",
+      "category": "integration_point",
+      "discovered_at": "2026-01-07T21:15:42.786250+00:00"
+    },
+    "frontend/app/page.tsx": {
+      "description": "Toaster component rendered at top-right with richColors, error state from useIncidents hook available for toast.error(), isLoading state available for success toast",
+      "category": "integration_point",
+      "discovered_at": "2026-01-07T21:15:42.795277+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:15:42.795287+00:00"
+}

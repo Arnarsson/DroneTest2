@@ -11,7 +11,7 @@ import type { FilterState, Incident } from "@/types";
 import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 
 // Dynamic import for map (no SSR)
@@ -95,6 +95,24 @@ export default function Home() {
       toast.error("Failed to load incidents. Retrying...");
     }
   }, [error]);
+
+  // Track previous loading state to detect loading -> loaded transition
+  const prevLoadingRef = useRef(true);
+
+  // Show toast notification when incidents are successfully loaded
+  useEffect(() => {
+    // Detect transition from loading to loaded
+    const wasLoading = prevLoadingRef.current;
+    const isNowLoaded = !isLoading;
+
+    if (wasLoading && isNowLoaded && allIncidents && !error) {
+      const count = allIncidents.length;
+      toast.success(`Loaded ${count} incident${count !== 1 ? "s" : ""}`);
+    }
+
+    // Update ref for next render
+    prevLoadingRef.current = isLoading;
+  }, [isLoading, allIncidents, error]);
 
   return (
     <>
