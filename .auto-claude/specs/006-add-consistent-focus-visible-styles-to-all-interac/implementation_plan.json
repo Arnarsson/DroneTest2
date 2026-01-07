@@ -3,8 +3,8 @@
   "description": "Add visible focus ring styles to buttons, tabs, and clickable elements for keyboard navigation accessibility. Currently only form inputs have focus:ring-2 styling while buttons like ViewTab, QuickFilterChip, and ThemeToggle lack visible focus indicators. This is required for WCAG 2.1 Level AA compliance.",
   "created_at": "2026-01-07T21:08:15.648Z",
   "updated_at": "2026-01-07T21:13:52.587Z",
-  "status": "in_progress",
-  "planStatus": "approved",
+  "status": "human_review",
+  "planStatus": "review",
   "phases": [
     {
       "id": "phase-1",
@@ -240,10 +240,49 @@
   ],
   "spec_file": "spec.md",
   "qa_signoff": {
-    "status": "pending",
-    "issues": "",
-    "tests_passed": ""
+    "status": "rejected",
+    "qa_session": 2,
+    "issues_found": [
+      {
+        "description": "3 interactive elements missing focus-ring: AtlasBadge.tsx:17 (Critical), EvidenceLegend.tsx:96 (Major), AboutModal.tsx:219 (Minor)"
+      }
+    ],
+    "tests_passed": {},
+    "timestamp": "2026-01-07T22:03:24.923831+00:00",
+    "ready_for_qa_revalidation": false
   },
   "estimated_subtasks": 18,
-  "last_updated": "2026-01-07T21:46:57.732600+00:00"
+  "last_updated": "2026-01-07T22:03:24.923841+00:00",
+  "qa_iteration_history": [
+    {
+      "iteration": 1,
+      "status": "rejected",
+      "timestamp": "2026-01-07T21:53:38.495109+00:00",
+      "issues": [
+        {
+          "description": "4 buttons missing focus-ring: ErrorBoundary.tsx (lines 106, 112), EvidenceLegend.tsx (lines 39, 67)"
+        }
+      ],
+      "duration_seconds": 360.48
+    },
+    {
+      "iteration": 2,
+      "status": "rejected",
+      "timestamp": "2026-01-07T22:03:33.995533+00:00",
+      "issues": [
+        {
+          "description": "3 interactive elements missing focus-ring: AtlasBadge.tsx:17 (Critical), EvidenceLegend.tsx:96 (Major), AboutModal.tsx:219 (Minor)"
+        }
+      ],
+      "duration_seconds": 477.31
+    }
+  ],
+  "qa_stats": {
+    "total_iterations": 2,
+    "last_iteration": 2,
+    "last_status": "rejected",
+    "issues_by_type": {
+      "unknown": 2
+    }
+  }
 }

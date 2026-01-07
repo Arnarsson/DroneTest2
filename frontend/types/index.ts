@@ -34,6 +34,7 @@ export interface FilterState {
   status: string
   assetType: string | null
   dateRange: 'day' | 'week' | 'month' | 'all'
+  searchQuery: string
 }
 
 export interface ApiResponse<T> {

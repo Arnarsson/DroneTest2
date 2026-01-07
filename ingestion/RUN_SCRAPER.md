@@ -11,14 +11,29 @@
 1. **Environment Variables** (required):
    ```bash
    export DATABASE_URL="postgresql://postgres:PASSWORD@HOST:6543/postgres"
-   export INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
+   export INGEST_TOKEN="your-secure-token-here"
    export OPENROUTER_API_KEY="sk-or-v1-..."
    ```
 
    **Get from**:
    - DATABASE_URL: Vercel dashboard → Environment Variables
-   - INGEST_TOKEN: Same as above
+   - INGEST_TOKEN: Generate a secure token (min 16 characters) or get from Vercel environment
    - OPENROUTER_API_KEY: OpenRouter account
+
+   **Generate a secure INGEST_TOKEN**:
+   ```bash
+   # Option 1: Using openssl (recommended)
+   openssl rand -base64 32
+
+   # Option 2: Using Python
+   python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+
+   # Option 3: Using /dev/urandom
+   head -c 32 /dev/urandom | base64
+   ```
+
+   > **Security Note**: The INGEST_TOKEN must be at least 16 characters and match the token
+   > configured in your Vercel environment. Never share or commit your token to version control.
 
 2. **Python 3.11+** with virtual environment:
    ```bash
@@ -179,10 +194,16 @@ export DATABASE_URL="postgresql://..."
 HTTP 401 Unauthorized: Invalid Bearer token
 ```
 
-**Solution**: Check INGEST_TOKEN matches Vercel environment variable
+**Solution**: Check INGEST_TOKEN matches the token configured in your Vercel environment:
 ```bash
-export INGEST_TOKEN="dw-secret-2025-nordic-drone-watch"
+export INGEST_TOKEN="your-secure-token-here"  # Must match Vercel env var
 ```
+
+If you haven't set up INGEST_TOKEN yet, generate a secure one:
+```bash
+openssl rand -base64 32
+```
+Then add it to both your local environment and Vercel dashboard.
 
 ### Error: OpenRouter API key invalid
 
