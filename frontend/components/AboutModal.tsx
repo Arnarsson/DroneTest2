@@ -60,6 +60,10 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
         >
           <motion.div
             ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-modal-title"
+            aria-describedby="about-modal-description"
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -83,8 +87,8 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200 dark:border-gray-800">
                 <DroneWatchLogo size="lg" />
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">DroneWatch</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Safety Through Transparency</p>
+                  <h2 id="about-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">DroneWatch</h2>
+                  <p id="about-modal-description" className="text-sm text-gray-500 dark:text-gray-400 font-medium">Safety Through Transparency</p>
                 </div>
               </div>
 
