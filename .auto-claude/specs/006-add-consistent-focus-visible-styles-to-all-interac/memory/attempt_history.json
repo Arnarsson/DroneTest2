@@ -83,11 +83,35 @@
         }
       ],
       "status": "completed"
+    },
+    "3.4": {
+      "attempts": [
+        {
+          "session": 9,
+          "timestamp": "2026-01-07T22:27:53.992201",
+          "approach": "Implemented: Add focus-visible styles to the QuickFilterChip button component (Airports, Military, Today, Verifie",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "3.5": {
+      "attempts": [
+        {
+          "session": 10,
+          "timestamp": "2026-01-07T22:29:17.431009",
+          "approach": "Implemented: Add focus-visible styles to the FilterSection collapsible header button.",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
     }
   },
   "stuck_subtasks": [],
   "metadata": {
     "created_at": "2026-01-07T22:13:54.528514",
-    "last_updated": "2026-01-07T22:26:46.391292"
+    "last_updated": "2026-01-07T22:29:17.431013"
   }
 }

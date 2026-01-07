@@ -207,7 +207,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                   <motion.button
                     key={level}
                     onClick={() => handleChange('minEvidence', level)}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all focus-ring ${
                       filters.minEvidence === level
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'

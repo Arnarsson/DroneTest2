@@ -93,16 +93,18 @@
           "title": "Add focus-visible to QuickFilterChip component",
           "description": "Add focus-visible styles to the QuickFilterChip button component (Airports, Military, Today, Verified chips).",
           "file": "frontend/components/FilterPanel.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class to the QuickFilterChip button component (line 372) in FilterPanel.tsx. The button already has rounded-full so the focus ring matches the circular chip shape. This provides keyboard accessibility focus indicators for all quick filter chips (Airports, Military, Today, Verified). Committed as 41c0a77.",
+          "updated_at": "2026-01-07T21:27:47.495007+00:00"
         },
         {
           "id": "3.5",
           "title": "Add focus-visible to FilterSection toggle",
           "description": "Add focus-visible styles to the FilterSection collapsible header button.",
           "file": "frontend/components/FilterPanel.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class and rounded to the FilterSection collapsible header button (line 329) in FilterPanel.tsx. The focus ring is now visible when navigating with Tab key for all filter section toggles (Evidence Level, Location, Time Period). Committed as 2bb576c.",
+          "updated_at": "2026-01-07T21:29:11.099738+00:00"
         },
         {
           "id": "3.6",
@@ -233,5 +235,5 @@
     "tests_passed": ""
   },
   "estimated_subtasks": 18,
-  "last_updated": "2026-01-07T21:26:39.292194+00:00"
+  "last_updated": "2026-01-07T21:29:11.099747+00:00"
 }
