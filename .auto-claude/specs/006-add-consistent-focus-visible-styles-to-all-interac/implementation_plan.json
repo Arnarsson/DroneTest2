@@ -1,0 +1,233 @@
+{
+  "feature": "Add consistent focus-visible styles to all interactive elements",
+  "description": "Add visible focus ring styles to buttons, tabs, and clickable elements for keyboard navigation accessibility. Currently only form inputs have focus:ring-2 styling while buttons like ViewTab, QuickFilterChip, and ThemeToggle lack visible focus indicators. This is required for WCAG 2.1 Level AA compliance.",
+  "created_at": "2026-01-07T21:08:15.648Z",
+  "updated_at": "2026-01-07T21:13:52.587Z",
+  "status": "in_progress",
+  "planStatus": "approved",
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Define Global Focus Utilities",
+      "description": "Create reusable focus-visible CSS utilities that can be applied consistently across all components",
+      "subtasks": [
+        {
+          "id": "1.1",
+          "title": "Add focus-visible utility classes to globals.css",
+          "description": "Create a standard focus-visible style using Tailwind's @layer utilities. Define .focus-ring class that provides consistent focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 styling with proper outline-none to prevent browser default outlines.",
+          "file": "frontend/app/globals.css",
+          "status": "completed",
+          "notes": "Added .focus-ring utility class to globals.css with focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 and outline-none. Committed as 1cdd493.",
+          "updated_at": "2026-01-07T21:17:47.120883+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Update Header Components",
+      "description": "Apply focus-visible styles to header navigation elements",
+      "subtasks": [
+        {
+          "id": "2.1",
+          "title": "Add focus-visible to ThemeToggle button",
+          "description": "Add focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 classes to both the placeholder and main button in ThemeToggle.tsx",
+          "file": "frontend/components/ThemeToggle.tsx",
+          "status": "completed",
+          "notes": "Added focus-ring class to both the placeholder button (line 17) and main theme toggle button (line 26) in ThemeToggle.tsx. The focus-ring utility class provides consistent focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 styling for keyboard accessibility. Committed as 5edd58f.",
+          "updated_at": "2026-01-07T21:19:31.912114+00:00"
+        },
+        {
+          "id": "2.2",
+          "title": "Add focus-visible to ViewTab component",
+          "description": "Add focus-visible styles to the ViewTab button component in Header.tsx. Ensure focus ring is visible on both active and inactive states.",
+          "file": "frontend/components/Header.tsx",
+          "status": "completed",
+          "notes": "Added focus-ring class and rounded-md to the ViewTab button component in Header.tsx (line 139). The focus ring is now visible on keyboard navigation for both active and inactive tab states. The rounded-md ensures the focus ring shape matches the active tab indicator. Committed as 3dc5ffd.",
+          "updated_at": "2026-01-07T21:21:16.071360+00:00"
+        },
+        {
+          "id": "2.3",
+          "title": "Add focus-visible to About button",
+          "description": "Add focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 to the About info button in Header.tsx",
+          "file": "frontend/components/Header.tsx",
+          "status": "pending",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Update Filter Components",
+      "description": "Apply focus-visible styles to filter panel and filter controls",
+      "subtasks": [
+        {
+          "id": "3.1",
+          "title": "Add focus-visible to view toggle buttons in Filters.tsx",
+          "description": "Add focus-visible styles to the Map, List, and Analytics toggle buttons in the Filters component.",
+          "file": "frontend/components/Filters.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "3.2",
+          "title": "Add focus-visible to FilterPanel mobile button",
+          "description": "Add focus-visible styles to the floating filter button (motion.button) that appears on mobile screens.",
+          "file": "frontend/components/FilterPanel.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "3.3",
+          "title": "Add focus-visible to FilterPanel close and clear buttons",
+          "description": "Add focus-visible styles to the close panel button and the 'Clear all' filter reset button.",
+          "file": "frontend/components/FilterPanel.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "3.4",
+          "title": "Add focus-visible to QuickFilterChip component",
+          "description": "Add focus-visible styles to the QuickFilterChip button component (Airports, Military, Today, Verified chips).",
+          "file": "frontend/components/FilterPanel.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "3.5",
+          "title": "Add focus-visible to FilterSection toggle",
+          "description": "Add focus-visible styles to the FilterSection collapsible header button.",
+          "file": "frontend/components/FilterPanel.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "3.6",
+          "title": "Add focus-visible to evidence level buttons",
+          "description": "Add focus-visible styles to the evidence level selection buttons (1-4) in FilterPanel.",
+          "file": "frontend/components/FilterPanel.tsx",
+          "status": "pending",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Update List Components",
+      "description": "Apply focus-visible styles to incident list interactive elements",
+      "subtasks": [
+        {
+          "id": "4.1",
+          "title": "Add focus-visible to Group by Facility button",
+          "description": "Add focus-visible styles to the 'Group by Facility' toggle button in IncidentList.tsx.",
+          "file": "frontend/components/IncidentList.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "4.2",
+          "title": "Add focus-visible to FacilityGroup header button",
+          "description": "Add focus-visible styles to the collapsible FacilityGroup header button for expanding/collapsing facility incident groups.",
+          "file": "frontend/components/IncidentList.tsx",
+          "status": "pending",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Update Modal and Badge Components",
+      "description": "Apply focus-visible styles to modal and badge interactive elements",
+      "subtasks": [
+        {
+          "id": "5.1",
+          "title": "Add focus-visible to AboutModal close button",
+          "description": "Add focus-visible styles to the close button in AboutModal.tsx.",
+          "file": "frontend/components/AboutModal.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "5.2",
+          "title": "Add focus-visible to SourceBadge link",
+          "description": "Add focus-visible styles to the anchor link in SourceBadge.tsx that opens sources in new tabs.",
+          "file": "frontend/components/SourceBadge.tsx",
+          "status": "pending",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Update Timeline Components",
+      "description": "Apply focus-visible styles to timeline controls",
+      "subtasks": [
+        {
+          "id": "6.1",
+          "title": "Add focus-visible to Timeline toggle button",
+          "description": "Add focus-visible styles to the main Timeline expand/collapse toggle button.",
+          "file": "frontend/components/Timeline.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "6.2",
+          "title": "Add focus-visible to Timeline playback controls",
+          "description": "Add focus-visible styles to Play/Pause, Show All/Reset, and Speed buttons in Timeline.tsx.",
+          "file": "frontend/components/Timeline.tsx",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "6.3",
+          "title": "Add focus-visible to Timeline distribution bars",
+          "description": "Add focus-visible styles to the incident distribution bar elements (motion.div) that are clickable. Add tabindex='0' and keyboard interaction for accessibility.",
+          "file": "frontend/components/Timeline.tsx",
+          "status": "pending",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "phase-7",
+      "name": "Verification and Testing",
+      "description": "Verify all changes work correctly with keyboard navigation",
+      "subtasks": [
+        {
+          "id": "7.1",
+          "title": "Run existing tests",
+          "description": "Run npm test to ensure existing tests pass with the new focus styles.",
+          "file": "",
+          "status": "pending",
+          "notes": ""
+        },
+        {
+          "id": "7.2",
+          "title": "Build verification",
+          "description": "Run npm run build to ensure the application builds without errors.",
+          "file": "",
+          "status": "pending",
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "workflow_type": "development",
+  "services_involved": [
+    "frontend"
+  ],
+  "final_acceptance": [
+    "All interactive elements have visible focus indicators when navigating with keyboard (Tab key)",
+    "Focus ring is visible in both light and dark modes",
+    "Focus ring has sufficient contrast ratio for accessibility",
+    "All existing tests pass",
+    "Application builds without errors"
+  ],
+  "spec_file": "spec.md",
+  "qa_signoff": {
+    "status": "pending",
+    "issues": "",
+    "tests_passed": ""
+  },
+  "estimated_subtasks": 18,
+  "last_updated": "2026-01-07T21:21:16.071369+00:00"
+}

@@ -1,0 +1,52 @@
+# Build Progress: Add Consistent Focus-Visible Styles
+
+## Session: 2026-01-07
+
+### Status: Implementation Plan Created
+
+### Codebase Analysis Summary
+
+**Components requiring focus-visible styles:**
+
+1. **ThemeToggle.tsx** - Theme toggle button (light/dark mode)
+2. **Header.tsx**
+   - ViewTab component (Map, List, Analytics navigation tabs)
+   - About info button
+3. **Filters.tsx** - View toggle buttons (already has focus on select elements)
+4. **FilterPanel.tsx**
+   - Mobile floating filter button
+   - Close panel button
+   - Clear all filters button
+   - QuickFilterChip component
+   - FilterSection toggle buttons
+   - Evidence level selection buttons
+5. **IncidentList.tsx**
+   - Group by Facility toggle button
+   - FacilityGroup header expand/collapse buttons
+6. **AboutModal.tsx** - Close modal button
+7. **SourceBadge.tsx** - External source links
+8. **Timeline.tsx**
+   - Timeline toggle button
+   - Play/Pause button
+   - Show All/Reset button
+   - Speed control button
+   - Distribution bar elements (need tabindex for keyboard access)
+
+**Existing patterns observed:**
+- Select elements already use: `focus:ring-2 focus:ring-blue-500 focus:border-transparent`
+- No focus styles on buttons, tabs, or clickable elements
+- Application uses Tailwind CSS with dark mode support
+
+**Recommended focus-visible pattern:**
+```
+focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2
+```
+
+### Implementation Plan Created
+- 7 phases with 18 subtasks
+- Starting with global utility class in globals.css
+- Then systematically updating each component
+
+### Next Steps
+- Begin Phase 1: Define global focus-visible utilities in globals.css
+- Progress through each component systematically

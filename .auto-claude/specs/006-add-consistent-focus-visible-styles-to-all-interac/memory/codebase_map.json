@@ -1,0 +1,25 @@
+{
+  "discovered_files": {
+    "frontend/app/globals.css": {
+      "description": "Added .focus-ring utility class in @layer utilities that provides consistent focus-visible styling: outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2. Use this class on all interactive elements for WCAG 2.1 Level AA keyboard accessibility compliance.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:17:52.946350+00:00"
+    },
+    "frontend/components/FilterPanel.tsx": {
+      "description": "FilterPanel contains multiple interactive elements: mobile filter button, QuickFilterChip component, FilterSection component with toggle, evidence level buttons. Select elements already have focus:ring-2 styling but buttons do not.",
+      "category": "components",
+      "discovered_at": "2026-01-07T21:16:21.820544+00:00"
+    },
+    "frontend/components/Header.tsx": {
+      "description": "ViewTab component now has focus-ring class for keyboard accessibility. Added rounded-md to ensure focus ring matches the button's visual shape (matching the motion.div active indicator).",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:21:21.218843+00:00"
+    },
+    "frontend/components/ThemeToggle.tsx": {
+      "description": "ThemeToggle has two buttons: a placeholder button shown during SSR/hydration and the main interactive button. Both need focus-ring class for consistent keyboard accessibility.",
+      "category": "component-pattern",
+      "discovered_at": "2026-01-07T21:19:40.391829+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:21:21.218853+00:00"
+}
