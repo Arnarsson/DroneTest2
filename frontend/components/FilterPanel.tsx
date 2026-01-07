@@ -43,6 +43,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
 
   const resetFilters = () => {
     onChange({
+      searchQuery: '',
       minEvidence: 1,
       country: 'all',
       status: 'all',
