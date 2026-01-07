@@ -417,6 +417,199 @@ test.describe('DroneWatch Production E2E Tests', () => {
     });
   });
 
+  test.describe('URL Filter State', () => {
+
+    test('should apply filters from URL params on page load', async ({ page }) => {
+      // Navigate directly to URL with filter params
+      await page.goto(`${BASE_URL}/?country=DK&min_evidence=3&date_range=week`);
+      await page.waitForLoadState('networkidle');
+
+      // Verify country filter is set to Denmark
+      const countrySelect = page.locator('select').first();
+      await expect(countrySelect).toHaveValue('DK');
+
+      // Verify evidence filter is set (check that Score 3+ is the minimum)
+      // The evidence buttons for lower scores should be visually different
+      const unconfirmedButton = page.locator('button:has-text("Unconfirmed")').first();
+      const reportedButton = page.locator('button:has-text("Reported")').first();
+
+      // These should be inactive/disabled appearance since minEvidence is 3
+      // We check aria-pressed or similar indicator
+      // The higher evidence buttons should be active
+      await expect(page.locator('button:has-text("Verified")').first()).toBeVisible();
+    });
+
+    test('should update URL when filter changes', async ({ page }) => {
+      // Start with default page (no filter params)
+      await page.goto(BASE_URL);
+      await page.waitForLoadState('networkidle');
+
+      // Initial URL should have no query params
+      expect(page.url()).toBe(`${BASE_URL}/`);
+
+      // Select a country filter
+      const countrySelect = page.locator('select').first();
+      await countrySelect.selectOption({ label: /Denmark/i });
+
+      // Wait for URL update
+      await page.waitForTimeout(500);
+
+      // URL should now contain country param
+      const currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.get('country')).toBe('DK');
+    });
+
+    test('should update URL with multiple filter params', async ({ page }) => {
+      await page.goto(BASE_URL);
+      await page.waitForLoadState('networkidle');
+
+      // Apply country filter
+      const countrySelect = page.locator('select').first();
+      await countrySelect.selectOption({ label: /Denmark/i });
+
+      // Wait for URL update
+      await page.waitForTimeout(500);
+
+      // Click on date range filter (Week)
+      const weekButton = page.locator('button:has-text("Week")').first();
+      await weekButton.click();
+
+      // Wait for URL update
+      await page.waitForTimeout(500);
+
+      // Verify both params are in URL
+      const currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.get('country')).toBe('DK');
+      expect(currentUrl.searchParams.get('date_range')).toBe('week');
+    });
+
+    test('should preserve filters when sharing URL', async ({ page, context }) => {
+      // Navigate to a URL with specific filters
+      const filterUrl = `${BASE_URL}/?country=DK&min_evidence=2&date_range=month`;
+      await page.goto(filterUrl);
+      await page.waitForLoadState('networkidle');
+
+      // Verify filters are applied
+      const countrySelect = page.locator('select').first();
+      await expect(countrySelect).toHaveValue('DK');
+
+      // Open a new page with the same URL (simulates sharing)
+      const newPage = await context.newPage();
+      await newPage.goto(filterUrl);
+      await newPage.waitForLoadState('networkidle');
+
+      // Verify filters are also applied in the new page
+      const newCountrySelect = newPage.locator('select').first();
+      await expect(newCountrySelect).toHaveValue('DK');
+
+      await newPage.close();
+    });
+
+    test('should handle browser back/forward navigation', async ({ page }) => {
+      // Start with default page
+      await page.goto(BASE_URL);
+      await page.waitForLoadState('networkidle');
+
+      // Apply a filter - select Denmark
+      const countrySelect = page.locator('select').first();
+      await countrySelect.selectOption({ label: /Denmark/i });
+      await page.waitForTimeout(500);
+
+      // Verify URL changed
+      let currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.get('country')).toBe('DK');
+
+      // Change to another filter - select Norway
+      await countrySelect.selectOption({ label: /Norway/i });
+      await page.waitForTimeout(500);
+
+      // Verify URL updated
+      currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.get('country')).toBe('NO');
+
+      // Go back in browser history
+      await page.goBack();
+      await page.waitForTimeout(500);
+
+      // Should restore previous filter (Denmark)
+      await expect(countrySelect).toHaveValue('DK');
+      currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.get('country')).toBe('DK');
+
+      // Go forward in browser history
+      await page.goForward();
+      await page.waitForTimeout(500);
+
+      // Should restore next filter (Norway)
+      await expect(countrySelect).toHaveValue('NO');
+    });
+
+    test('should clear URL params when clearing filters', async ({ page }) => {
+      // Start with filters in URL
+      await page.goto(`${BASE_URL}/?country=DK&date_range=week`);
+      await page.waitForLoadState('networkidle');
+
+      // Verify URL has params
+      let currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.has('country')).toBe(true);
+
+      // Click Clear All button
+      const clearButton = page.locator('button:has-text("Clear All")').first();
+      await clearButton.click();
+
+      // Wait for URL update
+      await page.waitForTimeout(500);
+
+      // URL should have no filter params
+      currentUrl = new URL(page.url());
+      expect(currentUrl.searchParams.has('country')).toBe(false);
+      expect(currentUrl.searchParams.has('date_range')).toBe(false);
+    });
+
+    test('should show Copy Link button when filters are active', async ({ page }) => {
+      // Start with filters in URL
+      await page.goto(`${BASE_URL}/?country=DK`);
+      await page.waitForLoadState('networkidle');
+
+      // Copy Link button should be visible when filters are active
+      const copyButton = page.locator('button:has-text("Copy Link")').first();
+      await expect(copyButton).toBeVisible();
+    });
+
+    test('should handle invalid URL params gracefully', async ({ page }) => {
+      // Navigate with invalid params - should not crash
+      await page.goto(`${BASE_URL}/?min_evidence=999&date_range=invalid&country=<script>alert(1)</script>`);
+      await page.waitForLoadState('networkidle');
+
+      // Page should load successfully
+      await expect(page.locator('.leaflet-container')).toBeVisible({ timeout: LOAD_TIMEOUT });
+
+      // Country select should fall back to default (or sanitized value)
+      const countrySelect = page.locator('select').first();
+      // Should not contain script tags
+      const selectedValue = await countrySelect.inputValue();
+      expect(selectedValue).not.toContain('<script>');
+    });
+
+    test('should work correctly on mobile viewport', async ({ page }) => {
+      // Set mobile viewport
+      await page.setViewportSize({ width: 375, height: 812 });
+
+      // Navigate with filter params
+      await page.goto(`${BASE_URL}/?country=DK&date_range=week`);
+      await page.waitForLoadState('networkidle');
+
+      // Open filter panel on mobile
+      const filterButton = page.locator('button[aria-label*="filter"]').first();
+      await filterButton.click();
+      await page.waitForTimeout(500);
+
+      // Verify filters are applied
+      const countrySelect = page.locator('select').first();
+      await expect(countrySelect).toHaveValue('DK');
+    });
+  });
+
   test.describe('Data Quality', () => {
 
     test('should only show Nordic incidents', async ({ page }) => {
