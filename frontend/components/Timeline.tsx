@@ -257,7 +257,9 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                   return (
                     <motion.div
                       key={idx}
-                      className={`flex-1 rounded-t cursor-pointer transition-all ${
+                      role="button"
+                      tabIndex={0}
+                      className={`flex-1 rounded-t cursor-pointer transition-all focus-ring ${
                         isActive ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
                       }`}
                       style={{ height: `${height}%` }}
@@ -265,7 +267,15 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                         setIsPlaying(false)
                         setCurrentDate(day.date)
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          setIsPlaying(false)
+                          setCurrentDate(day.date)
+                        }
+                      }}
                       title={`${format(day.date, 'MMM d')}: ${day.count} incident${day.count !== 1 ? 's' : ''}`}
+                      aria-label={`${format(day.date, 'MMM d')}: ${day.count} incident${day.count !== 1 ? 's' : ''}`}
                       whileHover={{ scale: 1.02, zIndex: 10 }}
                       whileTap={{ scale: 0.98 }}
                     />

@@ -34,7 +34,12 @@
       "description": "AboutModal close button now has focus-ring class for keyboard accessibility. The button has rounded-lg so focus ring shape matches correctly. Modal also has Escape key handling for closing.",
       "category": "accessibility",
       "discovered_at": "2026-01-07T21:36:39.009467+00:00"
+    },
+    "frontend/components/Timeline.tsx": {
+      "description": "Timeline toggle button (line 132-164) now has focus-ring class for keyboard accessibility. The button is a full-width expand/collapse toggle that controls the timeline panel visibility. Added rounded class for proper focus ring shape.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:39:15.355281+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:36:39.009476+00:00"
+  "last_updated": "2026-01-07T21:39:15.355294+00:00"
 }
