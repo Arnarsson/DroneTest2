@@ -24,7 +24,12 @@
       "description": "Filters.tsx contains view toggle buttons (Map, List, Analytics) that now have focus-ring class for keyboard accessibility. The buttons are contained in a flex container with rounded-lg styling. Select elements for filters already have focus:ring-2 styling.",
       "category": "component",
       "discovered_at": "2026-01-07T21:24:11.829687+00:00"
+    },
+    "frontend/components/IncidentList.tsx": {
+      "description": "IncidentList.tsx contains interactive elements that needed focus-ring class: the 'Group by Facility' toggle button (line 106) and FacilityGroup header button (line 179). The component uses motion.div for animations and manages state for grouping incidents by facility.",
+      "category": "component",
+      "discovered_at": "2026-01-07T21:32:21.017456+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:24:11.829696+00:00"
+  "last_updated": "2026-01-07T21:32:21.017465+00:00"
 }

@@ -178,7 +178,7 @@ function FacilityGroup({ facilityKey, incidents, isExpanded, onToggle }: {
       {/* Facility Header */}
       <button
         onClick={onToggle}
-        className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all border-b border-gray-200 dark:border-gray-800"
+        className="focus-ring rounded-t-xl w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all border-b border-gray-200 dark:border-gray-800"
       >
         <div className="flex items-center gap-3 flex-1 text-left">
           <div className="text-2xl">{emoji}</div>

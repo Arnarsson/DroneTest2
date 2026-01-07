@@ -111,8 +111,9 @@
           "title": "Add focus-visible to evidence level buttons",
           "description": "Add focus-visible styles to the evidence level selection buttons (1-4) in FilterPanel.",
           "file": "frontend/components/FilterPanel.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class to the evidence level selection buttons (1-4) in FilterPanel.tsx (line 210). The buttons already have rounded-lg so the focus ring shape matches the button's visual appearance correctly. This provides keyboard accessibility focus indicators for all evidence level filter buttons (1 - All Levels, 2+ Possible, 3+ Probable, 4+ Confirmed). Committed as c217c88.",
+          "updated_at": "2026-01-07T21:30:15.307738+00:00"
         }
       ]
     },
@@ -126,8 +127,9 @@
           "title": "Add focus-visible to Group by Facility button",
           "description": "Add focus-visible styles to the 'Group by Facility' toggle button in IncidentList.tsx.",
           "file": "frontend/components/IncidentList.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class to the 'Group by Facility' toggle button in IncidentList.tsx (line 106). The button already has rounded-lg so the focus ring shape matches the button's visual appearance correctly. Committed as 3f712ea.",
+          "updated_at": "2026-01-07T21:32:13.569117+00:00"
         },
         {
           "id": "4.2",
@@ -235,5 +237,5 @@
     "tests_passed": ""
   },
   "estimated_subtasks": 18,
-  "last_updated": "2026-01-07T21:29:11.099747+00:00"
+  "last_updated": "2026-01-07T21:32:13.569125+00:00"
 }
