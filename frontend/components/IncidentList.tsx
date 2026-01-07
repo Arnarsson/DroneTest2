@@ -91,6 +91,16 @@ export function IncidentList({ incidents, isLoading, onResetFilters }: IncidentL
               <li>• Clearing asset type filters</li>
             </ul>
           </div>
+          {onResetFilters && (
+            <motion.button
+              onClick={handleResetFilters}
+              className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Reset Filters
+            </motion.button>
+          )}
         </div>
       </motion.div>
     )
