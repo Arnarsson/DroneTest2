@@ -1,0 +1,15 @@
+{
+  "discovered_files": {
+    "frontend/components/EvidenceLegend.tsx": {
+      "description": "EvidenceLegend component uses 'hidden lg:block' class, making it invisible on mobile. Uses EVIDENCE_SYSTEM constants for level data.",
+      "category": "component",
+      "discovered_at": "2026-01-07T21:16:06.904176+00:00"
+    },
+    "frontend/components/AboutModal.tsx": {
+      "description": "Modal pattern reference - uses useAboutModal hook, handles escape key, click outside to close, and body scroll prevention. Uses framer-motion for animations.",
+      "category": "pattern",
+      "discovered_at": "2026-01-07T21:16:06.913119+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:16:06.913134+00:00"
+}

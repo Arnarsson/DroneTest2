@@ -1,0 +1,13 @@
+{
+  "sourceType": "ideation",
+  "ideationType": "ui_ux_improvements",
+  "ideaId": "uiux-002",
+  "rationale": "Mobile users make up a significant portion of web traffic and should have equal access to understand the evidence scoring system. Currently they have no way to learn what the colored markers mean without accessing the About page.",
+  "category": "ui_ux",
+  "uiuxCategory": "usability",
+  "affectedFiles": [
+    "frontend/components/EvidenceLegend.tsx",
+    "frontend/components/Header.tsx"
+  ],
+  "problemSolved": "EvidenceLegend.tsx line 33 uses 'hidden lg:block' which completely hides the legend on mobile. Mobile users can only access evidence information through the About modal which requires extra navigation."
+}

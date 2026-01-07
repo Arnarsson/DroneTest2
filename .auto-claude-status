@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "007-add-mobile-accessible-evidence-legend-via-info-but",
+  "state": "building",
+  "subtasks": {
+    "completed": 6,
+    "total": 7,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Final Integration",
+    "id": null,
+    "total": 2
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 8,
+    "started_at": "2026-01-07T22:13:54.306530"
+  },
+  "last_update": "2026-01-07T22:30:45.828459"
+}
