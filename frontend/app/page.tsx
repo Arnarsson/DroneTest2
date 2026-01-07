@@ -7,6 +7,7 @@ import { FilterPanel } from "@/components/FilterPanel";
 import { Header } from "@/components/Header";
 import { IncidentList } from "@/components/IncidentList";
 import { useIncidents } from "@/hooks/useIncidents";
+import { useKeyboardShortcuts, SHORTCUT_KEYS } from "@/hooks/useKeyboardShortcuts";
 import type { FilterState, Incident } from "@/types";
 import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
@@ -88,6 +89,18 @@ export default function Home() {
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
+
+  // Keyboard shortcuts for view switching and filter panel toggle
+  const keyboardShortcuts = useMemo(
+    () => ({
+      [SHORTCUT_KEYS.MAP_VIEW]: () => setView("map"),
+      [SHORTCUT_KEYS.LIST_VIEW]: () => setView("list"),
+      [SHORTCUT_KEYS.ANALYTICS_VIEW]: () => setView("analytics"),
+      [SHORTCUT_KEYS.FILTER_TOGGLE]: () => setIsFilterPanelOpen((prev) => !prev),
+    }),
+    []
+  );
+  useKeyboardShortcuts(keyboardShortcuts);
 
   return (
     <>
