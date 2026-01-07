@@ -8,8 +8,9 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  # Placeholder job - will be replaced with actual scanning jobs in subsequent subtasks
-  security-scan-placeholder:
+  # Python dependency vulnerability scanning using pip-audit
+  python-security-scan:
+    name: Python Dependency Scan (pip-audit)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,10 +19,97 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Security scanning placeholder
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Initialize scan results
         run: |
-          echo "## Dependency Security Scanning" >> $GITHUB_STEP_SUMMARY
+          echo "PYTHON_SCAN_FAILED=false" >> $GITHUB_ENV
+          mkdir -p scan-results
+
+      - name: Scan root requirements.txt
+        id: scan-root
+        continue-on-error: true
+        run: |
+          echo "### Scanning: requirements.txt (root)" >> $GITHUB_STEP_SUMMARY
+          if pip-audit -r requirements.txt --format=columns 2>&1 | tee scan-results/root.txt; then
+            echo "✅ No vulnerabilities found in root requirements.txt" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Vulnerabilities found in root requirements.txt" >> $GITHUB_STEP_SUMMARY
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔧 Security scanning jobs will be added in subsequent subtasks:" >> $GITHUB_STEP_SUMMARY
-          echo "- pip-audit for Python dependencies (subtask 1.2)" >> $GITHUB_STEP_SUMMARY
-          echo "- npm audit for JavaScript dependencies (subtask 1.3)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Scan api/requirements.txt
+        id: scan-api
+        continue-on-error: true
+        run: |
+          echo "### Scanning: api/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          if pip-audit -r api/requirements.txt --format=columns 2>&1 | tee scan-results/api.txt; then
+            echo "✅ No vulnerabilities found in api/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Vulnerabilities found in api/requirements.txt" >> $GITHUB_STEP_SUMMARY
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Scan ingestion/requirements.txt
+        id: scan-ingestion
+        continue-on-error: true
+        run: |
+          echo "### Scanning: ingestion/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          if pip-audit -r ingestion/requirements.txt --format=columns 2>&1 | tee scan-results/ingestion.txt; then
+            echo "✅ No vulnerabilities found in ingestion/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Vulnerabilities found in ingestion/requirements.txt" >> $GITHUB_STEP_SUMMARY
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Scan frontend/requirements.txt
+        id: scan-frontend
+        continue-on-error: true
+        run: |
+          echo "### Scanning: frontend/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          if pip-audit -r frontend/requirements.txt --format=columns 2>&1 | tee scan-results/frontend.txt; then
+            echo "✅ No vulnerabilities found in frontend/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Vulnerabilities found in frontend/requirements.txt" >> $GITHUB_STEP_SUMMARY
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Scan frontend/api/requirements.txt
+        id: scan-frontend-api
+        continue-on-error: true
+        run: |
+          echo "### Scanning: frontend/api/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          if pip-audit -r frontend/api/requirements.txt --format=columns 2>&1 | tee scan-results/frontend-api.txt; then
+            echo "✅ No vulnerabilities found in frontend/api/requirements.txt" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Vulnerabilities found in frontend/api/requirements.txt" >> $GITHUB_STEP_SUMMARY
+            echo "PYTHON_SCAN_FAILED=true" >> $GITHUB_ENV
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Python scan summary
+        run: |
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "## 🐍 Python Dependency Scan Summary" >> $GITHUB_STEP_SUMMARY
+          if [ "$PYTHON_SCAN_FAILED" = "true" ]; then
+            echo "⚠️ **Vulnerabilities detected in one or more Python dependencies.**" >> $GITHUB_STEP_SUMMARY
+            echo "Review the scan results above for details." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **All Python dependencies passed security scan.**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Placeholder for npm audit job - will be added in subtask 1.3
+  # javascript-security-scan:
+  #   name: JavaScript Dependency Scan (npm audit)
+  #   runs-on: ubuntu-latest
+  #   ...
