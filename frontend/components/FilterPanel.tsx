@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { FilterState } from '@/types'
 import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'
 import { logger } from '@/lib/logger'
+import { SHORTCUT_KEYS } from '@/hooks/useKeyboardShortcuts'
 
 interface FilterPanelProps {
   filters: FilterState
@@ -61,8 +62,9 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
       {/* Mobile: Floating Filter Button */}
       <motion.button
         onClick={onToggle}
-        aria-label={`${isOpen ? 'Close' : 'Open'} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ''}`}
+        aria-label={`${isOpen ? 'Close' : 'Open'} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ''} (press ${SHORTCUT_KEYS.FILTER_TOGGLE.toUpperCase()})`}
         aria-expanded={isOpen}
+        aria-keyshortcuts={SHORTCUT_KEYS.FILTER_TOGGLE}
         className="lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all"
         whileHover={{ scale: 1.08, rotate: 5 }}
         whileTap={{ scale: 0.95 }}
@@ -74,10 +76,13 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
+          <kbd className="absolute -bottom-1 -left-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded bg-white/20 border border-white/30 text-white shadow-sm">
+            {SHORTCUT_KEYS.FILTER_TOGGLE.toUpperCase()}
+          </kbd>
           {activeFilterCount > 0 && (
             <motion.span
               className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
-              initial={{ scale: 0 }} 
+              initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.6 }}
             >
