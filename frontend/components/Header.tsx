@@ -136,7 +136,7 @@ function ViewTab({ active, onClick, label, compact }: ViewTabProps) {
       onClick={onClick}
       aria-label={`Switch to ${label.toLowerCase()} view`}
       aria-current={active ? 'page' : undefined}
-      className={`relative px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
+      className={`relative px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all rounded-md focus-ring ${
         active
           ? 'text-white'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
