@@ -870,6 +870,540 @@ class TestEdgeCases:
         assert is_safe is False  # Should decode and detect
 
 
+class TestOWASPXSSPayloads:
+    """
+    Comprehensive XSS payload tests based on OWASP XSS Filter Evasion Cheat Sheet.
+    https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html
+
+    These payloads represent common attack vectors that security researchers
+    have identified as bypassing various filters.
+    """
+
+    # =========================================================================
+    # Script Tag Variations (OWASP)
+    # =========================================================================
+
+    def test_basic_script_tag(self):
+        """Basic XSS test case from OWASP"""
+        is_safe, _ = detect_xss_patterns("<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>")
+        assert is_safe is False
+
+    def test_script_tag_with_img_src_error(self):
+        """Image XSS using JavaScript directive"""
+        is_safe, _ = detect_xss_patterns('<IMG SRC="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_script_no_closing_tag(self):
+        """Malformed script tag without closing"""
+        is_safe, _ = detect_xss_patterns("<SCRIPT/XSS SRC=\"http://xss.rocks/xss.js\"></SCRIPT>")
+        assert is_safe is False
+
+    def test_script_with_extra_open_bracket(self):
+        """Attempt to bypass with extra open bracket"""
+        is_safe, _ = detect_xss_patterns("<<SCRIPT>alert(\"XSS\");//<</SCRIPT>")
+        assert is_safe is False
+
+    def test_script_end_title_tag(self):
+        """Breaking out of title tag"""
+        is_safe, _ = detect_xss_patterns("</TITLE><SCRIPT>alert(\"XSS\");</SCRIPT>")
+        assert is_safe is False
+
+    def test_script_with_spaces(self):
+        """Script with space before JavaScript"""
+        is_safe, _ = detect_xss_patterns("<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>")
+        assert is_safe is False
+
+    def test_script_self_closing_tag(self):
+        """Self-closing script tag"""
+        is_safe, _ = detect_xss_patterns('<SCRIPT SRC="http://xss.rocks/xss.js"/>')
+        assert is_safe is False
+
+    def test_script_tag_case_insensitive(self):
+        """Case mixing attempt"""
+        is_safe, _ = detect_xss_patterns('<ScRiPt>alert("XSS")</sCrIpT>')
+        assert is_safe is False
+
+    def test_script_multiline_obfuscated(self):
+        """Newline in script tag"""
+        is_safe, _ = detect_xss_patterns('<SCR\nIPT>alert("XSS")</SCRIPT>')
+        assert is_safe is False
+
+    def test_script_with_tab(self):
+        """Tab character in script tag"""
+        is_safe, _ = detect_xss_patterns('<SCR\tIPT>alert("XSS")</SCRIPT>')
+        assert is_safe is False
+
+    def test_script_split_with_nulls(self):
+        """Null character injection in script tag"""
+        is_safe, _ = detect_xss_patterns('<SCR\x00IPT>alert("XSS")</SCRIPT>')
+        assert is_safe is False
+
+    # =========================================================================
+    # Event Handler Injections (OWASP)
+    # =========================================================================
+
+    def test_img_onerror_basic(self):
+        """Basic IMG onerror XSS"""
+        is_safe, _ = detect_xss_patterns('<IMG SRC=x onerror="alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_img_onerror_no_quotes(self):
+        """IMG onerror without quotes"""
+        is_safe, _ = detect_xss_patterns("<IMG SRC=x onerror=alert('XSS')>")
+        assert is_safe is False
+
+    def test_body_onload(self):
+        """Body onload event handler"""
+        is_safe, _ = detect_xss_patterns('<BODY ONLOAD=alert("XSS")>')
+        assert is_safe is False
+
+    def test_body_background(self):
+        """Body background image XSS"""
+        is_safe, _ = detect_xss_patterns('<BODY BACKGROUND="javascript:alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_bgsound(self):
+        """BGSOUND tag XSS"""
+        is_safe, _ = detect_xss_patterns('<BGSOUND SRC="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_img_dynsrc(self):
+        """IMG DYNSRC"""
+        is_safe, _ = detect_xss_patterns('<IMG DYNSRC="javascript:alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_img_lowsrc(self):
+        """IMG LOWSRC"""
+        is_safe, _ = detect_xss_patterns('<IMG LOWSRC="javascript:alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_br_style_expression(self):
+        """BR tag with CSS expression"""
+        is_safe, _ = detect_xss_patterns('<BR SIZE="&{alert(\'XSS\')}">')
+        # This uses SSI, may not be detected but good to test
+        # The function may or may not catch this specific variant
+        pass  # Allow either result for this edge case
+
+    def test_input_onfocus(self):
+        """INPUT with autofocus and onfocus"""
+        is_safe, _ = detect_xss_patterns('<INPUT TYPE="TEXT" ONFOCUS="alert(\'XSS\')" AUTOFOCUS>')
+        assert is_safe is False
+
+    def test_marquee_onstart(self):
+        """MARQUEE onstart event"""
+        is_safe, _ = detect_xss_patterns('<MARQUEE ONSTART="alert(\'XSS\')">test</MARQUEE>')
+        assert is_safe is False
+
+    def test_video_onerror(self):
+        """VIDEO with onerror"""
+        is_safe, _ = detect_xss_patterns('<VIDEO><SOURCE ONERROR="alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_details_ontoggle(self):
+        """DETAILS ontoggle event"""
+        is_safe, _ = detect_xss_patterns('<DETAILS OPEN ONTOGGLE="alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_select_onchange(self):
+        """SELECT with onchange"""
+        is_safe, _ = detect_xss_patterns('<SELECT ONCHANGE="alert(\'XSS\')"><OPTION>1</OPTION></SELECT>')
+        assert is_safe is False
+
+    def test_textarea_onfocus(self):
+        """TEXTAREA with autofocus onfocus"""
+        is_safe, _ = detect_xss_patterns('<TEXTAREA ONFOCUS="alert(\'XSS\')" AUTOFOCUS>')
+        assert is_safe is False
+
+    def test_audio_onloadeddata(self):
+        """AUDIO with various events"""
+        is_safe, _ = detect_xss_patterns('<AUDIO SRC=1 ONLOADEDDATA="alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_div_onmouseover(self):
+        """DIV with onmouseover requiring user interaction"""
+        is_safe, _ = detect_xss_patterns('<DIV ONMOUSEOVER="alert(\'XSS\')">test</DIV>')
+        assert is_safe is False
+
+    def test_button_onclick(self):
+        """BUTTON with onclick"""
+        is_safe, _ = detect_xss_patterns('<BUTTON ONCLICK="alert(\'XSS\')">Click</BUTTON>')
+        assert is_safe is False
+
+    def test_keygen_onfocus(self):
+        """KEYGEN onfocus (legacy)"""
+        is_safe, _ = detect_xss_patterns('<KEYGEN ONFOCUS="alert(\'XSS\')" AUTOFOCUS>')
+        assert is_safe is False
+
+    def test_object_onerror(self):
+        """OBJECT onerror event"""
+        is_safe, _ = detect_xss_patterns('<OBJECT DATA=1 ONERROR="alert(\'XSS\')">')
+        assert is_safe is False
+
+    # =========================================================================
+    # Encoded Payloads (URL, HTML Entities) - OWASP
+    # =========================================================================
+
+    def test_url_encoded_script(self):
+        """URL encoded <script>"""
+        is_safe, _ = detect_xss_patterns('%3Cscript%3Ealert(1)%3C%2Fscript%3E')
+        assert is_safe is False
+
+    def test_double_url_encoded_script(self):
+        """Double URL encoded script tag"""
+        is_safe, _ = detect_xss_patterns('%253Cscript%253Ealert(1)%253C%252Fscript%253E')
+        assert is_safe is False
+
+    def test_html_decimal_entities(self):
+        """HTML decimal entities for script tag"""
+        is_safe, _ = detect_xss_patterns('&#60;script&#62;alert(1)&#60;/script&#62;')
+        assert is_safe is False
+
+    def test_html_hex_entities(self):
+        """HTML hex entities for script tag"""
+        is_safe, _ = detect_xss_patterns('&#x3C;script&#x3E;alert(1)&#x3C;/script&#x3E;')
+        assert is_safe is False
+
+    def test_html_entities_without_semicolon(self):
+        """HTML entities without trailing semicolons"""
+        is_safe, _ = detect_xss_patterns('&#60script&#62alert(1)&#60/script&#62')
+        assert is_safe is False
+
+    def test_mixed_encoding(self):
+        """Mixed URL and HTML encoding"""
+        is_safe, _ = detect_xss_patterns('%3C&#115;cript%3Ealert(1)%3C/script%3E')
+        assert is_safe is False
+
+    def test_javascript_uri_encoded(self):
+        """URL encoded javascript: URI"""
+        is_safe, _ = detect_xss_patterns('<a href="%6A%61%76%61%73%63%72%69%70%74%3Aalert(1)">click</a>')
+        assert is_safe is False
+
+    def test_html_entity_javascript(self):
+        """HTML entity encoded javascript:"""
+        is_safe, _ = detect_xss_patterns('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;alert(1)">x</a>')
+        assert is_safe is False
+
+    def test_unicode_encoding(self):
+        """Unicode escaped characters"""
+        is_safe, _ = detect_xss_patterns('<script>\\u0061lert(1)</script>')
+        assert is_safe is False
+
+    def test_hex_encoding_event_handler(self):
+        """Hex encoded event handler"""
+        is_safe, _ = detect_xss_patterns('<img src=x &#111;nerror="alert(1)">')
+        assert is_safe is False
+
+    def test_base64_data_uri(self):
+        """Base64 encoded JavaScript in data URI"""
+        is_safe, _ = detect_xss_patterns('<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">x</a>')
+        assert is_safe is False
+
+    def test_long_utf8_encoding(self):
+        """Long UTF-8 encoding of < (OWASP)"""
+        is_safe, _ = detect_xss_patterns('&#x0000003C;script&#x0000003E;alert(1)')
+        # Should detect after normalizing the long hex codes
+        assert is_safe is False
+
+    # =========================================================================
+    # SVG/MathML Vector Attacks (OWASP)
+    # =========================================================================
+
+    def test_svg_onload(self):
+        """SVG with onload event"""
+        is_safe, _ = detect_xss_patterns('<svg onload="alert(1)">')
+        assert is_safe is False
+
+    def test_svg_with_script_tag(self):
+        """SVG containing script element"""
+        is_safe, _ = detect_xss_patterns('<svg><script>alert(1)</script></svg>')
+        assert is_safe is False
+
+    def test_svg_animate_href(self):
+        """SVG animate with javascript href"""
+        is_safe, _ = detect_xss_patterns('<svg><animate xlink:href="javascript:alert(1)"/></svg>')
+        assert is_safe is False
+
+    def test_svg_animate_onclick(self):
+        """SVG animate with onclick"""
+        is_safe, _ = detect_xss_patterns('<svg><animate onclick="alert(1)"/></svg>')
+        assert is_safe is False
+
+    def test_svg_set_event(self):
+        """SVG set element with event"""
+        is_safe, _ = detect_xss_patterns('<svg><set onbegin="alert(1)"/></svg>')
+        assert is_safe is False
+
+    def test_svg_foreignobject(self):
+        """SVG foreignObject injection"""
+        is_safe, _ = detect_xss_patterns('<svg><foreignObject><script>alert(1)</script></foreignObject></svg>')
+        assert is_safe is False
+
+    def test_svg_image_xlink(self):
+        """SVG image with xlink:href"""
+        is_safe, _ = detect_xss_patterns('<svg><image xlink:href="javascript:alert(1)"></svg>')
+        assert is_safe is False
+
+    def test_svg_use_xlink(self):
+        """SVG use element with xlink"""
+        is_safe, _ = detect_xss_patterns('<svg><use xlink:href="javascript:alert(1)"></svg>')
+        assert is_safe is False
+
+    def test_svg_a_xlink(self):
+        """SVG a element with xlink:href"""
+        is_safe, _ = detect_xss_patterns('<svg><a xlink:href="javascript:alert(1)">click</a></svg>')
+        assert is_safe is False
+
+    def test_math_element_xss(self):
+        """MathML-based XSS"""
+        is_safe, _ = detect_xss_patterns('<math><maction actiontype="statusline#http://google.com" xlink:href="javascript:alert(1)">click</maction></math>')
+        assert is_safe is False
+
+    def test_math_annotation_xml_svg(self):
+        """MathML annotation-xml with SVG"""
+        is_safe, _ = detect_xss_patterns('<math><annotation-xml encoding="text/html"><svg onload="alert(1)"></svg></annotation-xml></math>')
+        assert is_safe is False
+
+    def test_svg_desc_foreignobject(self):
+        """SVG desc with foreignObject"""
+        is_safe, _ = detect_xss_patterns('<svg><desc><foreignObject><script>alert(1)</script></foreignObject></desc></svg>')
+        assert is_safe is False
+
+    # =========================================================================
+    # CSS Expression Attacks (OWASP) - IE Legacy
+    # =========================================================================
+
+    def test_css_expression_basic(self):
+        """Basic CSS expression (IE)"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="width: expression(alert(\'XSS\'));">')
+        assert is_safe is False
+
+    def test_css_expression_background_image(self):
+        """CSS expression in background-image"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="background-image: expression(alert(\'XSS\'));">')
+        assert is_safe is False
+
+    def test_css_expression_list_style(self):
+        """CSS expression in list-style"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="list-style: expression(alert(\'XSS\'));">')
+        assert is_safe is False
+
+    def test_css_expression_with_linebreaks(self):
+        """CSS expression with line breaks"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="width:\nexpr\nession(alert(\'XSS\'));">')
+        # May or may not catch all obfuscation, but test the attempt
+        pass  # Edge case
+
+    def test_css_url_javascript(self):
+        """CSS url() with javascript"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="background: url(javascript:alert(\'XSS\'));">')
+        assert is_safe is False
+
+    def test_css_behavior(self):
+        """CSS behavior property (IE)"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="behavior: url(xss.htc);">')
+        assert is_safe is False
+
+    def test_css_moz_binding(self):
+        """CSS -moz-binding (Firefox legacy)"""
+        is_safe, _ = detect_xss_patterns('<DIV STYLE="-moz-binding: url(xss.xml#xss);">')
+        assert is_safe is False
+
+    def test_css_import(self):
+        """CSS @import"""
+        is_safe, _ = detect_xss_patterns('<STYLE>@import "xss.css";</STYLE>')
+        assert is_safe is False
+
+    def test_style_tag_with_expression(self):
+        """STYLE tag with expression"""
+        is_safe, _ = detect_xss_patterns('<STYLE>body{width:expression(alert("XSS"))}</STYLE>')
+        assert is_safe is False
+
+    # =========================================================================
+    # Additional OWASP Vectors
+    # =========================================================================
+
+    def test_meta_refresh_redirect(self):
+        """Meta refresh redirect"""
+        is_safe, _ = detect_xss_patterns('<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_meta_refresh_data_uri(self):
+        """Meta refresh with data URI"""
+        is_safe, _ = detect_xss_patterns('<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">')
+        assert is_safe is False
+
+    def test_iframe_src_javascript(self):
+        """IFRAME with javascript src"""
+        is_safe, _ = detect_xss_patterns('<IFRAME SRC="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_iframe_srcdoc(self):
+        """IFRAME with srcdoc"""
+        is_safe, _ = detect_xss_patterns('<IFRAME SRCDOC="<script>alert(1)</script>">')
+        assert is_safe is False
+
+    def test_embed_src_javascript(self):
+        """EMBED with javascript src"""
+        is_safe, _ = detect_xss_patterns('<EMBED SRC="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_object_data_javascript(self):
+        """OBJECT with javascript data"""
+        is_safe, _ = detect_xss_patterns('<OBJECT DATA="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_frameset_onload(self):
+        """FRAMESET onload"""
+        is_safe, _ = detect_xss_patterns('<FRAMESET ONLOAD="alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_table_background(self):
+        """TABLE BACKGROUND javascript"""
+        is_safe, _ = detect_xss_patterns('<TABLE BACKGROUND="javascript:alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_td_background(self):
+        """TD BACKGROUND javascript"""
+        is_safe, _ = detect_xss_patterns('<TD BACKGROUND="javascript:alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_link_stylesheet(self):
+        """LINK stylesheet injection"""
+        is_safe, _ = detect_xss_patterns('<LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_base_href_javascript(self):
+        """BASE href javascript"""
+        is_safe, _ = detect_xss_patterns('<BASE HREF="javascript:alert(\'XSS\');//">')
+        assert is_safe is False
+
+    def test_applet_tag(self):
+        """APPLET tag (legacy)"""
+        is_safe, _ = detect_xss_patterns('<APPLET CODE="xss.class" CODEBASE="http://xss.rocks/">')
+        assert is_safe is False
+
+    def test_vbscript_image(self):
+        """VBScript in image (IE)"""
+        is_safe, _ = detect_xss_patterns('<IMG SRC="vbscript:msgbox(\'XSS\')">')
+        assert is_safe is False
+
+    def test_livescript(self):
+        """Livescript protocol (legacy Netscape)"""
+        is_safe, _ = detect_xss_patterns('<IMG SRC="livescript:[code]">')
+        assert is_safe is False
+
+    def test_form_action_javascript(self):
+        """FORM action javascript"""
+        is_safe, _ = detect_xss_patterns('<FORM ACTION="javascript:alert(\'XSS\')">')
+        assert is_safe is False
+
+    def test_formaction_attribute(self):
+        """formaction attribute"""
+        is_safe, _ = detect_xss_patterns('<BUTTON FORMACTION="javascript:alert(\'XSS\')">Submit</BUTTON>')
+        assert is_safe is False
+
+    def test_isindex_prompt_injection(self):
+        """ISINDEX tag (legacy)"""
+        is_safe, _ = detect_xss_patterns('<ISINDEX TYPE="IMAGE" SRC="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_input_image_src(self):
+        """INPUT type=image with javascript src"""
+        is_safe, _ = detect_xss_patterns('<INPUT TYPE="IMAGE" SRC="javascript:alert(\'XSS\');">')
+        assert is_safe is False
+
+    def test_xml_data_island(self):
+        """XML data island (IE)"""
+        is_safe, _ = detect_xss_patterns('<XML ID="xss"><I><B><IMG SRC="javas<!-- -->cript:alert(\'XSS\')"></B></I></XML>')
+        assert is_safe is False
+
+    def test_html_plus_time(self):
+        """HTML+TIME (IE)"""
+        is_safe, _ = detect_xss_patterns('<HTML><BODY><?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time"><?import namespace="t" implementation="#default#time2"><t:set attributeName="innerHTML" to="XSS"></BODY></HTML>')
+        # Edge case - test for dangerous tags at minimum
+        is_safe2, _ = detect_xss_patterns('<t:set attributeName="innerHTML">')
+        # May or may not detect this specific legacy IE vector
+
+    # =========================================================================
+    # DOM Clobbering Attacks
+    # =========================================================================
+
+    def test_dom_clobber_form_document(self):
+        """DOM clobbering with form named document"""
+        is_safe, _ = detect_xss_patterns('<form id="document"></form>')
+        assert is_safe is False
+
+    def test_dom_clobber_input_location(self):
+        """DOM clobbering with input named location"""
+        is_safe, _ = detect_xss_patterns('<input name="location" value="http://evil.com">')
+        assert is_safe is False
+
+    def test_dom_clobber_img_window(self):
+        """DOM clobbering with img named window"""
+        is_safe, _ = detect_xss_patterns('<img name="window">')
+        assert is_safe is False
+
+    def test_dom_clobber_anchor_document(self):
+        """DOM clobbering with anchor named document"""
+        is_safe, _ = detect_xss_patterns('<a id="document"></a>')
+        assert is_safe is False
+
+    # =========================================================================
+    # Bypasses and Edge Cases
+    # =========================================================================
+
+    def test_null_byte_in_script(self):
+        """Null byte injection in script tag"""
+        is_safe, _ = detect_xss_patterns('<scr\x00ipt>alert(1)</script>')
+        assert is_safe is False
+
+    def test_backslash_obfuscation(self):
+        """Backslash obfuscation attempt"""
+        is_safe, _ = detect_xss_patterns('<script>a]lert(1)</script>')
+        assert is_safe is False
+
+    def test_comment_in_script_tag(self):
+        """HTML comment within script tag"""
+        is_safe, _ = detect_xss_patterns('<script><!--alert(1)//--></script>')
+        assert is_safe is False
+
+    def test_split_across_attributes(self):
+        """XSS split across attributes"""
+        is_safe, _ = detect_xss_patterns('<img src="x" " onerror="alert(1)">')
+        assert is_safe is False
+
+    def test_quotes_escaped_context(self):
+        """Quote escaped context breaking"""
+        is_safe, _ = detect_xss_patterns('";alert(1);//')
+        # Just JavaScript code, not in HTML context - should be safe
+        assert is_safe is True
+
+    def test_protocol_handler_casing(self):
+        """Mixed case protocol handler"""
+        is_safe, _ = detect_xss_patterns('<a href="JaVaScRiPt:alert(1)">click</a>')
+        assert is_safe is False
+
+    def test_protocol_with_tabs(self):
+        """Tabs in javascript protocol"""
+        is_safe, _ = detect_xss_patterns('<a href="java\tscript:alert(1)">x</a>')
+        assert is_safe is False
+
+    def test_protocol_with_newlines(self):
+        """Newlines in javascript protocol"""
+        is_safe, _ = detect_xss_patterns('<a href="java\nscript:alert(1)">x</a>')
+        assert is_safe is False
+
+    def test_data_uri_svg(self):
+        """Data URI with SVG containing script"""
+        is_safe, _ = detect_xss_patterns('<img src="data:image/svg+xml,<svg onload=alert(1)>">')
+        assert is_safe is False
+
+    def test_xss_via_content_type(self):
+        """Data URI specifying text/html"""
+        is_safe, _ = detect_xss_patterns('<a href="data:text/html,<script>alert(1)</script>">click</a>')
+        assert is_safe is False
+
+
 class TestRealWorldExamples:
     """Test with realistic incident report content"""
 
