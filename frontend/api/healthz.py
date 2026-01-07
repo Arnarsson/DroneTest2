@@ -2,11 +2,13 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db import get_connection, run_async
+from db_utils import get_connection
+from db import run_async
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -29,10 +31,17 @@ class handler(BaseHTTPRequestHandler):
 
                 # Test actual connection
                 conn = await get_connection()
+                
                 await conn.fetchval("SELECT 1")
 
                 # Get incident count
                 count = await conn.fetchval("SELECT COUNT(*) FROM public.incidents")
+                
+                # Get recent incident count (last 24h)
+                recent_count = await conn.fetchval("""
+                    SELECT COUNT(*) FROM public.incidents 
+                    WHERE occurred_at >= NOW() - INTERVAL '24 hours'
+                """)
 
                 await conn.close()
 
@@ -41,8 +50,10 @@ class handler(BaseHTTPRequestHandler):
                     "service": "dronewatch-api",
                     "database": "connected",
                     "incident_count": count,
+                    "recent_incidents_24h": recent_count,
                     "using_pooler": is_pooler,
-                    "debug_url": url_masked
+                    "debug_url": url_masked,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             except Exception as e:
                 # SECURITY: Log full error server-side, don't expose to client

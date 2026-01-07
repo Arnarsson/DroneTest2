@@ -16,6 +16,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../
 from db import run_async, get_connection
 import asyncpg
 
+# Import validation functions
+try:
+    from utils import is_drone_incident
+except ImportError:
+    # Fallback if utils not available
+    logger.warning("utils module not available - drone validation disabled")
+    is_drone_incident = None
+
 # Import 3-tier duplicate detection system
 try:
     from fuzzy_matcher import FuzzyMatcher
@@ -527,6 +535,41 @@ class handler(BaseHTTPRequestHandler):
         if missing:
             self.send_error(400, f"Missing required fields: {', '.join(missing)}")
             return
+
+        # === CRITICAL: Validate this is actually a drone incident ===
+        title = incident_data.get('title', '')
+        narrative = incident_data.get('narrative', '')
+        full_text = (title + " " + narrative).lower()
+        
+        # Exclude non-drone incidents (avalanches, deaths, accidents, etc.)
+        non_drone_keywords = [
+            "avalanche", "lavine", "lawine",  # Avalanche
+            "killed", "died", "death", "død", "dödsfall", "kuolema",  # Deaths
+            "fatal", "fatality", "dødsulykke",  # Fatalities
+            "accident", "ulykke", "onnettomuus",  # Accidents (not drone-related)
+            "earthquake", "jordskælv", "jordskjelv",  # Natural disasters
+            "flood", "oversvømmelse", "flod",  # Floods
+            "fire", "brand", "tulipalo",  # Fires (unless drone-related)
+            "terror", "terrorist", "terrorisme",  # Terrorism
+            "shooting", "skud", "ammuskelu",  # Shootings
+            "bomb", "bombe", "pommi",  # Bombs
+            "war", "krig", "sota",  # War
+        ]
+        
+        # Check if it contains non-drone incident keywords
+        if any(keyword in full_text for keyword in non_drone_keywords):
+            # Only exclude if it doesn't also mention drones
+            if "drone" not in full_text and "dron" not in full_text and "drohne" not in full_text:
+                logger.warning(f"🚫 BLOCKED (Non-drone incident): {title[:60]}")
+                self.send_error(400, "This incident is not drone-related. Only drone incidents are accepted.")
+                return
+        
+        # Validate it's actually a drone incident using the same logic as ingestion pipeline
+        if is_drone_incident:
+            if not is_drone_incident(title, narrative):
+                logger.warning(f"🚫 BLOCKED (Not a drone incident): {title[:60]}")
+                self.send_error(400, "This incident does not appear to be drone-related. Only verified drone incidents are accepted.")
+                return
 
         # Validate source URLs are real and verifiable (CRITICAL for journalists)
         if incident_data.get('sources'):
