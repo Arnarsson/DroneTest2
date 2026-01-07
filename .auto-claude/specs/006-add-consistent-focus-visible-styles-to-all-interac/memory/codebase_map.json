@@ -29,7 +29,12 @@
       "description": "FacilityGroup component (line 146-228) contains a collapsible header button for grouping incidents by facility. The button now has focus-ring class and rounded-t-xl for keyboard accessibility focus indicators that match the visual rounded corners.",
       "category": "accessibility",
       "discovered_at": "2026-01-07T21:35:21.544781+00:00"
+    },
+    "frontend/components/AboutModal.tsx": {
+      "description": "AboutModal close button now has focus-ring class for keyboard accessibility. The button has rounded-lg so focus ring shape matches correctly. Modal also has Escape key handling for closing.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:36:39.009467+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:35:21.544789+00:00"
+  "last_updated": "2026-01-07T21:36:39.009476+00:00"
 }
