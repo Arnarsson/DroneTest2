@@ -153,14 +153,15 @@
           "subtask_id": "5.1",
           "title": "Update API documentation",
           "description": "Document rate limiting behavior, headers, and configuration in appropriate docs",
-          "status": "pending",
+          "status": "completed",
           "files": ["docs/API_RATE_LIMITING.md"],
           "acceptance_criteria": [
             "Documents rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After)",
             "Documents default limits (100 requests per minute)",
             "Documents how to configure custom limits",
             "Documents Upstash Redis setup for production"
-          ]
+          ],
+          "completion_notes": "Created comprehensive API_RATE_LIMITING.md documentation covering: rate limit headers, default limits (100 requests per 60 seconds), environment variable configuration, Upstash Redis setup with step-by-step instructions, client best practices with code examples, monitoring guidance, troubleshooting section, and API reference. Updated docs/README.md and docs/MONITORING.md to reference the new documentation."
         },
         {
           "subtask_id": "5.2",
