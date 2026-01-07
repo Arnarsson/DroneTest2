@@ -17,7 +17,7 @@ import requests
 from dotenv import load_dotenv
 load_dotenv()
 
-from config import API_BASE_URL, INGEST_TOKEN
+from config import API_BASE_URL, INGEST_TOKEN, IngestTokenError
 from db_cache import ScraperCache
 from geographic_analyzer import analyze_incident_geography
 
@@ -57,7 +57,14 @@ logger = logging.getLogger(__name__)
 class DroneWatchIngester:
     def __init__(self):
         self.api_url = f"{API_BASE_URL}/ingest"
-        self.token = INGEST_TOKEN
+
+        # Validate INGEST_TOKEN before attempting any API calls
+        try:
+            self.token = str(INGEST_TOKEN)
+        except IngestTokenError as e:
+            logger.error(f"❌ Configuration Error: {e}")
+            raise SystemExit(1)
+
         self.session = requests.Session()
         self.session.headers.update({
             'Authorization': f'Bearer {self.token}',
