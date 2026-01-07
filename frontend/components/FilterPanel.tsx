@@ -364,9 +364,10 @@ interface QuickFilterChipProps {
   onClick: () => void
   icon: string
   label: string
+  shortcutKey?: string
 }
 
-function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps) {
+function QuickFilterChip({ active, onClick, icon, label, shortcutKey }: QuickFilterChipProps) {
   return (
     <motion.button
       onClick={onClick}
@@ -377,10 +378,23 @@ function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps)
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
+      title={shortcutKey ? `Press ${shortcutKey} to toggle` : undefined}
     >
       <span className="flex items-center gap-1.5">
         <span>{icon}</span>
         <span>{label}</span>
+        {shortcutKey && (
+          <span
+            className={`hidden lg:inline-flex items-center justify-center ml-1 px-1.5 py-0.5 text-[10px] font-mono rounded border ${
+              active
+                ? 'bg-blue-500/50 border-blue-400/50 text-blue-100'
+                : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400'
+            }`}
+            aria-hidden="true"
+          >
+            {shortcutKey}
+          </span>
+        )}
       </span>
     </motion.button>
   )
