@@ -33,6 +33,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
   }
 
   const activeFilterCount = [
+    filters.searchQuery.trim() !== '',
     filters.minEvidence > 1,
     filters.country !== 'all',
     filters.status !== 'all',
