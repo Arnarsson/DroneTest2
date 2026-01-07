@@ -21,6 +21,7 @@ function EmbedContent() {
     status: searchParams.get("status") || "active",
     assetType: searchParams.get("assetType") || null,
     dateRange: "week" as const,
+    searchQuery: searchParams.get("search") || "",
   };
 
   const { data: incidents, isLoading } = useIncidents(filters);

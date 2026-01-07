@@ -643,12 +643,29 @@ def is_drone_incident(title: str, content: str) -> bool:
     has_incident = has_observation or has_action or has_response
 
     # Should not be about drone deliveries, commercial use, or royalty
-    is_excluded = any(word in full_text for word in [
+    is_excluded_commercial = any(word in full_text for word in [
         "levering", "delivery", "amazon", "pakke", "package",
         "tilladelse", "permission", "godkendt", "approved",
         "dronning", "kronprins", "royal", "kongelig",  # Exclude royalty articles
         "bryllup", "wedding", "parforhold", "relationship"  # Exclude personal news
     ])
+    
+    # Exclude non-drone incidents (avalanches, natural disasters, etc.)
+    # Only exclude if they don't mention drones (allows "drone kills" but blocks "avalanche kills")
+    non_drone_incidents = [
+        "avalanche", "lavine", "lawine",  # Avalanche
+        "earthquake", "jordskælv", "jordskjelv",  # Natural disasters
+        "flood", "oversvømmelse", "flod",  # Floods
+        "terror", "terrorist", "terrorisme",  # Terrorism (unless drone-related)
+        "shooting", "skud", "ammuskelu",  # Shootings (unless drone-related)
+        "bomb", "bombe", "pommi",  # Bombs (unless drone-related)
+        "war", "krig", "sota",  # War
+    ]
+    
+    # Check for non-drone incidents - only exclude if no drone keywords found
+    has_non_drone_incident = any(word in full_text for word in non_drone_incidents)
+    if has_non_drone_incident and not has_drone:
+        return False
 
     # CRITICAL: Exclude incidents OUTSIDE European coverage area (35-71°N, -10-31°E)
     # European countries (Poland, Germany, etc.) are NOW INCLUDED in coverage
@@ -699,6 +716,7 @@ def is_drone_incident(title: str, content: str) -> bool:
         "military equipment deployed", "militært udstyr"
     ])
 
+    # Final check: must have drone keywords AND incident indicators, and not be excluded
     return has_drone and has_incident and not is_excluded and not is_policy and not is_international and not is_defense
 
 def clean_html(html_text: str) -> str:
