@@ -13,7 +13,7 @@ interface IncidentListProps {
   onResetFilters?: () => void
 }
 
-export function IncidentList({ incidents, isLoading }: IncidentListProps) {
+export function IncidentList({ incidents, isLoading, onResetFilters }: IncidentListProps) {
   const [groupByFacility, setGroupByFacility] = useState(false)
   const [expandedFacilities, setExpandedFacilities] = useState<Set<string>>(new Set())
   if (isLoading) {
@@ -64,8 +64,9 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
   }
 
   const handleResetFilters = () => {
-    // This would need to be passed from parent, but for now just inform user
-    window.location.reload()
+    if (onResetFilters) {
+      onResetFilters()
+    }
   }
 
   if (incidents.length === 0) {
