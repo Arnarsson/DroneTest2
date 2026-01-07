@@ -38,6 +38,7 @@ export default function Home() {
     status: "all",
     assetType: null,
     dateRange: "all",
+    searchQuery: "",
   });
 
   const { data: allIncidents, isLoading, error } = useIncidents(filters);
