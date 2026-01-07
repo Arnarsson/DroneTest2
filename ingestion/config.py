@@ -49,7 +49,101 @@ load_dotenv()
 
 # API Configuration
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
-INGEST_TOKEN = os.getenv("INGEST_TOKEN", "dw-secret-2025-nordic-drone-watch")
+
+# Minimum token length for security (matches frontend/api/ingest.py validation)
+_MIN_TOKEN_LENGTH = 16
+
+# Private variable for caching validated token
+_validated_ingest_token = None
+
+
+class IngestTokenError(Exception):
+    """Raised when INGEST_TOKEN is missing or invalid."""
+    pass
+
+
+def get_ingest_token() -> str:
+    """
+    Get the INGEST_TOKEN with lazy validation.
+
+    Validates that:
+    1. INGEST_TOKEN environment variable is set
+    2. Token is at least 16 characters long
+
+    Returns:
+        str: The validated ingest token
+
+    Raises:
+        IngestTokenError: If token is not set or too short
+    """
+    global _validated_ingest_token
+
+    # Return cached token if already validated
+    if _validated_ingest_token is not None:
+        return _validated_ingest_token
+
+    token = os.getenv("INGEST_TOKEN")
+
+    if not token:
+        raise IngestTokenError(
+            "INGEST_TOKEN environment variable is not set.\n\n"
+            "To fix this:\n"
+            "  1. Create a .env file in the ingestion/ directory with:\n"
+            "     INGEST_TOKEN=your-secure-token-here\n\n"
+            "  2. Or set the environment variable directly:\n"
+            "     export INGEST_TOKEN='your-secure-token-here'\n\n"
+            "  Generate a secure token with:\n"
+            "     python3 -c \"import secrets; print(secrets.token_urlsafe(32))\""
+        )
+
+    if len(token) < _MIN_TOKEN_LENGTH:
+        raise IngestTokenError(
+            f"INGEST_TOKEN is too short (minimum {_MIN_TOKEN_LENGTH} characters required).\n\n"
+            f"Current token length: {len(token)} characters\n\n"
+            "Generate a secure token with:\n"
+            "  python3 -c \"import secrets; print(secrets.token_urlsafe(32))\""
+        )
+
+    # Cache the validated token
+    _validated_ingest_token = token
+    return _validated_ingest_token
+
+
+# Lazy property for backward compatibility
+# Access via INGEST_TOKEN will trigger validation on first use
+class _LazyToken:
+    """Lazy token accessor that validates on first access."""
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __str__(self):
+        return get_ingest_token()
+
+    def __repr__(self):
+        return f"<LazyToken: {'validated' if _validated_ingest_token else 'not yet accessed'}>"
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __len__(self):
+        return len(str(self))
+
+    def __bool__(self):
+        try:
+            return bool(get_ingest_token())
+        except IngestTokenError:
+            return False
+
+
+# INGEST_TOKEN is now a lazy accessor - validation happens on first use
+INGEST_TOKEN = _LazyToken()
 
 # ============================================================================
 # VERIFIED WORKING SOURCES - All URLs tested 2025-10-05
