@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from db import fetch_incidents, run_async
-from rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
+from distributed_rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
