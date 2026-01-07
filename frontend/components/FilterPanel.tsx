@@ -129,7 +129,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
             </div>
             <button
               onClick={onToggle}
-              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus-ring"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -151,7 +151,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                 </span>
                 <button
                   onClick={resetFilters}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold rounded focus-ring"
                 >
                   Clear all
                 </button>
