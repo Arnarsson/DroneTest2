@@ -11,7 +11,7 @@ import type { FilterState, Incident } from "@/types";
 import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { Toaster } from "sonner";
 
 // Dynamic import for map (no SSR)
@@ -22,7 +22,7 @@ const Map = dynamic(() => import("@/components/Map"), {
   ),
 });
 
-export default function Home() {
+function HomeContent() {
   const [view, setView] = useState<"map" | "list" | "analytics">("map");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [timelineRange, setTimelineRange] = useState<{
@@ -180,5 +180,22 @@ export default function Home() {
         <AtlasBadge />
       </div>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+          <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700" />
+          <div className="flex-1 bg-gray-100 dark:bg-gray-900 animate-pulse flex items-center justify-center">
+            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+          </div>
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }
