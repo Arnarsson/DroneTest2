@@ -431,4 +431,162 @@ describe('FilterPanel', () => {
     expect(screen.getByText('Last 7 Days')).toBeInTheDocument()
     expect(screen.getByText('Last 30 Days')).toBeInTheDocument()
   })
+
+  describe('Keyboard Hints', () => {
+    it('displays keyboard hints on quick filter chips', () => {
+      render(
+        <FilterPanel
+          filters={mockFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // Check that all quick filter keyboard hints are displayed
+      expect(screen.getByText('A')).toBeInTheDocument()
+      expect(screen.getByText('M')).toBeInTheDocument()
+      expect(screen.getByText('T')).toBeInTheDocument()
+      expect(screen.getByText('V')).toBeInTheDocument()
+    })
+
+    it('displays keyboard hint F next to Filters header', () => {
+      render(
+        <FilterPanel
+          filters={mockFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // The F hint should be visible in the header
+      expect(screen.getByText('F')).toBeInTheDocument()
+    })
+
+    it('displays keyboard hint R on reset button when filters are active', () => {
+      const activeFilters: FilterState = {
+        minEvidence: 3,
+        country: 'DK',
+        status: 'all',
+        dateRange: 'all',
+        assetType: null,
+      }
+
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // The R hint should be visible next to Clear all
+      expect(screen.getByText('R')).toBeInTheDocument()
+    })
+
+    it('keyboard hints have aria-hidden attribute for accessibility', () => {
+      const activeFilters: FilterState = {
+        minEvidence: 3,
+        country: 'all',
+        status: 'all',
+        dateRange: 'all',
+        assetType: null,
+      }
+
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // All keyboard hint badges should be hidden from screen readers
+      const keyboardHints = ['A', 'M', 'T', 'V', 'F', 'R']
+      keyboardHints.forEach((hint) => {
+        const hintElement = screen.getByText(hint)
+        expect(hintElement).toHaveAttribute('aria-hidden', 'true')
+      })
+    })
+
+    it('quick filter chips have title attribute with shortcut hint', () => {
+      render(
+        <FilterPanel
+          filters={mockFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // Check that quick filter buttons have title attributes
+      expect(screen.getByTitle('Press A to toggle')).toBeInTheDocument()
+      expect(screen.getByTitle('Press M to toggle')).toBeInTheDocument()
+      expect(screen.getByTitle('Press T to toggle')).toBeInTheDocument()
+      expect(screen.getByTitle('Press V to toggle')).toBeInTheDocument()
+    })
+
+    it('filter toggle header hint has title attribute', () => {
+      render(
+        <FilterPanel
+          filters={mockFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // The F hint in the header should have a descriptive title
+      expect(screen.getByTitle('Press F to toggle filters')).toBeInTheDocument()
+    })
+
+    it('mobile filter toggle button includes keyboard hint in aria-label', () => {
+      render(
+        <FilterPanel
+          filters={mockFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={false}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // Mobile button should mention keyboard shortcut in aria-label
+      const mobileButton = screen.getByLabelText('Open filters (Press F)')
+      expect(mobileButton).toBeInTheDocument()
+    })
+
+    it('mobile filter toggle button with active filters includes keyboard hint', () => {
+      const activeFilters: FilterState = {
+        minEvidence: 3,
+        country: 'DK',
+        status: 'all',
+        dateRange: 'all',
+        assetType: null,
+      }
+
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={false}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      // Mobile button with active filters should include keyboard shortcut
+      const mobileButton = screen.getByLabelText('Open filters (2 active) (Press F)')
+      expect(mobileButton).toBeInTheDocument()
+    })
+  })
 })
