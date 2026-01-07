@@ -111,6 +111,39 @@ class MockHTTPRequestHandler:
     def get_response_body(self):
         return self._wfile.getvalue().decode('utf-8')
 
+def create_test_handler(mock_request):
+    """Create a handler instance configured for testing without calling __init__"""
+    h = object.__new__(handler)
+
+    # Set up required attributes from mock
+    h.path = mock_request.path
+    h.command = mock_request.command
+    h.headers = mock_request.headers
+    h.rfile = mock_request._rfile
+    h.wfile = mock_request._wfile
+
+    # Override response methods to track results on mock
+    def tracked_send_error(code, message=None):
+        mock_request.response_code = code
+        mock_request.error_message = message
+    h.send_error = tracked_send_error
+
+    def tracked_send_response(code):
+        mock_request.response_code = code
+    h.send_response = tracked_send_response
+
+    def tracked_send_header(key, value):
+        mock_request.response_headers[key] = value
+    h.send_header = tracked_send_header
+
+    def tracked_end_headers():
+        pass
+    h.end_headers = tracked_end_headers
+
+    return h
+
+
+
 
 class TestIngestAPIAuthentication:
     """Test Bearer token authentication and authorization"""
@@ -130,9 +163,8 @@ class TestIngestAPIAuthentication:
             headers={}  # No Authorization header
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 401
@@ -153,9 +185,8 @@ class TestIngestAPIAuthentication:
             headers={'Authorization': 'Bearer wrong-token'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 403
@@ -174,18 +205,17 @@ class TestIngestAPIAuthentication:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-secret-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 mock_run_async.return_value = {
                     "id": str(uuid4()),
                     "status": "created"
                 }
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 # Should not be 401 or 403
@@ -207,8 +237,7 @@ class TestIngestAPIAuthentication:
         )
 
         with patch.dict(os.environ, {}, clear=True):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 500
@@ -230,12 +259,11 @@ class TestIngestAPIValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -247,12 +275,11 @@ class TestIngestAPIValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=b'{ invalid json }',
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -263,12 +290,11 @@ class TestIngestAPIValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=b'',
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -467,16 +493,15 @@ class TestIngestAPICORS:
             mock_request = MockHTTPRequestHandler(
                 method='POST',
                 body=json.dumps(incident_data).encode(),
-                headers={'Authorization': 'Bearer test-token'},
+                headers={'Authorization': 'Bearer test-secret-token-123'},
                 origin=allowed_origin
             )
 
-            with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+            with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
                 with patch('ingest.run_async') as mock_run_async:
                     mock_run_async.return_value = {"id": str(uuid4()), "status": "created"}
 
-                    h = handler()
-                    h.__dict__.update(mock_request.__dict__)
+                    h = create_test_handler(mock_request)
                     h.do_POST()
 
                     assert mock_request.response_headers.get('Access-Control-Allow-Origin') == allowed_origin
@@ -493,16 +518,15 @@ class TestIngestAPICORS:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'},
+            headers={'Authorization': 'Bearer test-secret-token-123'},
             origin='https://evil-site.com'
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 mock_run_async.return_value = {"id": str(uuid4()), "status": "created"}
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 # Should NOT have CORS headers for unauthorized origin
@@ -515,8 +539,7 @@ class TestIngestAPICORS:
             origin='https://evil-site.com'
         )
 
-        h = handler()
-        h.__dict__.update(mock_request.__dict__)
+        h = create_test_handler(mock_request)
         h.do_OPTIONS()
 
         # Should return 403 for unauthorized origin
@@ -538,10 +561,10 @@ class TestIngestAPIErrorHandling:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 # Simulate internal error
                 mock_run_async.return_value = {
@@ -549,8 +572,7 @@ class TestIngestAPIErrorHandling:
                     "detail": "Failed to process incident. Check server logs for details."
                 }
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 500
@@ -636,12 +658,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -660,12 +681,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -683,12 +703,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -707,12 +726,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -731,12 +749,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -755,12 +772,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -781,12 +797,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -809,12 +824,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -835,10 +849,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 # Capture what gets passed to insert_incident
                 captured_data = {}
@@ -850,8 +864,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 # Should succeed (201 Created)
@@ -883,10 +896,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 captured_data = {}
 
@@ -896,8 +909,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 201
@@ -923,10 +935,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode('utf-8'),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 captured_data = {}
 
@@ -936,8 +948,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 201
@@ -961,10 +972,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 captured_data = {}
 
@@ -974,8 +985,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 201
@@ -1001,10 +1011,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 captured_data = {}
 
@@ -1014,8 +1024,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 201
@@ -1040,12 +1049,11 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
+            h = create_test_handler(mock_request)
             h.do_POST()
 
             assert mock_request.response_code == 400
@@ -1070,10 +1078,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 captured_data = {}
 
@@ -1083,8 +1091,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 201
@@ -1107,15 +1114,14 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 mock_run_async.return_value = {"id": str(uuid4()), "status": "created"}
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 # Empty title is valid (validation passes for empty strings)
@@ -1135,10 +1141,10 @@ class TestIngestAPITextValidation:
         mock_request = MockHTTPRequestHandler(
             method='POST',
             body=json.dumps(incident_data).encode(),
-            headers={'Authorization': 'Bearer test-token'}
+            headers={'Authorization': 'Bearer test-secret-token-123'}
         )
 
-        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-token'}):
+        with patch.dict(os.environ, {'INGEST_TOKEN': 'test-secret-token-123'}):
             with patch('ingest.run_async') as mock_run_async:
                 captured_data = {}
 
@@ -1148,8 +1154,7 @@ class TestIngestAPITextValidation:
 
                 mock_run_async.side_effect = capture_and_return
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
+                h = create_test_handler(mock_request)
                 h.do_POST()
 
                 assert mock_request.response_code == 201
