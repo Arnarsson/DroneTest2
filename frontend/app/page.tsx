@@ -89,6 +89,16 @@ export default function Home() {
     setFilters(newFilters);
   }, []);
 
+  const resetFilters = useCallback(() => {
+    setFilters({
+      minEvidence: 1,
+      country: "all",
+      status: "all",
+      assetType: null,
+      dateRange: "all",
+    });
+  }, []);
+
   return (
     <>
       <Toaster position="top-right" richColors />
