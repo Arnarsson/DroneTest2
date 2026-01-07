@@ -9,7 +9,12 @@
       "description": "Contains the proper resetFilters() function at lines 43-51 that sets all filters to defaults: minEvidence: 1, country: 'all', status: 'all', assetType: null, dateRange: 'all'. This pattern should be reused in page.tsx.",
       "category": "pattern",
       "discovered_at": "2026-01-07T21:15:03.911933+00:00"
+    },
+    "frontend/app/page.tsx": {
+      "description": "The resetFilters callback (lines 92-100) sets filters to default values and is memoized with useCallback. This callback can be passed to child components (like IncidentList) via onResetFilters prop to enable instant filter resets without page reload.",
+      "category": "patterns",
+      "discovered_at": "2026-01-07T21:21:42.542821+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:15:03.911939+00:00"
+  "last_updated": "2026-01-07T21:21:42.542829+00:00"
 }

@@ -3,8 +3,8 @@
   "spec": "008-replace-page-reload-with-proper-filter-reset-in-em",
   "state": "building",
   "subtasks": {
-    "completed": 0,
-    "total": 0,
+    "completed": 5,
+    "total": 7,
     "in_progress": 1,
     "failed": 0
   },
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 2,
+    "number": 7,
     "started_at": "2026-01-07T22:13:54.060705"
   },
-  "last_update": "2026-01-07T22:15:17.497517"
+  "last_update": "2026-01-07T22:23:15.793390"
 }
