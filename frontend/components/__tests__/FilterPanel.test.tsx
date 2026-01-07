@@ -65,6 +65,7 @@ Object.defineProperty(navigator, 'clipboard', {
 
 describe('FilterPanel', () => {
   const mockFilters: FilterState = {
+    searchQuery: '',
     minEvidence: 1,
     country: 'all',
     status: 'all',
@@ -224,6 +225,7 @@ describe('FilterPanel', () => {
 
   it('persists filter state values', () => {
     const activeFilters: FilterState = {
+      searchQuery: '',
       minEvidence: 3,
       country: 'DK',
       status: 'active',
@@ -265,6 +267,7 @@ describe('FilterPanel', () => {
 
   it('resets all filters when Clear all is clicked', () => {
     const activeFilters: FilterState = {
+      searchQuery: 'test query',
       minEvidence: 3,
       country: 'DK',
       status: 'active',
@@ -286,6 +289,7 @@ describe('FilterPanel', () => {
     fireEvent.click(clearButton)
 
     expect(mockOnChange).toHaveBeenCalledWith({
+      searchQuery: '',
       minEvidence: 1,
       country: 'all',
       status: 'all',
@@ -296,6 +300,7 @@ describe('FilterPanel', () => {
 
   it('shows active filter count badge', () => {
     const activeFilters: FilterState = {
+      searchQuery: '',
       minEvidence: 3,
       country: 'DK',
       status: 'active',
@@ -371,9 +376,12 @@ describe('FilterPanel', () => {
 
   it('updates ARIA label when filters are active', () => {
     const activeFilters: FilterState = {
-      ...mockFilters,
+      searchQuery: '',
       minEvidence: 3,
       country: 'DK',
+      status: 'all',
+      dateRange: 'all',
+      assetType: null,
     }
 
     render(
@@ -443,8 +451,161 @@ describe('FilterPanel', () => {
     expect(screen.getByText('Last 30 Days')).toBeInTheDocument()
   })
 
+  // Search Input Tests
+  it('renders search input with placeholder', () => {
+    render(
+      <FilterPanel
+        filters={mockFilters}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    const searchInput = screen.getByPlaceholderText('Search incidents...')
+    expect(searchInput).toBeInTheDocument()
+    expect(searchInput).toHaveAttribute('type', 'text')
+  })
+
+  it('calls onChange with searchQuery when search input changes', () => {
+    render(
+      <FilterPanel
+        filters={mockFilters}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    const searchInput = screen.getByPlaceholderText('Search incidents...')
+    fireEvent.change(searchInput, { target: { value: 'airport' } })
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      ...mockFilters,
+      searchQuery: 'airport',
+    })
+  })
+
+  it('displays current search query value', () => {
+    const filtersWithSearch: FilterState = {
+      ...mockFilters,
+      searchQuery: 'test search',
+    }
+
+    render(
+      <FilterPanel
+        filters={filtersWithSearch}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    const searchInput = screen.getByPlaceholderText('Search incidents...')
+    expect(searchInput).toHaveValue('test search')
+  })
+
+  it('clears searchQuery when Clear all is clicked', () => {
+    const filtersWithSearch: FilterState = {
+      searchQuery: 'airport drone',
+      minEvidence: 1,
+      country: 'all',
+      status: 'all',
+      dateRange: 'all',
+      assetType: null,
+    }
+
+    render(
+      <FilterPanel
+        filters={filtersWithSearch}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    const clearButton = screen.getByText('Clear all')
+    fireEvent.click(clearButton)
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      searchQuery: '',
+      minEvidence: 1,
+      country: 'all',
+      status: 'all',
+      assetType: null,
+      dateRange: 'all',
+    })
+  })
+
+  it('includes searchQuery in active filter count when non-empty', () => {
+    const filtersWithSearch: FilterState = {
+      searchQuery: 'test',
+      minEvidence: 1,
+      country: 'all',
+      status: 'all',
+      dateRange: 'all',
+      assetType: null,
+    }
+
+    render(
+      <FilterPanel
+        filters={filtersWithSearch}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    expect(screen.getByText('1 active filter')).toBeInTheDocument()
+  })
+
+  it('does not include empty searchQuery in active filter count', () => {
+    render(
+      <FilterPanel
+        filters={mockFilters}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    // With mockFilters having all defaults, there should be no active filters
+    expect(screen.queryByText(/active filter/)).not.toBeInTheDocument()
+  })
+
+  it('does not include whitespace-only searchQuery in active filter count', () => {
+    const filtersWithWhitespace: FilterState = {
+      searchQuery: '   ',
+      minEvidence: 1,
+      country: 'all',
+      status: 'all',
+      dateRange: 'all',
+      assetType: null,
+    }
+
+    render(
+      <FilterPanel
+        filters={filtersWithWhitespace}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    // Whitespace-only searchQuery should not count as active filter
+    expect(screen.queryByText(/active filter/)).not.toBeInTheDocument()
+  })
+
   describe('Copy Link functionality', () => {
     const activeFilters: FilterState = {
+      searchQuery: '',
       minEvidence: 3,
       country: 'DK',
       status: 'active',

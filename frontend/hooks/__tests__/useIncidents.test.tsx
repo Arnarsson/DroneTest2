@@ -35,9 +35,11 @@ const createWrapper = () => {
 
 describe('useIncidents', () => {
   const mockFilters: FilterState = {
+    searchQuery: '',
     minEvidence: 1,
     country: 'all',
     status: 'all',
+    assetType: null,
     dateRange: 'all',
   }
 
@@ -317,5 +319,49 @@ describe('useIncidents', () => {
 
     const fetchUrl = (global.fetch as jest.Mock).mock.calls[0][0]
     expect(fetchUrl).not.toContain('since=')
+  })
+
+  it('includes search parameter in URL when searchQuery is provided', async () => {
+    const filters: FilterState = {
+      ...mockFilters,
+      searchQuery: 'airport drone',
+    }
+
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    })
+
+    renderHook(() => useIncidents(filters), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled())
+
+    const fetchUrl = (global.fetch as jest.Mock).mock.calls[0][0]
+    expect(fetchUrl).toContain('search=airport+drone')
+  })
+
+  it('omits search parameter from URL when searchQuery is empty', async () => {
+    const filters: FilterState = {
+      ...mockFilters,
+      searchQuery: '',
+    }
+
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    })
+
+    renderHook(() => useIncidents(filters), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled())
+
+    const fetchUrl = (global.fetch as jest.Mock).mock.calls[0][0]
+    expect(fetchUrl).not.toContain('search=')
   })
 })
