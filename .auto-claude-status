@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "011-remove-hardcoded-default-api-token-in-ingestion-co",
+  "state": "building",
+  "subtasks": {
+    "completed": 0,
+    "total": 0,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Update Documentation",
+    "id": null,
+    "total": 2
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 6,
+    "started_at": "2026-01-07T22:13:50.337126"
+  },
+  "last_update": "2026-01-07T22:25:09.847815"
+}

@@ -1,0 +1,35 @@
+# Build Progress: Remove Hardcoded Default API Token
+
+## Session: 2025-01-07
+
+### Initial Analysis Complete
+- Identified the security vulnerability in `ingestion/config.py:52`
+- Hardcoded token: `dw-secret-2025-nordic-drone-watch` used as fallback
+- Token also found in: setup-scraper.sh, ingestion/.env.example, RUN_SCRAPER.md, config.py.backup
+
+### Key Findings
+1. **API endpoints already handle missing token correctly**
+   - `frontend/api/ingest.py` validates INGEST_TOKEN is set and returns 500 if missing
+   - `api/ingest.py` has same validation
+   - These correctly enforce "INGEST_TOKEN not set" error
+
+2. **The vulnerability is in the client-side config**
+   - `ingestion/config.py` uses fallback: `os.getenv("INGEST_TOKEN", "dw-secret-2025-nordic-drone-watch")`
+   - This means if env var is not set, hardcoded token is used
+   - Anyone reading source code knows the fallback token
+
+3. **Multiple files contain the hardcoded token**
+   - `setup-scraper.sh:10` - Setup script with hardcoded token
+   - `ingestion/.env.example:6` - Example file with actual token
+   - `ingestion/RUN_SCRAPER.md` - Documentation with token
+   - `ingestion/config.py.backup:11` - Backup with token
+
+### Implementation Plan Created
+- Phase 1: Remove hardcoded token from config.py (add validation)
+- Phase 2: Update setup-scraper.sh to require user input
+- Phase 3: Update .env.example with placeholder
+- Phase 4: Update documentation, delete backup file
+- Phase 5: Testing and verification
+
+### Next Steps
+- Begin Phase 1: Update ingestion/config.py

@@ -1,0 +1,179 @@
+{
+  "feature": "Remove hardcoded default API token in ingestion config",
+  "description": "The `ingestion/config.py` file contains a hardcoded default value for INGEST_TOKEN: `INGEST_TOKEN = os.getenv(\"INGEST_TOKEN\", \"dw-secret-2025-nordic-drone-watch\")`. If the environment variable is not set, this predictable default token will be used, allowing unauthorized access to the ingest API endpoint.",
+  "created_at": "2026-01-07T21:08:26.403Z",
+  "updated_at": "2026-01-07T22:15:00.000Z",
+  "status": "in_progress",
+  "planStatus": "in_progress",
+  "workflow_type": "development",
+  "services_involved": ["ingestion", "api"],
+  "spec_file": "spec.md",
+  "phases": [
+    {
+      "phase_id": "phase-1",
+      "name": "Remove Hardcoded Token from Config",
+      "description": "Modify ingestion/config.py to require INGEST_TOKEN environment variable instead of using a hardcoded default",
+      "subtasks": [
+        {
+          "subtask_id": "1.1",
+          "title": "Update config.py to require INGEST_TOKEN",
+          "description": "Remove the hardcoded default from INGEST_TOKEN. Add validation that raises an error if INGEST_TOKEN is not set or is too short (minimum 16 characters). Use lazy evaluation so validation only runs when token is accessed.",
+          "status": "completed",
+          "files_to_modify": ["ingestion/config.py"],
+          "acceptance_criteria": [
+            "INGEST_TOKEN no longer has a hardcoded default value",
+            "Clear error message when INGEST_TOKEN is not set",
+            "Validation for minimum token length (16 chars)",
+            "Error includes instructions on how to set the token"
+          ],
+          "completion_notes": "Implemented lazy token validation via _LazyToken class and get_ingest_token() function. Removed hardcoded default. Added IngestTokenError exception with clear error messages. All acceptance criteria met and tests passed. Commit: 8cb855c"
+        },
+        {
+          "subtask_id": "1.2",
+          "title": "Update ingest.py to handle missing token gracefully",
+          "description": "Ensure ingest.py handles the case when INGEST_TOKEN is not configured and provides a clear error message before attempting API calls",
+          "status": "completed",
+          "files_to_modify": ["ingestion/ingest.py"],
+          "acceptance_criteria": [
+            "Script exits gracefully if token is not configured",
+            "Clear error message explains how to set token",
+            "Error message appears before any API calls are attempted"
+          ],
+          "completion_notes": "Added IngestTokenError handling in DroneWatchIngester.__init__. When INGEST_TOKEN is missing or invalid, the script now catches the error, logs a clear error message with setup instructions, and exits gracefully with SystemExit(1). All acceptance criteria met. Commit: cca4406"
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-2",
+      "name": "Remove Hardcoded Token from Scripts",
+      "description": "Update setup scripts to use placeholders instead of hardcoded tokens",
+      "subtasks": [
+        {
+          "subtask_id": "2.1",
+          "title": "Update setup-scraper.sh to require user-provided token",
+          "description": "Remove hardcoded token from setup-scraper.sh. Prompt user to provide their own secure token or use environment variable. Add token generation suggestion.",
+          "status": "completed",
+          "files_to_modify": ["setup-scraper.sh"],
+          "acceptance_criteria": [
+            "No hardcoded token in script",
+            "Script prompts for or accepts token as argument",
+            "Provides guidance on generating a secure token",
+            "Validates token before proceeding"
+          ],
+          "completion_notes": "Removed hardcoded token. Script now accepts token from command line argument or INGEST_TOKEN env var, provides interactive prompt if neither provided, validates token (min 16 chars, no placeholders), provides secure token generation guidance (openssl, /dev/urandom, Python), and redacts token from output summary. All acceptance criteria met. Commit: 775169f"
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-3",
+      "name": "Update Environment Example Files",
+      "description": "Replace actual tokens in example files with placeholders",
+      "subtasks": [
+        {
+          "subtask_id": "3.1",
+          "title": "Update ingestion/.env.example",
+          "description": "Replace hardcoded token with placeholder and add security guidance comment",
+          "status": "completed",
+          "files_to_modify": ["ingestion/.env.example"],
+          "acceptance_criteria": [
+            "Token value is a placeholder like 'your-secure-token-here'",
+            "Comment explains token should be unique and secure",
+            "Comment provides token generation guidance"
+          ],
+          "completion_notes": "Replaced hardcoded token with placeholder 'your-secure-token-here-min-16-chars'. Added security guidance with token generation methods (openssl, python secrets, urandom). All acceptance criteria met. Commit: b7cd52f"
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-4",
+      "name": "Update Documentation",
+      "description": "Remove hardcoded tokens from documentation files",
+      "subtasks": [
+        {
+          "subtask_id": "4.1",
+          "title": "Update ingestion/RUN_SCRAPER.md",
+          "description": "Replace all instances of the hardcoded token with placeholders",
+          "status": "completed",
+          "files_to_modify": ["ingestion/RUN_SCRAPER.md"],
+          "acceptance_criteria": [
+            "No hardcoded token values",
+            "Clear instructions on generating/obtaining a token"
+          ],
+          "completion_notes": "Replaced hardcoded token 'dw-secret-2025-nordic-drone-watch' with placeholder 'your-secure-token-here' in two locations (Prerequisites and Troubleshooting sections). Added comprehensive token generation guidance (openssl, Python secrets, /dev/urandom) and security note about minimum 16 character requirement. Commit: bdeb8ae"
+        },
+        {
+          "subtask_id": "4.2",
+          "title": "Remove config.py.backup with hardcoded token",
+          "description": "Delete the backup file that contains the hardcoded token",
+          "status": "pending",
+          "files_to_modify": ["ingestion/config.py.backup"],
+          "acceptance_criteria": [
+            "Backup file is deleted",
+            "No traces of hardcoded token in backup files"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-5",
+      "name": "Testing and Verification",
+      "description": "Verify the changes work correctly and don't break existing functionality",
+      "subtasks": [
+        {
+          "subtask_id": "5.1",
+          "title": "Test config without INGEST_TOKEN",
+          "description": "Verify that running the ingestion script without INGEST_TOKEN set produces a clear error message",
+          "status": "pending",
+          "files_to_modify": [],
+          "acceptance_criteria": [
+            "Script fails gracefully with clear error",
+            "Error message explains how to fix the issue",
+            "No stack trace for expected configuration errors"
+          ]
+        },
+        {
+          "subtask_id": "5.2",
+          "title": "Test config with valid INGEST_TOKEN",
+          "description": "Verify that running the ingestion script with a valid INGEST_TOKEN works correctly",
+          "status": "pending",
+          "files_to_modify": [],
+          "acceptance_criteria": [
+            "Script initializes successfully",
+            "Token is properly loaded from environment",
+            "Existing functionality is not broken"
+          ]
+        },
+        {
+          "subtask_id": "5.3",
+          "title": "Run existing tests",
+          "description": "Ensure all existing tests pass with the changes",
+          "status": "pending",
+          "files_to_modify": [],
+          "acceptance_criteria": [
+            "All frontend/api/__tests__/test_ingest.py tests pass",
+            "No regression in existing functionality"
+          ]
+        }
+      ]
+    }
+  ],
+  "final_acceptance": [
+    "No hardcoded tokens exist in the codebase",
+    "INGEST_TOKEN must be explicitly set via environment variable",
+    "Clear error messages guide users to properly configure token",
+    "All existing tests pass",
+    "Documentation updated to reflect new security requirements"
+  ],
+  "notes": [
+    "The API endpoints (api/ingest.py, frontend/api/ingest.py) already properly validate INGEST_TOKEN is set",
+    "The issue is specifically in ingestion/config.py which provides a hardcoded fallback",
+    "The hardcoded token 'dw-secret-2025-nordic-drone-watch' appears in multiple files and documentation",
+    "GitHub workflows already use secrets.INGEST_TOKEN which is correct",
+    "Token minimum length of 16 characters matches existing validation in frontend/api/ingest.py"
+  ],
+  "qa_signoff": {
+    "status": "pending",
+    "tests_passed": "",
+    "issues": ""
+  }
+}
