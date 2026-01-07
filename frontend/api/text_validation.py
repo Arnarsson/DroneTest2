@@ -532,3 +532,93 @@ def detect_xss_patterns(text: str) -> Tuple[bool, Optional[str]]:
                     return False, f"Detected URL-encoded XSS: {msg}"
 
     return True, None
+
+
+def validate_title(title: Optional[str]) -> Tuple[bool, str, Optional[str]]:
+    """
+    Validate and sanitize incident title field.
+
+    Applies:
+    - Length validation (max 500 characters)
+    - Full text sanitization (unicode normalization, control char removal,
+      HTML stripping, whitespace normalization)
+    - XSS pattern detection
+
+    Args:
+        title: Raw title text from user input (may be None)
+
+    Returns:
+        (is_valid, sanitized_title, error_message)
+        - is_valid: True if title is valid and safe
+        - sanitized_title: Cleaned title text (empty string if None/empty input)
+        - error_message: Error description if invalid, None if valid
+    """
+    # Handle None/empty values gracefully
+    if title is None or (isinstance(title, str) and not title.strip()):
+        return True, '', None
+
+    # Ensure it's a string
+    if not isinstance(title, str):
+        return False, '', "Title must be a string"
+
+    # Apply sanitization first
+    sanitized = sanitize_text(title)
+
+    # Check length after sanitization
+    is_valid_length, length_error = validate_text_length(
+        sanitized, MAX_TITLE_LENGTH, "Title"
+    )
+    if not is_valid_length:
+        return False, sanitized, length_error
+
+    # Check for XSS patterns in original text (before sanitization stripped them)
+    is_safe, xss_warning = detect_xss_patterns(title)
+    if not is_safe:
+        return False, sanitized, f"Title contains potentially malicious content: {xss_warning}"
+
+    return True, sanitized, None
+
+
+def validate_narrative(narrative: Optional[str]) -> Tuple[bool, str, Optional[str]]:
+    """
+    Validate and sanitize incident narrative field.
+
+    Applies:
+    - Length validation (max 10000 characters)
+    - Full text sanitization (unicode normalization, control char removal,
+      HTML stripping, whitespace normalization)
+    - XSS pattern detection
+
+    Args:
+        narrative: Raw narrative text from user input (may be None)
+
+    Returns:
+        (is_valid, sanitized_narrative, error_message)
+        - is_valid: True if narrative is valid and safe
+        - sanitized_narrative: Cleaned narrative text (empty string if None/empty input)
+        - error_message: Error description if invalid, None if valid
+    """
+    # Handle None/empty values gracefully
+    if narrative is None or (isinstance(narrative, str) and not narrative.strip()):
+        return True, '', None
+
+    # Ensure it's a string
+    if not isinstance(narrative, str):
+        return False, '', "Narrative must be a string"
+
+    # Apply sanitization first
+    sanitized = sanitize_text(narrative)
+
+    # Check length after sanitization
+    is_valid_length, length_error = validate_text_length(
+        sanitized, MAX_NARRATIVE_LENGTH, "Narrative"
+    )
+    if not is_valid_length:
+        return False, sanitized, length_error
+
+    # Check for XSS patterns in original text (before sanitization stripped them)
+    is_safe, xss_warning = detect_xss_patterns(narrative)
+    if not is_safe:
+        return False, sanitized, f"Narrative contains potentially malicious content: {xss_warning}"
+
+    return True, sanitized, None
