@@ -17,6 +17,43 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from incidents import handler
 
 
+# Default rate limit mock values (always allow requests)
+DEFAULT_RATE_LIMIT_RESPONSE = (True, 99, 60)  # (allowed, remaining, reset_after)
+DEFAULT_RATE_LIMIT_HEADERS = {
+    'X-RateLimit-Limit': '100',
+    'X-RateLimit-Remaining': '99',
+    'X-RateLimit-Reset': '1704067260',
+    'Retry-After': '60',
+}
+
+
+def mock_rate_limit_allow():
+    """Context manager to mock rate limiter to always allow requests"""
+    return patch.multiple(
+        'incidents',
+        check_rate_limit=Mock(return_value=DEFAULT_RATE_LIMIT_RESPONSE),
+        get_client_ip=Mock(return_value='127.0.0.1'),
+        get_rate_limit_headers=Mock(return_value=DEFAULT_RATE_LIMIT_HEADERS)
+    )
+
+
+def mock_rate_limit_block(remaining=0, reset_after=30):
+    """Context manager to mock rate limiter to block requests (rate limit exceeded)"""
+    blocked_response = (False, remaining, reset_after)
+    blocked_headers = {
+        'X-RateLimit-Limit': '100',
+        'X-RateLimit-Remaining': str(remaining),
+        'X-RateLimit-Reset': str(int(datetime.now(timezone.utc).timestamp()) + reset_after),
+        'Retry-After': str(reset_after),
+    }
+    return patch.multiple(
+        'incidents',
+        check_rate_limit=Mock(return_value=blocked_response),
+        get_client_ip=Mock(return_value='127.0.0.1'),
+        get_rate_limit_headers=Mock(return_value=blocked_headers)
+    )
+
+
 class MockAsyncPGConnection:
     """Mock asyncpg.Connection for database testing"""
 
@@ -121,58 +158,60 @@ class TestIncidentsAPIBasics:
             create_mock_incident_row(title="Incident 3", evidence_score=2),
         ]
 
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [
-                {
-                    "id": str(inc["id"]),
-                    "title": inc["title"],
-                    "narrative": inc["narrative"],
-                    "occurred_at": inc["occurred_at"].isoformat(),
-                    "lat": inc["lat"],
-                    "lon": inc["lon"],
-                    "evidence_score": inc["evidence_score"],
-                    "country": inc["country"],
-                    "asset_type": inc["asset_type"],
-                    "status": inc["status"],
-                    "sources": json.loads(inc["sources"])
-                }
-                for inc in mock_incidents
-            ]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [
+                    {
+                        "id": str(inc["id"]),
+                        "title": inc["title"],
+                        "narrative": inc["narrative"],
+                        "occurred_at": inc["occurred_at"].isoformat(),
+                        "lat": inc["lat"],
+                        "lon": inc["lon"],
+                        "evidence_score": inc["evidence_score"],
+                        "country": inc["country"],
+                        "asset_type": inc["asset_type"],
+                        "status": inc["status"],
+                        "sources": json.loads(inc["sources"])
+                    }
+                    for inc in mock_incidents
+                ]
 
-            # Create mock request
-            mock_request = MockHTTPRequestHandler(path='/api/incidents')
+                # Create mock request
+                mock_request = MockHTTPRequestHandler(path='/api/incidents')
 
-            # Execute handler
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                # Execute handler
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            # Verify response
-            assert mock_request.response_code == 200
-            assert mock_request.response_headers['Content-Type'] == 'application/json'
+                # Verify response
+                assert mock_request.response_code == 200
+                assert mock_request.response_headers['Content-Type'] == 'application/json'
 
-            # Parse response body
-            response_data = json.loads(mock_request.get_response_body())
-            assert len(response_data) == 3
-            assert response_data[0]['title'] == "Incident 1"
+                # Parse response body
+                response_data = json.loads(mock_request.get_response_body())
+                assert len(response_data) == 3
+                assert response_data[0]['title'] == "Incident 1"
 
     @pytest.mark.asyncio
     async def test_get_incidents_empty_result(self):
         """Test API returns empty array when no incidents match filters"""
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = []
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = []
 
-            mock_request = MockHTTPRequestHandler(
-                path='/api/incidents?min_evidence=4&country=XX'
-            )
+                mock_request = MockHTTPRequestHandler(
+                    path='/api/incidents?min_evidence=4&country=XX'
+                )
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            assert mock_request.response_code == 200
-            response_data = json.loads(mock_request.get_response_body())
-            assert response_data == []
+                assert mock_request.response_code == 200
+                response_data = json.loads(mock_request.get_response_body())
+                assert response_data == []
 
 
 class TestIncidentsFiltering:
@@ -181,23 +220,24 @@ class TestIncidentsFiltering:
     @pytest.mark.asyncio
     async def test_get_incidents_with_evidence_filter(self):
         """Test min_evidence filter correctly passed to database query"""
-        with patch('incidents.fetch_incidents') as mock_fetch:
-            mock_fetch.return_value = []
+        with mock_rate_limit_allow():
+            with patch('incidents.fetch_incidents') as mock_fetch:
+                mock_fetch.return_value = []
 
-            with patch('incidents.run_async') as mock_run_async:
-                mock_run_async.return_value = []
+                with patch('incidents.run_async') as mock_run_async:
+                    mock_run_async.return_value = []
 
-                mock_request = MockHTTPRequestHandler(
-                    path='/api/incidents?min_evidence=3'
-                )
+                    mock_request = MockHTTPRequestHandler(
+                        path='/api/incidents?min_evidence=3'
+                    )
 
-                h = handler()
-                h.__dict__.update(mock_request.__dict__)
-                h.handle_get()
+                    h = handler()
+                    h.__dict__.update(mock_request.__dict__)
+                    h.handle_get()
 
-                # Verify fetch_incidents called with correct params
-                # Note: fetch_incidents is called inside run_async
-                assert mock_request.response_code == 200
+                    # Verify fetch_incidents called with correct params
+                    # Note: fetch_incidents is called inside run_async
+                    assert mock_request.response_code == 200
 
     @pytest.mark.asyncio
     async def test_get_incidents_with_country_filter(self):
@@ -208,35 +248,36 @@ class TestIncidentsFiltering:
             create_mock_incident_row(title="Aarhus incident", country="DK"),
         ]
 
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [
-                {
-                    "id": str(inc["id"]),
-                    "title": inc["title"],
-                    "country": inc["country"],
-                    "evidence_score": inc["evidence_score"],
-                    "lat": inc["lat"],
-                    "lon": inc["lon"],
-                    "asset_type": inc["asset_type"],
-                    "status": inc["status"],
-                    "narrative": inc["narrative"],
-                    "occurred_at": inc["occurred_at"].isoformat(),
-                    "sources": json.loads(inc["sources"])
-                }
-                for inc in mock_incidents
-            ]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [
+                    {
+                        "id": str(inc["id"]),
+                        "title": inc["title"],
+                        "country": inc["country"],
+                        "evidence_score": inc["evidence_score"],
+                        "lat": inc["lat"],
+                        "lon": inc["lon"],
+                        "asset_type": inc["asset_type"],
+                        "status": inc["status"],
+                        "narrative": inc["narrative"],
+                        "occurred_at": inc["occurred_at"].isoformat(),
+                        "sources": json.loads(inc["sources"])
+                    }
+                    for inc in mock_incidents
+                ]
 
-            mock_request = MockHTTPRequestHandler(
-                path='/api/incidents?country=DK'
-            )
+                mock_request = MockHTTPRequestHandler(
+                    path='/api/incidents?country=DK'
+                )
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            response_data = json.loads(mock_request.get_response_body())
-            assert len(response_data) == 2
-            assert all(inc["country"] == "DK" for inc in response_data)
+                response_data = json.loads(mock_request.get_response_body())
+                assert len(response_data) == 2
+                assert all(inc["country"] == "DK" for inc in response_data)
 
     @pytest.mark.asyncio
     async def test_get_incidents_with_status_filter(self):
@@ -245,62 +286,64 @@ class TestIncidentsFiltering:
             path='/api/incidents?status=active'
         )
 
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [
-                {
-                    "id": str(uuid4()),
-                    "title": "Active incident",
-                    "status": "active",
-                    "evidence_score": 3,
-                    "country": "DK",
-                    "lat": 55.6181,
-                    "lon": 12.6560,
-                    "asset_type": "airport",
-                    "narrative": "Test",
-                    "occurred_at": datetime.now(timezone.utc).isoformat(),
-                    "sources": []
-                }
-            ]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [
+                    {
+                        "id": str(uuid4()),
+                        "title": "Active incident",
+                        "status": "active",
+                        "evidence_score": 3,
+                        "country": "DK",
+                        "lat": 55.6181,
+                        "lon": 12.6560,
+                        "asset_type": "airport",
+                        "narrative": "Test",
+                        "occurred_at": datetime.now(timezone.utc).isoformat(),
+                        "sources": []
+                    }
+                ]
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            response_data = json.loads(mock_request.get_response_body())
-            assert all(inc["status"] == "active" for inc in response_data)
+                response_data = json.loads(mock_request.get_response_body())
+                assert all(inc["status"] == "active" for inc in response_data)
 
     @pytest.mark.asyncio
     async def test_get_incidents_pagination(self):
         """Test limit parameter restricts result count"""
         # Mock 100 incidents but limit to 10
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [
-                {
-                    "id": str(uuid4()),
-                    "title": f"Incident {i}",
-                    "evidence_score": 2,
-                    "country": "DK",
-                    "lat": 55.6 + i * 0.01,
-                    "lon": 12.6 + i * 0.01,
-                    "asset_type": "other",
-                    "status": "active",
-                    "narrative": f"Test incident {i}",
-                    "occurred_at": datetime.now(timezone.utc).isoformat(),
-                    "sources": []
-                }
-                for i in range(10)  # API should limit to 10
-            ]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [
+                    {
+                        "id": str(uuid4()),
+                        "title": f"Incident {i}",
+                        "evidence_score": 2,
+                        "country": "DK",
+                        "lat": 55.6 + i * 0.01,
+                        "lon": 12.6 + i * 0.01,
+                        "asset_type": "other",
+                        "status": "active",
+                        "narrative": f"Test incident {i}",
+                        "occurred_at": datetime.now(timezone.utc).isoformat(),
+                        "sources": []
+                    }
+                    for i in range(10)  # API should limit to 10
+                ]
 
-            mock_request = MockHTTPRequestHandler(
-                path='/api/incidents?limit=10'
-            )
+                mock_request = MockHTTPRequestHandler(
+                    path='/api/incidents?limit=10'
+                )
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            response_data = json.loads(mock_request.get_response_body())
-            assert len(response_data) == 10
+                response_data = json.loads(mock_request.get_response_body())
+                assert len(response_data) == 10
 
     @pytest.mark.asyncio
     async def test_get_incidents_all_filter_value_ignored(self):
@@ -309,30 +352,31 @@ class TestIncidentsFiltering:
             path='/api/incidents?country=all&status=all&asset_type=all'
         )
 
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [
-                {
-                    "id": str(uuid4()),
-                    "title": "Mixed country incident",
-                    "country": "NO",  # Not filtered out even though we passed country=all
-                    "status": "resolved",  # Not filtered out
-                    "evidence_score": 2,
-                    "lat": 59.9139,
-                    "lon": 10.7522,
-                    "asset_type": "harbor",
-                    "narrative": "Test",
-                    "occurred_at": datetime.now(timezone.utc).isoformat(),
-                    "sources": []
-                }
-            ]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [
+                    {
+                        "id": str(uuid4()),
+                        "title": "Mixed country incident",
+                        "country": "NO",  # Not filtered out even though we passed country=all
+                        "status": "resolved",  # Not filtered out
+                        "evidence_score": 2,
+                        "lat": 59.9139,
+                        "lon": 10.7522,
+                        "asset_type": "harbor",
+                        "narrative": "Test",
+                        "occurred_at": datetime.now(timezone.utc).isoformat(),
+                        "sources": []
+                    }
+                ]
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            assert mock_request.response_code == 200
-            response_data = json.loads(mock_request.get_response_body())
-            assert len(response_data) == 1
+                assert mock_request.response_code == 200
+                response_data = json.loads(mock_request.get_response_body())
+                assert len(response_data) == 1
 
 
 class TestIncidentsDataStructure:
@@ -344,30 +388,31 @@ class TestIncidentsDataStructure:
         expected_lat = 55.6181
         expected_lon = 12.6560
 
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [{
-                "id": str(uuid4()),
-                "title": "Test incident",
-                "lat": expected_lat,
-                "lon": expected_lon,
-                "evidence_score": 3,
-                "country": "DK",
-                "asset_type": "airport",
-                "status": "active",
-                "narrative": "Test",
-                "occurred_at": datetime.now(timezone.utc).isoformat(),
-                "sources": []
-            }]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [{
+                    "id": str(uuid4()),
+                    "title": "Test incident",
+                    "lat": expected_lat,
+                    "lon": expected_lon,
+                    "evidence_score": 3,
+                    "country": "DK",
+                    "asset_type": "airport",
+                    "status": "active",
+                    "narrative": "Test",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "sources": []
+                }]
 
-            mock_request = MockHTTPRequestHandler(path='/api/incidents')
+                mock_request = MockHTTPRequestHandler(path='/api/incidents')
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            response_data = json.loads(mock_request.get_response_body())
-            assert response_data[0]["lat"] == expected_lat
-            assert response_data[0]["lon"] == expected_lon
+                response_data = json.loads(mock_request.get_response_body())
+                assert response_data[0]["lat"] == expected_lat
+                assert response_data[0]["lon"] == expected_lon
 
     @pytest.mark.asyncio
     async def test_sources_aggregation(self):
@@ -387,34 +432,35 @@ class TestIncidentsDataStructure:
             }
         ]
 
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = [{
-                "id": str(uuid4()),
-                "title": "Multi-source incident",
-                "evidence_score": 4,
-                "country": "DK",
-                "lat": 55.6181,
-                "lon": 12.6560,
-                "asset_type": "airport",
-                "status": "active",
-                "narrative": "Test",
-                "occurred_at": datetime.now(timezone.utc).isoformat(),
-                "sources": mock_sources
-            }]
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = [{
+                    "id": str(uuid4()),
+                    "title": "Multi-source incident",
+                    "evidence_score": 4,
+                    "country": "DK",
+                    "lat": 55.6181,
+                    "lon": 12.6560,
+                    "asset_type": "airport",
+                    "status": "active",
+                    "narrative": "Test",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "sources": mock_sources
+                }]
 
-            mock_request = MockHTTPRequestHandler(path='/api/incidents')
+                mock_request = MockHTTPRequestHandler(path='/api/incidents')
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            response_data = json.loads(mock_request.get_response_body())
-            sources = response_data[0]["sources"]
+                response_data = json.loads(mock_request.get_response_body())
+                sources = response_data[0]["sources"]
 
-            assert len(sources) == 2
-            assert sources[0]["source_type"] == "police"
-            assert sources[1]["source_type"] == "news"
-            assert sources[0]["trust_weight"] == 4
+                assert len(sources) == 2
+                assert sources[0]["source_type"] == "police"
+                assert sources[1]["source_type"] == "news"
+                assert sources[0]["trust_weight"] == 4
 
 
 class TestIncidentsCORS:
@@ -428,37 +474,39 @@ class TestIncidentsCORS:
             'http://localhost:3000',
             'http://localhost:3001'
         ]:
+            with mock_rate_limit_allow():
+                with patch('incidents.run_async') as mock_run_async:
+                    mock_run_async.return_value = []
+
+                    mock_request = MockHTTPRequestHandler(
+                        path='/api/incidents',
+                        origin=allowed_origin
+                    )
+
+                    h = handler()
+                    h.__dict__.update(mock_request.__dict__)
+                    h.handle_get()
+
+                    assert mock_request.response_headers.get('Access-Control-Allow-Origin') == allowed_origin
+                    assert 'Access-Control-Allow-Methods' in mock_request.response_headers
+
+    def test_cors_headers_blocked_origin(self):
+        """Test CORS headers NOT set for non-whitelisted origins"""
+        with mock_rate_limit_allow():
             with patch('incidents.run_async') as mock_run_async:
                 mock_run_async.return_value = []
 
                 mock_request = MockHTTPRequestHandler(
                     path='/api/incidents',
-                    origin=allowed_origin
+                    origin='https://evil-site.com'
                 )
 
                 h = handler()
                 h.__dict__.update(mock_request.__dict__)
                 h.handle_get()
 
-                assert mock_request.response_headers.get('Access-Control-Allow-Origin') == allowed_origin
-                assert 'Access-Control-Allow-Methods' in mock_request.response_headers
-
-    def test_cors_headers_blocked_origin(self):
-        """Test CORS headers NOT set for non-whitelisted origins"""
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = []
-
-            mock_request = MockHTTPRequestHandler(
-                path='/api/incidents',
-                origin='https://evil-site.com'
-            )
-
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
-
-            # CORS headers should NOT be present for blocked origins
-            assert 'Access-Control-Allow-Origin' not in mock_request.response_headers
+                # CORS headers should NOT be present for blocked origins
+                assert 'Access-Control-Allow-Origin' not in mock_request.response_headers
 
     def test_options_preflight_request(self):
         """Test OPTIONS preflight request handling"""
@@ -483,55 +531,129 @@ class TestIncidentsErrorHandling:
     @pytest.mark.asyncio
     async def test_database_error_returns_500(self):
         """Test database errors return 500 status"""
-        with patch('incidents.run_async') as mock_run_async:
-            # Simulate database error
-            mock_run_async.side_effect = Exception("Database connection failed")
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                # Simulate database error
+                mock_run_async.side_effect = Exception("Database connection failed")
 
-            mock_request = MockHTTPRequestHandler(path='/api/incidents')
+                mock_request = MockHTTPRequestHandler(path='/api/incidents')
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
-            h.handle_get()
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
 
-            assert mock_request.response_code == 500
-            response_data = json.loads(mock_request.get_response_body())
-            assert response_data == []
+                assert mock_request.response_code == 500
+                response_data = json.loads(mock_request.get_response_body())
+                assert response_data == []
 
     @pytest.mark.asyncio
     async def test_invalid_parameters_handled_gracefully(self):
         """Test invalid query parameters don't crash the API"""
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = []
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = []
 
-            # Test with invalid min_evidence (should default to 1)
-            mock_request = MockHTTPRequestHandler(
-                path='/api/incidents?min_evidence=invalid'
-            )
+                # Test with invalid min_evidence (should default to 1)
+                mock_request = MockHTTPRequestHandler(
+                    path='/api/incidents?min_evidence=invalid'
+                )
 
-            h = handler()
-            h.__dict__.update(mock_request.__dict__)
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
 
-            try:
-                h.handle_get()
-                # If it doesn't crash, the test passes
-                assert mock_request.response_code in [200, 500]
-            except ValueError:
-                # Expected behavior - invalid int conversion
-                pass
+                try:
+                    h.handle_get()
+                    # If it doesn't crash, the test passes
+                    assert mock_request.response_code in [200, 500]
+                except ValueError:
+                    # Expected behavior - invalid int conversion
+                    pass
 
     @pytest.mark.asyncio
     async def test_cache_control_header_set(self):
         """Test Cache-Control header is set for performance"""
-        with patch('incidents.run_async') as mock_run_async:
-            mock_run_async.return_value = []
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = []
 
-            mock_request = MockHTTPRequestHandler(path='/api/incidents')
+                mock_request = MockHTTPRequestHandler(path='/api/incidents')
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
+
+                assert 'Cache-Control' in mock_request.response_headers
+                # Should have public caching with max-age
+                cache_header = mock_request.response_headers['Cache-Control']
+                assert 'public' in cache_header or 'max-age' in cache_header
+
+
+class TestIncidentsRateLimiting:
+    """Test rate limiting behavior with the distributed rate limiter"""
+
+    def test_rate_limit_exceeded_returns_429(self):
+        """Test that exceeding rate limit returns 429 status"""
+        with mock_rate_limit_block(remaining=0, reset_after=30):
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents',
+                origin='https://www.dronemap.cc'
+            )
 
             h = handler()
             h.__dict__.update(mock_request.__dict__)
             h.handle_get()
 
-            assert 'Cache-Control' in mock_request.response_headers
-            # Should have public caching with max-age
-            cache_header = mock_request.response_headers['Cache-Control']
-            assert 'public' in cache_header or 'max-age' in cache_header
+            assert mock_request.response_code == 429
+            response_data = json.loads(mock_request.get_response_body())
+            assert 'error' in response_data
+            assert response_data['error'] == 'Rate limit exceeded'
+            assert 'retry_after' in response_data
+
+    def test_rate_limit_headers_included_on_429(self):
+        """Test that rate limit headers are included in 429 response"""
+        with mock_rate_limit_block(remaining=0, reset_after=30):
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents',
+                origin='https://www.dronemap.cc'
+            )
+
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.handle_get()
+
+            assert mock_request.response_code == 429
+            assert 'X-RateLimit-Limit' in mock_request.response_headers
+            assert 'X-RateLimit-Remaining' in mock_request.response_headers
+            assert 'Retry-After' in mock_request.response_headers
+
+    def test_rate_limit_headers_included_on_success(self):
+        """Test that rate limit headers are included in successful responses"""
+        with mock_rate_limit_allow():
+            with patch('incidents.run_async') as mock_run_async:
+                mock_run_async.return_value = []
+
+                mock_request = MockHTTPRequestHandler(path='/api/incidents')
+
+                h = handler()
+                h.__dict__.update(mock_request.__dict__)
+                h.handle_get()
+
+                assert mock_request.response_code == 200
+                assert 'X-RateLimit-Limit' in mock_request.response_headers
+                assert 'X-RateLimit-Remaining' in mock_request.response_headers
+
+    def test_cors_headers_on_rate_limit_response(self):
+        """Test that CORS headers are still included on rate limit response for allowed origins"""
+        with mock_rate_limit_block(remaining=0, reset_after=30):
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents',
+                origin='https://www.dronemap.cc'
+            )
+
+            h = handler()
+            h.__dict__.update(mock_request.__dict__)
+            h.handle_get()
+
+            assert mock_request.response_code == 429
+            # CORS headers should still be present for rate-limited responses
+            assert mock_request.response_headers.get('Access-Control-Allow-Origin') == 'https://www.dronemap.cc'
