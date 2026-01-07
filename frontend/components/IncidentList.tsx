@@ -103,7 +103,7 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
         </div>
         <button
           onClick={() => setGroupByFacility(!groupByFacility)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+          className={`focus-ring flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             groupByFacility
               ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
