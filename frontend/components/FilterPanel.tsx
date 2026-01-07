@@ -170,24 +170,28 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                 onClick={() => handleChange('assetType', filters.assetType === 'airport' ? null : 'airport')}
                 icon="✈️"
                 label="Airports"
+                shortcutKey="A"
               />
               <QuickFilterChip
                 active={filters.assetType === 'military'}
                 onClick={() => handleChange('assetType', filters.assetType === 'military' ? null : 'military')}
                 icon="🛡️"
                 label="Military"
+                shortcutKey="M"
               />
               <QuickFilterChip
                 active={filters.dateRange === 'day'}
                 onClick={() => handleChange('dateRange', filters.dateRange === 'day' ? 'all' : 'day')}
                 icon="🕐"
                 label="Today"
+                shortcutKey="T"
               />
               <QuickFilterChip
                 active={filters.minEvidence >= 3}
                 onClick={() => handleChange('minEvidence', filters.minEvidence >= 3 ? 1 : 3)}
                 icon="✓"
                 label="Verified"
+                shortcutKey="V"
               />
             </div>
           </div>
