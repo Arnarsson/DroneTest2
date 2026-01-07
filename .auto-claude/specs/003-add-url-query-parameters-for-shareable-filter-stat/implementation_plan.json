@@ -298,5 +298,42 @@
     "tests_passed": ""
   },
   "spec_file": "spec.md",
-  "last_updated": "2026-01-07T21:56:06.862203+00:00"
+  "last_updated": "2026-01-07T23:15:00.000000+00:00",
+  "qa_signoff": {
+    "status": "fixes_applied",
+    "timestamp": "2026-01-07T23:15:00.000000+00:00",
+    "fix_session": 0,
+    "issues_fixed": [
+      {
+        "title": "Rebase onto origin/main",
+        "description": "Successfully rebased all 10 commits onto origin/main (was 7 commits behind), resolving the 'fix conflicts' request. Auto-merge completed cleanly.",
+        "fix_commit": "be14226"
+      }
+    ],
+    "ready_for_qa_revalidation": true
+  },
+  "qa_iteration_history": [
+    {
+      "iteration": 1,
+      "status": "approved",
+      "timestamp": "2026-01-07T22:02:57.559997+00:00",
+      "issues": [],
+      "duration_seconds": 316.46
+    },
+    {
+      "iteration": 2,
+      "status": "rejected",
+      "timestamp": "2026-01-07T22:13:33.946Z",
+      "issues": ["fix conflicts - rebased onto origin/main"],
+      "fix_session": 0
+    }
+  ],
+  "qa_stats": {
+    "total_iterations": 2,
+    "last_iteration": 2,
+    "last_status": "fixes_applied",
+    "issues_by_type": {
+      "rebase": 1
+    }
+  }
 }
