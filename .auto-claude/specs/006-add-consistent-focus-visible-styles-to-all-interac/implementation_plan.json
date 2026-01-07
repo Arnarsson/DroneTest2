@@ -161,8 +161,9 @@
           "title": "Add focus-visible to SourceBadge link",
           "description": "Add focus-visible styles to the anchor link in SourceBadge.tsx that opens sources in new tabs.",
           "file": "frontend/components/SourceBadge.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class to the motion.a anchor link in SourceBadge.tsx (line 81). The link already has rounded-lg so the focus ring matches the button's visual appearance correctly. This provides keyboard accessibility focus indicators for users navigating source links with Tab key. Committed as daf1b36.",
+          "updated_at": "2026-01-07T21:37:54.949695+00:00"
         }
       ]
     },
@@ -239,5 +240,5 @@
     "tests_passed": ""
   },
   "estimated_subtasks": 18,
-  "last_updated": "2026-01-07T21:36:33.810999+00:00"
+  "last_updated": "2026-01-07T21:37:54.949704+00:00"
 }

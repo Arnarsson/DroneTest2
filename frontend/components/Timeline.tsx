@@ -131,7 +131,7 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group focus-ring rounded"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">⏱️</span>

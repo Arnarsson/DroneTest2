@@ -1,7 +1,7 @@
 {
   "spec_id": "006-add-consistent-focus-visible-styles-to-all-interac",
   "created_at": "2026-01-07T21:13:54.528972+00:00",
-  "updated_at": "2026-01-07T21:37:44.240393+00:00",
+  "updated_at": "2026-01-07T21:38:57.553045+00:00",
   "phases": {
     "planning": {
       "phase": "planning",
@@ -4135,6 +4135,204 @@
           "tool_input": "git add . && git commit -m \"auto-claude: 5.2 - ...",
           "subtask_id": "5.2",
           "session": 15
+        },
+        {
+          "timestamp": "2026-01-07T21:37:49.558446+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Done",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "5.2",
+          "session": 15,
+          "detail": "[auto-claude/006-add-consistent-focus-visible-styles-to-all-interac daf1b36] auto-claude: 5.2 - Add focus-visible styles to SourceBadge anchor link\n 8 files changed, 332 insertions(+), 12 deletions(-)\n create mode 100644 .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/memory/session_insights/session_014.json",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:37:53.362649+00:00",
+          "type": "text",
+          "content": "Now let me update the subtask status in the implementation plan:",
+          "phase": "coding",
+          "subtask_id": "5.2",
+          "session": 15
+        },
+        {
+          "timestamp": "2026-01-07T21:37:54.942016+00:00",
+          "type": "tool_start",
+          "content": "[mcp__auto-claude__update_subtask_status]",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__update_subtask_status",
+          "subtask_id": "5.2",
+          "session": 15
+        },
+        {
+          "timestamp": "2026-01-07T21:37:54.958754+00:00",
+          "type": "tool_end",
+          "content": "[mcp__auto-claude__update_subtask_status] Done",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__update_subtask_status",
+          "subtask_id": "5.2",
+          "session": 15,
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:38:01.427801+00:00",
+          "type": "text",
+          "content": "Subtask 5.2 has been completed successfully. Here's a summary:\n\n## Completed: Subtask 5.2\n\n**Task:** Add focus-visible styles to the anchor link in SourceBadge.tsx\n\n**Change Made:**\n- Added the `focus-ring` utility class to the `motion.a` element in `SourceBadge.tsx` (line 81)\n- The anchor link already had `rounded-lg` so the focus ring matches the visual shape correctly\n\n**Before:**\n```tsx\nclassName={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border transition-all ${config.color} ${config.hoverColor} ${className}`}\n```\n\n**After:**\n```tsx\nclassName={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border transition-all focus-ring ${config.color} ${config.hoverColor} ${className}`}\n```\n\n**Commit:** `daf1b36` - \"auto-claude: 5.2 - Add focus-visible styles to SourceBadge anchor link\"\n\nThis provides keyboard accessibility focus indicators for users navigating source links with the Tab key, improving WCAG 2.1 Level AA compliance.",
+          "phase": "coding",
+          "subtask_id": "5.2",
+          "session": 15
+        },
+        {
+          "timestamp": "2026-01-07T21:38:24.652427+00:00",
+          "type": "text",
+          "content": "I'll implement subtask 6.1 to add focus-visible styles to the Timeline expand/collapse toggle button. Let me start by reading the relevant files.",
+          "phase": "coding",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:25.669265+00:00",
+          "type": "tool_start",
+          "content": "[Read] ...ent-focus-visible-styles-to-all-interac/spec.md",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "...ent-focus-visible-styles-to-all-interac/spec.md",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:25.901427+00:00",
+          "type": "tool_start",
+          "content": "[Read] ...-styles-to-all-interac/implementation_plan.json",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "...-styles-to-all-interac/implementation_plan.json",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:25.928287+00:00",
+          "type": "tool_start",
+          "content": "[mcp__auto-claude__get_session_context]",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__get_session_context",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:25.952417+00:00",
+          "type": "tool_end",
+          "content": "[mcp__auto-claude__get_session_context] Done",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__get_session_context",
+          "subtask_id": "6.1",
+          "session": 16,
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:38:29.690259+00:00",
+          "type": "text",
+          "content": "Now let me read the Timeline.tsx file to find the expand/collapse toggle button:",
+          "phase": "coding",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:30.315061+00:00",
+          "type": "tool_start",
+          "content": "[Read] ./frontend/components/Timeline.tsx",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "./frontend/components/Timeline.tsx",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:30.459283+00:00",
+          "type": "tool_end",
+          "content": "[Read] Done",
+          "phase": "coding",
+          "tool_name": "Read",
+          "subtask_id": "6.1",
+          "session": 16,
+          "detail": "     1→'use client'\n     2→\n     3→import { useState, useEffect, useCallback, useRef } from 'react'\n     4→import { motion, AnimatePresence } from 'framer-motion'\n     5→import { format } from 'date-fns/format'\n     6→import { startOfDay } from 'date-fns/startOfDay'\n     7→import { endOfDay } from 'date-fns/endOfDay'\n     8→import { isWithinInterval } from 'date-fns/isWithinInterval'\n     9→import type { Incident } from '@/types'\n    10→\n    11→interface TimelineProps {\n    12→  incidents: Incident[]\n    13→  onTimeRangeChange: (start: Date | null, end: Date | null) => void\n    14→  isOpen: boolean\n    15→  onToggle: () => void\n    16→}\n    17→\n    18→type PlaySpeed = 1 | 2 | 5 | 10\n    19→\n    20→export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: TimelineProps) {\n    21→  const [isPlaying, setIsPlaying] = useState(false)\n    22→  const [playSpeed, setPlaySpeed] = useState<PlaySpeed>(1)\n    23→  const [currentDate, setCurrentDate] = useState<Date | null>(null)\n    24→  const intervalRef = useRef<NodeJS.Timeout>()\n    25→\n    26→  // Calculate date range from incidents\n    27→  const { minDate, maxDate, dateRange } = useIncidentDateRange(incidents)\n    28→\n    29→  // Handle animation playback\n    30→  useEffect(() => {\n    31→    if (!isPlaying || !currentDate || !maxDate) {\n    32→      if (intervalRef.current) {\n    33→        clearInterval(intervalRef.current)\n    34→      }\n    35→      return\n    36→    }\n    37→\n    38→    const intervalMs = 1000 / playSpeed\n    39→    intervalRef.current = setInterval(() => {\n    40→      setCurrentDate((prev) => {\n    41→        if (!prev || !maxDate) return prev\n    42→\n    43→        const nextDate = new Date(prev)\n    44→        nextDate.setDate(nextDate.getDate() + 1)\n    45→\n    46→        if (nextDate > maxDate) {\n    47→          setIsPlaying(false)\n    48→          return maxDate\n    49→        }\n    50→\n    51→        return nextDate\n    52→      })\n    53→    }, intervalMs)\n    54→\n    55→    return () => {\n    56→      if (intervalRef.current) {\n    57→        clearInterval(intervalRef.current)\n    58→      }\n    59→    }\n    60→  }, [isPlaying, playSpeed, maxDate])\n    61→\n    62→  // Update filter when current date changes\n    63→  useEffect(() => {\n    64→    if (currentDate) {\n    65→      const start = startOfDay(currentDate)\n    66→      const end = endOfDay(currentDate)\n    67→      onTimeRangeChange(start, end)\n    68→    } else {\n    69→      onTimeRangeChange(null, null)\n    70→    }\n    71→  }, [currentDate, onTimeRangeChange])\n    72→\n    73→  const handleReset = useCallback(() => {\n    74→    setIsPlaying(false)\n    75→    setCurrentDate(null)\n    76→  }, [])\n    77→\n    78→  const handleShowAll = useCallback(() => {\n    79→    setIsPlaying(false)\n    80→    setCurrentDate(null)\n    81→  }, [])\n    82→\n    83→  const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {\n    84→    setIsPlaying(false)\n    85→    const dayIndex = parseInt(e.target.value)\n    86→    if (dateRange[dayIndex]) {\n    87→      setCurrentDate(dateRange[dayIndex].date)\n    88→    }\n    89→  }, [dateRange])\n    90→\n    91→  const togglePlay = useCallback(() => {\n    92→    if (!currentDate && minDate) {\n    93→      setCurrentDate(minDate)\n    94→    }\n    95→    setIsPlaying((prev) => !prev)\n    96→  }, [currentDate, minDate])\n    97→\n    98→  const cycleSpeed = useCallback(() => {\n    99→    setPlaySpeed((prev) => {\n   100→      const speeds: PlaySpeed[] = [1, 2, 5, 10]\n   101→      const currentIndex = speeds.indexOf(prev)\n   102→      return speeds[(currentIndex + 1) % speeds.length]\n   103→    })\n   104→  }, [])\n   105→\n   106→  if (!minDate || !maxDate || incidents.length === 0) {\n   107→    return null\n   108→  }\n   109→\n   110→  const currentDayIndex = currentDate\n   111→    ? dateRange.findIndex((d) => d.date.getTime() === startOfDay(currentDate).getTime())\n   112→    : 0\n   113→\n   114→  const incidentsOnCurrentDay = currentDate\n   115→    ? incidents.filter((inc) =>\n   116→        isWithinInterval(new Date(inc.occurred_at), {\n   117→          start: startOfDay(currentDate),\n   118→          end: endOfDay(currentDate),\n   119→        })\n   120→      )\n   121→    : []\n   122→\n   123→  return (\n   124→    <motion.div\n   125→      className=\"fixed bottom-0 left-0 right-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl border-t border-gray-200/70 dark:border-gray-800/70 shadow-elevated z-40\"\n   126→      initial={{ y: 100 }}\n   127→      animate={{ y: 0 }}\n   128→      exit={{ y: 100 }}\n   129→      transition={{ type: 'spring', damping: 25, stiffness: 300 }}\n   130→    >\n   131→      {/* Toggle Button */}\n   132→      <button\n   133→        onClick={onToggle}\n   134→        className=\"w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group\"\n   135→      >\n   136→        <div className=\"flex items-center gap-3\">\n   137→          <span className=\"text-2xl\">⏱️</span>\n   138→          <div>\n   139→            <div className=\"font-semibold text-gray-900 dark:text-white flex items-center gap-2\">\n   140→              Timeline\n   141→              {currentDate && (\n   142→                <span className=\"text-sm font-normal text-gray-500 dark:text-gray-400\">\n   143→                  {format(currentDate, 'MMM d, yyyy')}\n   144→                </span>\n   145→              )}\n   146→            </div>\n   147→            {currentDate && (\n   148→              <div className=\"text-xs text-gray-500 dark:text-gray-400\">\n   149→                {incidentsOnCurrentDay.length} incident{incidentsOnCurrentDay.length !== 1 ? 's' : ''} on this day\n   150→              </div>\n   151→            )}\n   152→          </div>\n   153→        </div>\n   154→        <motion.svg\n   155→          className=\"w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors\"\n   156→          fill=\"none\"\n   157→          stroke=\"currentColor\"\n   158→          viewBox=\"0 0 24 24\"\n   159→          animate={{ rotate: isOpen ? 180 : 0 }}\n   160→          transition={{ duration: 0.2 }}\n   161→        >\n   162→          <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 9l-7 7-7-7\" />\n   163→        </motion.svg>\n   164→      </button>\n   165→\n   166→      {/* Timeline Controls */}\n   167→      <AnimatePresence>\n   168→        {isOpen && (\n   169→          <motion.div\n   170→            className=\"px-4 pb-4 space-y-4\"\n   171→            initial={{ opacity: 0, height: 0 }}\n   172→            animate={{ opacity: 1, height: 'auto' }}\n   173→            exit={{ opacity: 0, height: 0 }}\n   174→            transition={{ duration: 0.2 }}\n   175→          >\n   176→            {/* Slider */}\n   177→            <div className=\"relative px-1\">\n   178→              <input\n   179→                type=\"range\"\n   180→                min={0}\n   181→                max={dateRange.length - 1}\n   182→                value={currentDayIndex}\n   183→                onChange={handleDateChange}\n   184→                className=\"w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider accent-blue-600\"\n   185→                style={{\n   186→                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(currentDayIndex / (dateRange.length - 1)) * 100}%, #e5e7eb ${(currentDayIndex / (dateRange.length - 1)) * 100}%, #e5e7eb 100%)`\n   187→                }}\n   188→              />\n   189→\n   190→              {/* Date markers */}\n   191→              <div className=\"flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400\">\n   192→                <span>{format(minDate, 'MMM d, yyyy')}</span>\n   193→                <span>{format(maxDate, 'MMM d, yyyy')}</span>\n   194→              </div>\n   195→            </div>\n   196→\n   197→            {/* Controls Row */}\n   198→            <div className=\"flex items-center justify-between gap-3\">\n   199→              <div className=\"flex items-center gap-2\">\n   200→                {/* Play/Pause */}\n   201→                <motion.button\n   202→                  onClick={togglePlay}\n   203→                  className=\"px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md flex items-center gap-2\"\n   204→                  whileHover={{ scale: 1.02 }}\n   205→                  whileTap={{ scale: 0.98 }}\n   206→                >\n   207→                  {isPlaying ? (\n   208→                    <>\n   209→                      <span className=\"text-base\">⏸</span>\n   210→                      <span>Pause</span>\n   211→                    </>\n   212→                  ) : (\n   213→                    <>\n   214→                      <span className=\"text-base\">▶</span>\n   215→                      <span>Play</span>\n   216→                    </>\n   217→                  )}\n   218→                </motion.button>\n   219→\n   220→                {/* Show All / Reset */}\n   221→                <motion.button\n   222→                  onClick={handleShowAll}\n   223→                  className=\"px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium\"\n   224→                  whileHover={{ scale: 1.02 }}\n   225→                  whileTap={{ scale: 0.98 }}\n   226→                >\n   227→                  {currentDate ? 'Show All' : 'Reset'}\n   228→                </motion.button>\n   229→\n   230→                {/* Speed */}\n   231→                <motion.button\n   232→                  onClick={cycleSpeed}\n   233→                  className=\"px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium\"\n   234→                  whileHover={{ scale: 1.02 }}\n   235→                  whileTap={{ scale: 0.98 }}\n   236→                >\n   237→                  {playSpeed}x\n   238→                </motion.button>\n   239→              </div>\n   240→\n   241→              {/* Stats */}\n   242→              <div className=\"text-sm font-medium text-gray-600 dark:text-gray-400 hidde\n\n... [truncated - full output was 13878 chars]",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:38:41.335874+00:00",
+          "type": "text",
+          "content": "I found the Timeline toggle button at lines 132-164. It's a full-width button that toggles the expand/collapse state. I need to add the `focus-ring` class for keyboard accessibility. Let me update it:",
+          "phase": "coding",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:43.639801+00:00",
+          "type": "tool_start",
+          "content": "[Edit] ./frontend/components/Timeline.tsx",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "tool_input": "./frontend/components/Timeline.tsx",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:43.686788+00:00",
+          "type": "tool_end",
+          "content": "[Edit] Done",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "subtask_id": "6.1",
+          "session": 16,
+          "detail": "The file ./frontend/components/Timeline.tsx has been updated. Here's the result of running `cat -n` on a snippet of the edited file:\n   127→      animate={{ y: 0 }}\n   128→      exit={{ y: 100 }}\n   129→      transition={{ type: 'spring', damping: 25, stiffness: 300 }}\n   130→    >\n   131→      {/* Toggle Button */}\n   132→      <button\n   133→        onClick={onToggle}\n   134→        className=\"w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group focus-ring rounded\"\n   135→      >\n   136→        <div className=\"flex items-center gap-3\">\n   137→          <span className=\"text-2xl\">⏱️</span>\n   138→          <div>\n   139→            <div className=\"font-semibold text-gray-900 dark:text-white flex items-center gap-2\">",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:38:48.328832+00:00",
+          "type": "text",
+          "content": "Now let me verify the build passes:",
+          "phase": "coding",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:49.184806+00:00",
+          "type": "tool_start",
+          "content": "[Bash] cd ./frontend && npm run build 2>&1 | tail -30",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "cd ./frontend && npm run build 2>&1 | tail -30",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:49.210711+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Error: Command 'npm' is not in the allowed commands for this project",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "6.1",
+          "session": 16,
+          "detail": "Command 'npm' is not in the allowed commands for this project",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:38:53.483311+00:00",
+          "type": "text",
+          "content": "Let me commit the changes and update the plan:",
+          "phase": "coding",
+          "subtask_id": "6.1",
+          "session": 16
+        },
+        {
+          "timestamp": "2026-01-07T21:38:57.553017+00:00",
+          "type": "tool_start",
+          "content": "[Bash] git add . && git commit -m \"auto-claude: 6.1 - ...",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "git add . && git commit -m \"auto-claude: 6.1 - ...",
+          "subtask_id": "6.1",
+          "session": 16
         }
       ]
     },
