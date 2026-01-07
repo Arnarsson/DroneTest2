@@ -7,8 +7,17 @@ from urllib.parse import parse_qs, urlparse
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db import fetch_incidents, run_async
-from distributed_rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
+# Import with error handling to catch initialization failures
+try:
+    from db import fetch_incidents, run_async
+    from distributed_rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
+except Exception as e:
+    # Log import errors for debugging
+    print(f"CRITICAL: Failed to import modules: {str(e)}", file=sys.stderr)
+    import traceback
+    traceback.print_exc(file=sys.stderr)
+    # Re-raise to fail fast - Vercel will show this in logs
+    raise
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -38,6 +47,31 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def handle_get(self):
+        # Validate DATABASE_URL is set before processing
+        if not os.getenv('DATABASE_URL'):
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            origin = self.headers.get('Origin', '')
+            ALLOWED_ORIGINS = [
+                'https://www.dronemap.cc',
+                'https://dronemap.cc',
+                'https://www.dronewatch.cc',
+                'https://dronewatch.cc',
+                'http://localhost:3000',
+                'http://localhost:3001'
+            ]
+            if origin in ALLOWED_ORIGINS:
+                self.send_header('Access-Control-Allow-Origin', origin)
+            self.end_headers()
+            error_response = {
+                'error': 'Configuration error',
+                'message': 'DATABASE_URL environment variable not set. Check Vercel environment variables.',
+                'detail': 'This is a server configuration issue. Contact the administrator.'
+            }
+            self.wfile.write(json.dumps(error_response).encode())
+            print("ERROR: DATABASE_URL not set", file=sys.stderr)
+            return
+        
         # Rate limiting check
         client_ip = get_client_ip(dict(self.headers))
         allowed, remaining, reset_after = check_rate_limit(client_ip)
@@ -95,6 +129,7 @@ class handler(BaseHTTPRequestHandler):
             asset_type = None
 
         # Fetch incidents from database
+        error_detail = None
         try:
             result = run_async(fetch_incidents(
                 min_evidence=min_evidence,
@@ -110,15 +145,26 @@ class handler(BaseHTTPRequestHandler):
             if isinstance(result, dict) and 'error' in result:
                 incidents = []
                 status_code = 500
+                error_detail = result.get('detail', result.get('error', 'Unknown error'))
             else:
                 incidents = result
                 status_code = 200
-        except Exception as e:
-            print(f"Error fetching incidents: {str(e)}", file=sys.stderr)
+        except ValueError as e:
+            # Database connection errors (missing DATABASE_URL, invalid format)
+            print(f"Database configuration error: {str(e)}", file=sys.stderr)
             import traceback
-            traceback.print_exc()
+            traceback.print_exc(file=sys.stderr)
             incidents = []
             status_code = 500
+            error_detail = str(e)
+        except Exception as e:
+            # Other unexpected errors
+            print(f"Error fetching incidents: {str(e)}", file=sys.stderr)
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+            incidents = []
+            status_code = 500
+            error_detail = "Internal server error"
 
         # Handle CORS - whitelist specific origins only
         ALLOWED_ORIGINS = [
@@ -135,7 +181,10 @@ class handler(BaseHTTPRequestHandler):
         # Send response
         self.send_response(status_code)
         self.send_header('Content-Type', 'application/json')
-        self.send_header('Cache-Control', 'public, max-age=15')
+        
+        # Only add cache headers for successful responses
+        if status_code == 200:
+            self.send_header('Cache-Control', 'public, max-age=15')
         
         # Add rate limit headers
         for key, value in get_rate_limit_headers(remaining, reset_after).items():
@@ -148,4 +197,14 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Headers', 'Content-Type')
 
         self.end_headers()
-        self.wfile.write(json.dumps(incidents).encode())
+        
+        # Return error response if there was an error
+        if status_code != 200:
+            error_response = {
+                'error': 'Failed to fetch incidents',
+                'message': error_detail if error_detail else 'Unknown error occurred',
+                'status_code': status_code
+            }
+            self.wfile.write(json.dumps(error_response).encode())
+        else:
+            self.wfile.write(json.dumps(incidents).encode())

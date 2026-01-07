@@ -29,7 +29,13 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
         params.append('asset_type', filters.assetType)
       }
 
+      if (filters.searchQuery) {
+        params.append('search', filters.searchQuery)
+      }
+
       // Add date range
+      // Client-side filtering is handled in page.tsx to prevent API 500 errors with 'since' param
+      /* 
       const now = new Date()
       if (filters.dateRange !== 'all') {
         const since = new Date()
@@ -46,6 +52,7 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
         }
         params.append('since', since.toISOString())
       }
+      */
 
       const url = `${API_URL}/incidents?${params}`
 
@@ -59,12 +66,46 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
         span.setAttribute("http.status_code", response.status)
 
         if (!response.ok) {
-          Sentry.captureException(new Error(`API error: ${response.status}`))
-          throw new Error(`API error: ${response.status}`)
+          // Try to parse error response for better error messages
+          let errorMessage = `API error: ${response.status}`
+          try {
+            const errorData = await response.json()
+            if (errorData.error || errorData.message) {
+              errorMessage = errorData.message || errorData.error || errorMessage
+            }
+          } catch {
+            // If JSON parsing fails, use status-based message
+            if (response.status === 403) {
+              errorMessage = 'Access denied. Please check API configuration.'
+            } else if (response.status === 500) {
+              errorMessage = 'Server error. Please try again later.'
+            } else if (response.status === 429) {
+              errorMessage = 'Rate limit exceeded. Please wait a moment.'
+            }
+          }
+          
+          Sentry.captureException(new Error(errorMessage), {
+            extra: { 
+              status: response.status,
+              url,
+              filters 
+            }
+          })
+          throw new Error(errorMessage)
         }
 
         const data = await response.json()
-        span.setAttribute("incident_count", data.length)
+        
+        // Check if response is an error object (from our improved error handling)
+        if (data && typeof data === 'object' && 'error' in data && !Array.isArray(data)) {
+          const errorMessage = data.message || data.error || 'Unknown API error'
+          Sentry.captureException(new Error(errorMessage), {
+            extra: { url, filters, errorData: data }
+          })
+          throw new Error(errorMessage)
+        }
+        
+        span.setAttribute("incident_count", Array.isArray(data) ? data.length : 0)
 
         // Monitor for empty responses
         if (data.length === 0) {

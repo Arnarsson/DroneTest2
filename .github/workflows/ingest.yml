@@ -41,4 +41,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           cd ingestion
-          python ingest.py
+          python ingest.py --smart-schedule
