@@ -1,0 +1,13 @@
+{
+  "sourceType": "ideation",
+  "ideationType": "ui_ux_improvements",
+  "ideaId": "uiux-003",
+  "rationale": "Full page reloads are jarring, slow, and cause unnecessary network requests. A proper state reset provides instant feedback and maintains the user's mental context of where they are in the app.",
+  "category": "ui_ux",
+  "uiuxCategory": "usability",
+  "affectedFiles": [
+    "frontend/components/IncidentList.tsx",
+    "frontend/app/page.tsx"
+  ],
+  "problemSolved": "In IncidentList.tsx lines 65-68, handleResetFilters() calls window.location.reload(). The comment even acknowledges 'This would need to be passed from parent'. The empty state at lines 70-94 could use a reset button that's currently missing."
+}

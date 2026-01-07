@@ -11,9 +11,10 @@ import { SourceBadge } from './SourceBadge'
 interface IncidentListProps {
   incidents: Incident[]
   isLoading: boolean
+  onResetFilters?: () => void
 }
 
-export function IncidentList({ incidents, isLoading }: IncidentListProps) {
+export function IncidentList({ incidents, isLoading, onResetFilters }: IncidentListProps) {
   const [groupByFacility, setGroupByFacility] = useState(false)
   const [expandedFacilities, setExpandedFacilities] = useState<Set<string>>(new Set())
   if (isLoading) {
@@ -64,8 +65,9 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
   }
 
   const handleResetFilters = () => {
-    // This would need to be passed from parent, but for now just inform user
-    window.location.reload()
+    if (onResetFilters) {
+      onResetFilters()
+    }
   }
 
   if (incidents.length === 0) {
@@ -90,6 +92,16 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
               <li>• Clearing asset type filters</li>
             </ul>
           </div>
+          {onResetFilters && (
+            <motion.button
+              onClick={handleResetFilters}
+              className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Reset Filters
+            </motion.button>
+          )}
         </div>
       </motion.div>
     )

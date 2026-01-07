@@ -106,6 +106,16 @@ export default function Home() {
     setFilters(newFilters);
   }, []);
 
+  const resetFilters = useCallback(() => {
+    setFilters({
+      minEvidence: 1,
+      country: "all",
+      status: "all",
+      assetType: null,
+      dateRange: "all",
+    });
+  }, []);
+
   // Announce changes to screen readers
   const announce = useCallback((message: string) => {
     // Clear any pending announcement timeout
@@ -155,7 +165,6 @@ export default function Home() {
     [announce]
   );
   useKeyboardShortcuts(keyboardShortcuts);
-
   return (
     <>
       <Toaster position="top-right" richColors />
@@ -220,7 +229,7 @@ export default function Home() {
                 <EvidenceLegend />
               </>
             ) : view === "list" ? (
-              <IncidentList incidents={incidents || []} isLoading={isLoading} />
+              <IncidentList incidents={incidents || []} isLoading={isLoading} onResetFilters={resetFilters} />
             ) : (
               <Analytics incidents={incidents || []} />
             )}
