@@ -292,6 +292,16 @@ jobs:
           echo "python_failed=$PYTHON_SCAN_FAILED" >> $GITHUB_OUTPUT
           echo "python_count=$PYTHON_VULN_COUNT" >> $GITHUB_OUTPUT
 
+      - name: Upload Python vulnerability reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-vulnerability-reports
+          path: |
+            scan-results/*.json
+            scan-results/*.txt
+          retention-days: 30
+          if-no-files-found: warn
+
   # JavaScript dependency vulnerability scanning using npm audit
   javascript-security-scan:
     name: JavaScript Dependency Scan (npm audit)
@@ -544,3 +554,13 @@ jobs:
           NODE_SCRIPT
 
           echo "---" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload JavaScript vulnerability reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-vulnerability-reports
+          path: |
+            scan-results/*-npm.json
+            scan-results/*-npm.txt
+          retention-days: 30
+          if-no-files-found: warn
