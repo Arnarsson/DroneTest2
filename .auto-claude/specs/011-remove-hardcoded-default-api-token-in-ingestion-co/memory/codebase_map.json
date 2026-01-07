@@ -1,0 +1,15 @@
+{
+  "discovered_files": {
+    "ingestion/config.py": {
+      "description": "Implemented lazy token validation pattern using _LazyToken class. Token is validated on first access (not import), raising IngestTokenError with helpful instructions if missing or too short (< 16 chars). Backward compatible with existing f-string usage like f'Bearer {INGEST_TOKEN}'.",
+      "category": "security",
+      "discovered_at": "2026-01-07T21:18:42.979540+00:00"
+    },
+    "setup-scraper.sh": {
+      "description": "Script now requires user-provided token via command line arg or INGEST_TOKEN env var. Validates minimum 16 chars. Provides token generation guidance using openssl, /dev/urandom, or Python secrets module. Redacts token from output summary.",
+      "category": "security",
+      "discovered_at": "2026-01-07T21:23:54.935392+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:23:54.935401+00:00"
+}
