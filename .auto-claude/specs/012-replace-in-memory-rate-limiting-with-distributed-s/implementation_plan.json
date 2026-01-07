@@ -84,7 +84,7 @@
           "subtask_id": "3.1",
           "title": "Update incidents.py to use distributed rate limiter",
           "description": "Replace import from rate_limit.py to distributed_rate_limit.py in frontend/api/incidents.py",
-          "status": "pending",
+          "status": "completed",
           "files": ["frontend/api/incidents.py"],
           "acceptance_criteria": [
             "Imports from distributed_rate_limit instead of rate_limit",
@@ -96,7 +96,7 @@
           "subtask_id": "3.2",
           "title": "Deprecate old rate_limit.py",
           "description": "Add deprecation notice to old rate_limit.py and update comment to reference new module",
-          "status": "pending",
+          "status": "completed",
           "files": ["frontend/api/rate_limit.py"],
           "acceptance_criteria": [
             "Deprecation notice added at top of file",
@@ -116,7 +116,7 @@
           "subtask_id": "4.1",
           "title": "Create unit tests for distributed rate limiter",
           "description": "Create frontend/api/__tests__/test_distributed_rate_limit.py with mocked Redis responses",
-          "status": "pending",
+          "status": "completed",
           "files": ["frontend/api/__tests__/test_distributed_rate_limit.py"],
           "acceptance_criteria": [
             "Tests rate limiting allows requests under limit",
@@ -125,7 +125,8 @@
             "Tests fallback to in-memory when Redis unavailable",
             "Tests correct rate limit headers in response",
             "Tests IP extraction from various header formats"
-          ]
+          ],
+          "completion_notes": "Created 34 comprehensive tests covering: IP extraction (8 tests), rate limit headers (4 tests), memory fallback (3 tests), Redis rate limiting with mocks (6 tests), Redis client initialization (4 tests), availability checks (3 tests), integration (2 tests), sliding window behavior (2 tests), env var configuration (2 tests). All tests pass."
         },
         {
           "subtask_id": "4.2",
