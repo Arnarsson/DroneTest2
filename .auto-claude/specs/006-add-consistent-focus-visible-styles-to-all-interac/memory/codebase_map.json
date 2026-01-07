@@ -26,10 +26,10 @@
       "discovered_at": "2026-01-07T21:24:11.829687+00:00"
     },
     "frontend/components/IncidentList.tsx": {
-      "description": "IncidentList.tsx contains interactive elements that needed focus-ring class: the 'Group by Facility' toggle button (line 106) and FacilityGroup header button (line 179). The component uses motion.div for animations and manages state for grouping incidents by facility.",
-      "category": "component",
-      "discovered_at": "2026-01-07T21:32:21.017456+00:00"
+      "description": "FacilityGroup component (line 146-228) contains a collapsible header button for grouping incidents by facility. The button now has focus-ring class and rounded-t-xl for keyboard accessibility focus indicators that match the visual rounded corners.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:35:21.544781+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:32:21.017465+00:00"
+  "last_updated": "2026-01-07T21:35:21.544789+00:00"
 }

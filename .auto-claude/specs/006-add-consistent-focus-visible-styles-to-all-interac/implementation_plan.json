@@ -136,8 +136,9 @@
           "title": "Add focus-visible to FacilityGroup header button",
           "description": "Add focus-visible styles to the collapsible FacilityGroup header button for expanding/collapsing facility incident groups.",
           "file": "frontend/components/IncidentList.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class and rounded-t-xl to the FacilityGroup header button (line 181) in IncidentList.tsx. The button is the collapsible header for facility incident groups. The rounded-t-xl ensures the focus ring matches the visual shape (rounded top corners from parent container's rounded-xl and overflow-hidden). Committed as 9ca1434.",
+          "updated_at": "2026-01-07T21:35:16.003339+00:00"
         }
       ]
     },
@@ -237,5 +238,5 @@
     "tests_passed": ""
   },
   "estimated_subtasks": 18,
-  "last_updated": "2026-01-07T21:32:13.569125+00:00"
+  "last_updated": "2026-01-07T21:35:16.003346+00:00"
 }
