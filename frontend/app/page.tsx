@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
 import { Toaster } from "sonner";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 // Dynamic import for map (no SSR)
 const Map = dynamic(() => import("@/components/Map"), {
@@ -93,6 +94,58 @@ export default function Home() {
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
+
+  // Keyboard shortcut handlers for quick filters
+  const keyboardShortcuts = useMemo(
+    () => ({
+      // A: Toggle airports filter
+      a: () => {
+        setFilters((prev) => ({
+          ...prev,
+          assetType: prev.assetType === "airport" ? null : "airport",
+        }));
+      },
+      // M: Toggle military filter
+      m: () => {
+        setFilters((prev) => ({
+          ...prev,
+          assetType: prev.assetType === "military" ? null : "military",
+        }));
+      },
+      // T: Toggle today (last 24 hours) filter
+      t: () => {
+        setFilters((prev) => ({
+          ...prev,
+          dateRange: prev.dateRange === "day" ? "all" : "day",
+        }));
+      },
+      // V: Toggle verified (3+ evidence) filter
+      v: () => {
+        setFilters((prev) => ({
+          ...prev,
+          minEvidence: prev.minEvidence >= 3 ? 1 : 3,
+        }));
+      },
+      // R: Reset all filters
+      r: () => {
+        setFilters({
+          minEvidence: 1,
+          country: "all",
+          status: "all",
+          assetType: null,
+          dateRange: "all",
+        });
+      },
+      // F: Toggle filter panel
+      f: () => {
+        setIsFilterPanelOpen((prev) => !prev);
+      },
+    }),
+    []
+  );
+
+  // Register keyboard shortcuts
+  useKeyboardShortcuts(keyboardShortcuts);
 
   return (
     <>
