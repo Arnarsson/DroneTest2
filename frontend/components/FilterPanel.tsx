@@ -369,7 +369,7 @@ function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps)
   return (
     <motion.button
       onClick={onClick}
-      className={`px-3 py-2 text-sm rounded-full font-medium transition-all ${
+      className={`px-3 py-2 text-sm rounded-full font-medium transition-all focus-ring ${
         active
           ? 'bg-blue-600 text-white shadow-md'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'

@@ -1,7 +1,7 @@
 {
   "spec_id": "006-add-consistent-focus-visible-styles-to-all-interac",
   "created_at": "2026-01-07T21:13:54.528972+00:00",
-  "updated_at": "2026-01-07T21:25:11.274508+00:00",
+  "updated_at": "2026-01-07T21:27:33.536124+00:00",
   "phases": {
     "planning": {
       "phase": "planning",
@@ -2185,6 +2185,462 @@
           "tool_input": "git add . && git commit -m \"auto-claude: 3.2 - ...",
           "subtask_id": "3.2",
           "session": 7
+        },
+        {
+          "timestamp": "2026-01-07T21:25:13.387710+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Done",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "3.2",
+          "session": 7,
+          "detail": "[auto-claude/006-add-consistent-focus-visible-styles-to-all-interac 4434e8d] auto-claude: 3.2 - Add focus-visible styles to the floating filter button\n 9 files changed, 732 insertions(+), 16 deletions(-)\n create mode 100644 .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/memory/session_insights/session_005.json\n create mode 100644 .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/memory/session_insights/session_006.json",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:25:16.259311+00:00",
+          "type": "text",
+          "content": "Now let me update the subtask status to completed:",
+          "phase": "coding",
+          "subtask_id": "3.2",
+          "session": 7
+        },
+        {
+          "timestamp": "2026-01-07T21:25:17.901029+00:00",
+          "type": "tool_start",
+          "content": "[mcp__auto-claude__update_subtask_status]",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__update_subtask_status",
+          "subtask_id": "3.2",
+          "session": 7
+        },
+        {
+          "timestamp": "2026-01-07T21:25:17.914245+00:00",
+          "type": "tool_end",
+          "content": "[mcp__auto-claude__update_subtask_status] Done",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__update_subtask_status",
+          "subtask_id": "3.2",
+          "session": 7,
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:25:25.646516+00:00",
+          "type": "text",
+          "content": "Subtask 3.2 is now complete. Here's a summary:\n\n## ✅ Subtask 3.2 Complete\n\n**Task:** Add focus-visible styles to the floating filter button (mobile)\n\n**Changes Made:**\n- Added `focus-ring` class to the mobile floating filter button (`motion.button`) in `FilterPanel.tsx` at line 64\n- The button already has `rounded-full`, so the focus ring will properly match its circular shape\n\n**Before:**\n```jsx\nclassName=\"lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all\"\n```\n\n**After:**\n```jsx\nclassName=\"lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all focus-ring\"\n```\n\n**Commit:** `4434e8d` - \"auto-claude: 3.2 - Add focus-visible styles to the floating filter button\"\n\nThe floating filter button (visible on mobile screens) now has proper keyboard focus indication for WCAG 2.1 Level AA compliance.",
+          "phase": "coding",
+          "subtask_id": "3.2",
+          "session": 7
+        },
+        {
+          "timestamp": "2026-01-07T21:25:49.340815+00:00",
+          "type": "text",
+          "content": "I'll start by reading the spec, plan, and understanding the context for this subtask.",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:25:50.142783+00:00",
+          "type": "tool_start",
+          "content": "[Read] ...ent-focus-visible-styles-to-all-interac/spec.md",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "...ent-focus-visible-styles-to-all-interac/spec.md",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:25:51.274226+00:00",
+          "type": "tool_start",
+          "content": "[Read] ...-styles-to-all-interac/implementation_plan.json",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "...-styles-to-all-interac/implementation_plan.json",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:25:51.443977+00:00",
+          "type": "tool_start",
+          "content": "[mcp__auto-claude__get_session_context]",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__get_session_context",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:25:51.489978+00:00",
+          "type": "tool_end",
+          "content": "[mcp__auto-claude__get_session_context] Done",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__get_session_context",
+          "subtask_id": "3.3",
+          "session": 8,
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:25:55.066284+00:00",
+          "type": "text",
+          "content": "Now let me read the FilterPanel.tsx file to find the close panel button and the 'Clear all' filter reset button:",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:25:55.713469+00:00",
+          "type": "tool_start",
+          "content": "[Read] ./frontend/components/FilterPanel.tsx",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "./frontend/components/FilterPanel.tsx",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:25:55.731123+00:00",
+          "type": "tool_end",
+          "content": "[Read] Done",
+          "phase": "coding",
+          "tool_name": "Read",
+          "subtask_id": "3.3",
+          "session": 8,
+          "detail": "     1→'use client'\n     2→\n     3→import { useState } from 'react'\n     4→import { motion, AnimatePresence } from 'framer-motion'\n     5→import { toast } from 'sonner'\n     6→import { FilterState } from '@/types'\n     7→import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'\n     8→import { logger } from '@/lib/logger'\n     9→\n    10→interface FilterPanelProps {\n    11→  filters: FilterState\n    12→  onChange: (filters: FilterState) => void\n    13→  incidentCount: number\n    14→  isOpen: boolean\n    15→  onToggle: () => void\n    16→}\n    17→\n    18→export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle }: FilterPanelProps) {\n    19→  logger.debug('[FilterPanel] Rendered')\n    20→  logger.debug('[FilterPanel] incidentCount:', incidentCount)\n    21→  logger.debug('[FilterPanel] filters:', filters)\n    22→  logger.debug('[FilterPanel] isOpen:', isOpen)\n    23→\n    24→  const [expandedSections, setExpandedSections] = useState({\n    25→    evidence: true,\n    26→    location: true,\n    27→    time: true,\n    28→  })\n    29→\n    30→\n    31→  const handleChange = (key: keyof FilterState, value: any) => {\n    32→    onChange({ ...filters, [key]: value })\n    33→  }\n    34→\n    35→  const activeFilterCount = [\n    36→    filters.minEvidence > 1,\n    37→    filters.country !== 'all',\n    38→    filters.status !== 'all',\n    39→    filters.assetType !== null,\n    40→    filters.dateRange !== 'all'\n    41→  ].filter(Boolean).length\n    42→\n    43→  const resetFilters = () => {\n    44→    onChange({\n    45→      minEvidence: 1,\n    46→      country: 'all',\n    47→      status: 'all',\n    48→      assetType: null,\n    49→      dateRange: 'all'\n    50→    })\n    51→  }\n    52→\n    53→  const toggleSection = (section: keyof typeof expandedSections) => {\n    54→    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))\n    55→  }\n    56→\n    57→  return (\n    58→    <>\n    59→      {/* Mobile: Floating Filter Button */}\n    60→      <motion.button\n    61→        onClick={onToggle}\n    62→        aria-label={`${isOpen ? 'Close' : 'Open'} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ''}`}\n    63→        aria-expanded={isOpen}\n    64→        className=\"lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all focus-ring\"\n    65→        whileHover={{ scale: 1.08, rotate: 5 }}\n    66→        whileTap={{ scale: 0.95 }}\n    67→        initial={{ opacity: 0, scale: 0 }}\n    68→        animate={{ opacity: 1, scale: 1 }}\n    69→        transition={{ type: 'spring', bounce: 0.5 }}\n    70→      >\n    71→        <div className=\"flex items-center gap-2\">\n    72→          <svg className=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n    73→            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z\" />\n    74→          </svg>\n    75→          {activeFilterCount > 0 && (\n    76→            <motion.span\n    77→              className=\"absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center\"\n    78→              initial={{ scale: 0 }} \n    79→              animate={{ scale: 1 }}\n    80→              transition={{ type: 'spring', bounce: 0.6 }}\n    81→            >\n    82→              {activeFilterCount}\n    83→            </motion.span>\n    84→          )}\n    85→        </div>\n    86→      </motion.button>\n    87→\n    88→      {/* Filter Panel Overlay (Mobile) */}\n    89→      <AnimatePresence>\n    90→        {isOpen && (\n    91→          <motion.div\n    92→            className=\"lg:hidden fixed inset-0 bg-black/60 z-[998] backdrop-blur-sm\"\n    93→            onClick={onToggle}\n    94→            initial={{ opacity: 0 }}\n    95→            animate={{ opacity: 1 }}\n    96→            exit={{ opacity: 0 }}\n    97→          />\n    98→        )}\n    99→      </AnimatePresence>\n   100→\n   101→      {/* Filter Panel */}\n   102→      <motion.div\n   103→        className={`\n   104→          fixed lg:relative top-0 right-0 h-full\n   105→          bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl border-l border-gray-200/70 dark:border-gray-800/70\n   106→          shadow-elevated lg:shadow-soft\n   107→          z-[999] lg:z-auto\n   108→          w-80 lg:w-80\n   109→          overflow-y-auto\n   110→          ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}\n   111→          transition-transform duration-300 ease-out\n   112→        `}\n   113→        initial={false}\n   114→        transition={{ type: 'spring', damping: 30, stiffness: 300 }}\n   115→      >\n   116→        <div className=\"p-6 space-y-6\">\n   117→          {/* Header */}\n   118→          <div className=\"flex items-center justify-between\">\n   119→            <div>\n   120→              <h2 className=\"text-xl font-bold text-gray-900 dark:text-white\">Filters</h2>\n   121→              <motion.p\n   122→                className=\"text-sm text-gray-500 dark:text-gray-400 mt-1\"\n   123→                key={incidentCount}\n   124→                initial={{ opacity: 0, y: -10 }}\n   125→                animate={{ opacity: 1, y: 0 }}\n   126→              >\n   127→                {incidentCount} incident{incidentCount !== 1 ? 's' : ''} found\n   128→              </motion.p>\n   129→            </div>\n   130→            <button\n   131→              onClick={onToggle}\n   132→              className=\"lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors\"\n   133→            >\n   134→              <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n   135→                <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M6 18L18 6M6 6l12 12\" />\n   136→              </svg>\n   137→            </button>\n   138→          </div>\n   139→\n   140→          {/* Active Filters & Reset */}\n   141→          <AnimatePresence>\n   142→            {activeFilterCount > 0 && (\n   143→              <motion.div\n   144→                className=\"flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800\"\n   145→                initial={{ opacity: 0, height: 0 }}\n   146→                animate={{ opacity: 1, height: 'auto' }}\n   147→                exit={{ opacity: 0, height: 0 }}\n   148→              >\n   149→                <span className=\"text-sm font-medium text-blue-700 dark:text-blue-300\">\n   150→                  {activeFilterCount} active filter{activeFilterCount !== 1 ? 's' : ''}\n   151→                </span>\n   152→                <button\n   153→                  onClick={resetFilters}\n   154→                  className=\"text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold\"\n   155→                >\n   156→                  Clear all\n   157→                </button>\n   158→              </motion.div>\n   159→            )}\n   160→          </AnimatePresence>\n   161→\n   162→          {/* Quick Filters */}\n   163→          <div>\n   164→            <label className=\"text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 block\">\n   165→              Quick Filters\n   166→            </label>\n   167→            <div className=\"flex flex-wrap gap-2\">\n   168→              <QuickFilterChip\n   169→                active={filters.assetType === 'airport'}\n   170→                onClick={() => handleChange('assetType', filters.assetType === 'airport' ? null : 'airport')}\n   171→                icon=\"✈️\"\n   172→                label=\"Airports\"\n   173→              />\n   174→              <QuickFilterChip\n   175→                active={filters.assetType === 'military'}\n   176→                onClick={() => handleChange('assetType', filters.assetType === 'military' ? null : 'military')}\n   177→                icon=\"🛡️\"\n   178→                label=\"Military\"\n   179→              />\n   180→              <QuickFilterChip\n   181→                active={filters.dateRange === 'day'}\n   182→                onClick={() => handleChange('dateRange', filters.dateRange === 'day' ? 'all' : 'day')}\n   183→                icon=\"🕐\"\n   184→                label=\"Today\"\n   185→              />\n   186→              <QuickFilterChip\n   187→                active={filters.minEvidence >= 3}\n   188→                onClick={() => handleChange('minEvidence', filters.minEvidence >= 3 ? 1 : 3)}\n   189→                icon=\"✓\"\n   190→                label=\"Verified\"\n   191→              />\n   192→            </div>\n   193→          </div>\n   194→\n   195→          <hr className=\"border-gray-200 dark:border-gray-700\" />\n   196→\n   197→          {/* Evidence Level Section */}\n   198→          <FilterSection\n   199→            title=\"Evidence Level\"\n   200→            isExpanded={expandedSections.evidence}\n   201→            onToggle={() => toggleSection('evidence')}\n   202→          >\n   203→            <div className=\"space-y-2\">\n   204→              {[1, 2, 3, 4].map((level) => {\n   205→                const config = getEvidenceConfig(level as EvidenceScore)\n   206→                return (\n   207→                  <motion.button\n   208→                    key={level}\n   209→                    onClick={() => handleChange('minEvidence', level)}\n   210→                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${\n   211→                      filters.minEvidence === level\n   212→                        ? 'bg-blue-600 text-white shadow-md'\n   213→                        : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'\n   214→                    }`}\n   215→                    whileHover={{ scale: 1.02 }}\n   216→                    whileTap={{ scale: 0.98 }}\n   217→                  >\n   218→                    <div className=\"flex items-center justify-between\">\n   219→                      <span className=\"text-sm font-medium\">\n   220→                        {level === 1 ? '1 - All Levels' : `${level\n\n... [truncated - full output was 18290 chars]",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:04.501013+00:00",
+          "type": "text",
+          "content": "I found the two buttons that need focus-visible styles:\n\n1. **Close panel button** (lines 130-137): The X button to close the filter panel on mobile\n2. **'Clear all' filter reset button** (lines 152-157): The button to clear all active filters\n\nI need to add the `focus-ring` class to both. Let me make these edits:",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:05.809886+00:00",
+          "type": "tool_start",
+          "content": "[Edit] ./frontend/components/FilterPanel.tsx",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "tool_input": "./frontend/components/FilterPanel.tsx",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:07.148419+00:00",
+          "type": "tool_start",
+          "content": "[Edit] ./frontend/components/FilterPanel.tsx",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "tool_input": "./frontend/components/FilterPanel.tsx",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:07.166210+00:00",
+          "type": "tool_end",
+          "content": "[Edit] Done",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "subtask_id": "3.3",
+          "session": 8,
+          "detail": "The file ./frontend/components/FilterPanel.tsx has been updated. Here's the result of running `cat -n` on a snippet of the edited file:\n   126→              >\n   127→                {incidentCount} incident{incidentCount !== 1 ? 's' : ''} found\n   128→              </motion.p>\n   129→            </div>\n   130→            <button\n   131→              onClick={onToggle}\n   132→              className=\"lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus-ring\"\n   133→            >\n   134→              <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n   135→                <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M6 18L18 6M6 6l12 12\" />\n   136→              </svg>\n   137→            </button>",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:10.901735+00:00",
+          "type": "text",
+          "content": "Both edits were successful. Now let me verify the changes build correctly:",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:11.893752+00:00",
+          "type": "tool_start",
+          "content": "[Bash] cd ./frontend && npm run build 2>&1 | tail -30",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "cd ./frontend && npm run build 2>&1 | tail -30",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:11.947106+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Error: Command 'npm' is not in the allowed commands for this project",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "3.3",
+          "session": 8,
+          "detail": "Command 'npm' is not in the allowed commands for this project",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:16.700099+00:00",
+          "type": "text",
+          "content": "The build command isn't available in this environment. Let me commit the changes and update the plan. The subtask indicates manual verification is required anyway.",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:18.668077+00:00",
+          "type": "tool_start",
+          "content": "[Bash] git status",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "git status",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:18.727928+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Done",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "3.3",
+          "session": 8,
+          "detail": "On branch auto-claude/006-add-consistent-focus-visible-styles-to-all-interac\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   .auto-claude-status\n\tmodified:   .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/implementation_plan.json\n\tmodified:   .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/memory/attempt_history.json\n\tmodified:   .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/memory/build_commits.json\n\tmodified:   .auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/task_logs.json\n\tmodified:   frontend/components/FilterPanel.tsx\n\nUntracked files:\n  (use \"git add <file>...\" to include in what will be committed)\n\t.auto-claude/specs/006-add-consistent-focus-visible-styles-to-all-interac/memory/session_insights/session_007.json\n\nno changes added to commit (use \"git add\" and/or \"git commit -a\")",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:23.317774+00:00",
+          "type": "tool_start",
+          "content": "[Bash] git diff frontend/components/FilterPanel.tsx",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "git diff frontend/components/FilterPanel.tsx",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:23.356521+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Done",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "3.3",
+          "session": 8,
+          "detail": "diff --git i/frontend/components/FilterPanel.tsx w/frontend/components/FilterPanel.tsx\nindex 9637938..45c5c50 100644\n--- i/frontend/components/FilterPanel.tsx\n+++ w/frontend/components/FilterPanel.tsx\n@@ -129,7 +129,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle\n             </div>\n             <button\n               onClick={onToggle}\n-              className=\"lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors\"\n+              className=\"lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus-ring\"\n             >\n               <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                 <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M6 18L18 6M6 6l12 12\" />\n@@ -151,7 +151,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle\n                 </span>\n                 <button\n                   onClick={resetFilters}\n-                  className=\"text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold\"\n+                  className=\"text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold rounded focus-ring\"\n                 >\n                   Clear all\n                 </button>",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:27.468985+00:00",
+          "type": "text",
+          "content": "The changes look correct - I've added `focus-ring` class to both buttons. Let me commit:",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:31.234739+00:00",
+          "type": "tool_start",
+          "content": "[Bash] git add frontend/components/FilterPanel.tsx && ...",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "git add frontend/components/FilterPanel.tsx && ...",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:33.583327+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Done",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "3.3",
+          "session": 8,
+          "detail": "[auto-claude/006-add-consistent-focus-visible-styles-to-all-interac f0faf83] auto-claude: 3.3 - Add focus-visible styles to close panel and clear all buttons\n 1 file changed, 2 insertions(+), 2 deletions(-)",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:37.230874+00:00",
+          "type": "text",
+          "content": "Now let me update the subtask status in the implementation plan:",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:39.283803+00:00",
+          "type": "tool_start",
+          "content": "[mcp__auto-claude__update_subtask_status]",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__update_subtask_status",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:26:39.301229+00:00",
+          "type": "tool_end",
+          "content": "[mcp__auto-claude__update_subtask_status] Done",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__update_subtask_status",
+          "subtask_id": "3.3",
+          "session": 8,
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:26:45.769779+00:00",
+          "type": "text",
+          "content": "Subtask 3.3 is complete. Here's a summary:\n\n## Summary\n\n**Subtask 3.3: Add focus-visible styles to FilterPanel close and clear buttons**\n\n### Changes Made\n1. **Close panel button** (line 132): Added `focus-ring` class to the X button that closes the filter panel on mobile. The button already had `rounded-lg` so the focus ring shape matches properly.\n\n2. **'Clear all' filter reset button** (line 154): Added `focus-ring` class and `rounded` to the button that clears all active filters. The `rounded` class ensures the focus ring has a proper shape for this text button.\n\n### Files Modified\n- `frontend/components/FilterPanel.tsx`\n\n### Commit\n- Hash: `f0faf83`\n- Message: \"auto-claude: 3.3 - Add focus-visible styles to close panel and clear all buttons\"\n\nBoth buttons now have visible focus indicators when navigating with keyboard (Tab key), improving WCAG 2.1 Level AA accessibility compliance.",
+          "phase": "coding",
+          "subtask_id": "3.3",
+          "session": 8
+        },
+        {
+          "timestamp": "2026-01-07T21:27:06.053300+00:00",
+          "type": "text",
+          "content": "I'll start by reading the spec and implementation plan to understand the context and patterns, then find and update the QuickFilterChip component.",
+          "phase": "coding",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:06.926494+00:00",
+          "type": "tool_start",
+          "content": "[Read] ...ent-focus-visible-styles-to-all-interac/spec.md",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "...ent-focus-visible-styles-to-all-interac/spec.md",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:07.400704+00:00",
+          "type": "tool_start",
+          "content": "[Read] ...-styles-to-all-interac/implementation_plan.json",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "...-styles-to-all-interac/implementation_plan.json",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:07.417179+00:00",
+          "type": "tool_start",
+          "content": "[mcp__auto-claude__get_session_context]",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__get_session_context",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:07.483528+00:00",
+          "type": "tool_end",
+          "content": "[mcp__auto-claude__get_session_context] Done",
+          "phase": "coding",
+          "tool_name": "mcp__auto-claude__get_session_context",
+          "subtask_id": "3.4",
+          "session": 9,
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:27:11.084720+00:00",
+          "type": "text",
+          "content": "Now let me read the FilterPanel.tsx file to find the QuickFilterChip component:",
+          "phase": "coding",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:11.749859+00:00",
+          "type": "tool_start",
+          "content": "[Read] ./frontend/components/FilterPanel.tsx",
+          "phase": "coding",
+          "tool_name": "Read",
+          "tool_input": "./frontend/components/FilterPanel.tsx",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:11.761785+00:00",
+          "type": "tool_end",
+          "content": "[Read] Done",
+          "phase": "coding",
+          "tool_name": "Read",
+          "subtask_id": "3.4",
+          "session": 9,
+          "detail": "     1→'use client'\n     2→\n     3→import { useState } from 'react'\n     4→import { motion, AnimatePresence } from 'framer-motion'\n     5→import { toast } from 'sonner'\n     6→import { FilterState } from '@/types'\n     7→import { getEvidenceConfig, type EvidenceScore } from '@/constants/evidence'\n     8→import { logger } from '@/lib/logger'\n     9→\n    10→interface FilterPanelProps {\n    11→  filters: FilterState\n    12→  onChange: (filters: FilterState) => void\n    13→  incidentCount: number\n    14→  isOpen: boolean\n    15→  onToggle: () => void\n    16→}\n    17→\n    18→export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle }: FilterPanelProps) {\n    19→  logger.debug('[FilterPanel] Rendered')\n    20→  logger.debug('[FilterPanel] incidentCount:', incidentCount)\n    21→  logger.debug('[FilterPanel] filters:', filters)\n    22→  logger.debug('[FilterPanel] isOpen:', isOpen)\n    23→\n    24→  const [expandedSections, setExpandedSections] = useState({\n    25→    evidence: true,\n    26→    location: true,\n    27→    time: true,\n    28→  })\n    29→\n    30→\n    31→  const handleChange = (key: keyof FilterState, value: any) => {\n    32→    onChange({ ...filters, [key]: value })\n    33→  }\n    34→\n    35→  const activeFilterCount = [\n    36→    filters.minEvidence > 1,\n    37→    filters.country !== 'all',\n    38→    filters.status !== 'all',\n    39→    filters.assetType !== null,\n    40→    filters.dateRange !== 'all'\n    41→  ].filter(Boolean).length\n    42→\n    43→  const resetFilters = () => {\n    44→    onChange({\n    45→      minEvidence: 1,\n    46→      country: 'all',\n    47→      status: 'all',\n    48→      assetType: null,\n    49→      dateRange: 'all'\n    50→    })\n    51→  }\n    52→\n    53→  const toggleSection = (section: keyof typeof expandedSections) => {\n    54→    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))\n    55→  }\n    56→\n    57→  return (\n    58→    <>\n    59→      {/* Mobile: Floating Filter Button */}\n    60→      <motion.button\n    61→        onClick={onToggle}\n    62→        aria-label={`${isOpen ? 'Close' : 'Open'} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ''}`}\n    63→        aria-expanded={isOpen}\n    64→        className=\"lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all focus-ring\"\n    65→        whileHover={{ scale: 1.08, rotate: 5 }}\n    66→        whileTap={{ scale: 0.95 }}\n    67→        initial={{ opacity: 0, scale: 0 }}\n    68→        animate={{ opacity: 1, scale: 1 }}\n    69→        transition={{ type: 'spring', bounce: 0.5 }}\n    70→      >\n    71→        <div className=\"flex items-center gap-2\">\n    72→          <svg className=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n    73→            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z\" />\n    74→          </svg>\n    75→          {activeFilterCount > 0 && (\n    76→            <motion.span\n    77→              className=\"absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center\"\n    78→              initial={{ scale: 0 }} \n    79→              animate={{ scale: 1 }}\n    80→              transition={{ type: 'spring', bounce: 0.6 }}\n    81→            >\n    82→              {activeFilterCount}\n    83→            </motion.span>\n    84→          )}\n    85→        </div>\n    86→      </motion.button>\n    87→\n    88→      {/* Filter Panel Overlay (Mobile) */}\n    89→      <AnimatePresence>\n    90→        {isOpen && (\n    91→          <motion.div\n    92→            className=\"lg:hidden fixed inset-0 bg-black/60 z-[998] backdrop-blur-sm\"\n    93→            onClick={onToggle}\n    94→            initial={{ opacity: 0 }}\n    95→            animate={{ opacity: 1 }}\n    96→            exit={{ opacity: 0 }}\n    97→          />\n    98→        )}\n    99→      </AnimatePresence>\n   100→\n   101→      {/* Filter Panel */}\n   102→      <motion.div\n   103→        className={`\n   104→          fixed lg:relative top-0 right-0 h-full\n   105→          bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl border-l border-gray-200/70 dark:border-gray-800/70\n   106→          shadow-elevated lg:shadow-soft\n   107→          z-[999] lg:z-auto\n   108→          w-80 lg:w-80\n   109→          overflow-y-auto\n   110→          ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}\n   111→          transition-transform duration-300 ease-out\n   112→        `}\n   113→        initial={false}\n   114→        transition={{ type: 'spring', damping: 30, stiffness: 300 }}\n   115→      >\n   116→        <div className=\"p-6 space-y-6\">\n   117→          {/* Header */}\n   118→          <div className=\"flex items-center justify-between\">\n   119→            <div>\n   120→              <h2 className=\"text-xl font-bold text-gray-900 dark:text-white\">Filters</h2>\n   121→              <motion.p\n   122→                className=\"text-sm text-gray-500 dark:text-gray-400 mt-1\"\n   123→                key={incidentCount}\n   124→                initial={{ opacity: 0, y: -10 }}\n   125→                animate={{ opacity: 1, y: 0 }}\n   126→              >\n   127→                {incidentCount} incident{incidentCount !== 1 ? 's' : ''} found\n   128→              </motion.p>\n   129→            </div>\n   130→            <button\n   131→              onClick={onToggle}\n   132→              className=\"lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus-ring\"\n   133→            >\n   134→              <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n   135→                <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M6 18L18 6M6 6l12 12\" />\n   136→              </svg>\n   137→            </button>\n   138→          </div>\n   139→\n   140→          {/* Active Filters & Reset */}\n   141→          <AnimatePresence>\n   142→            {activeFilterCount > 0 && (\n   143→              <motion.div\n   144→                className=\"flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800\"\n   145→                initial={{ opacity: 0, height: 0 }}\n   146→                animate={{ opacity: 1, height: 'auto' }}\n   147→                exit={{ opacity: 0, height: 0 }}\n   148→              >\n   149→                <span className=\"text-sm font-medium text-blue-700 dark:text-blue-300\">\n   150→                  {activeFilterCount} active filter{activeFilterCount !== 1 ? 's' : ''}\n   151→                </span>\n   152→                <button\n   153→                  onClick={resetFilters}\n   154→                  className=\"text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold rounded focus-ring\"\n   155→                >\n   156→                  Clear all\n   157→                </button>\n   158→              </motion.div>\n   159→            )}\n   160→          </AnimatePresence>\n   161→\n   162→          {/* Quick Filters */}\n   163→          <div>\n   164→            <label className=\"text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 block\">\n   165→              Quick Filters\n   166→            </label>\n   167→            <div className=\"flex flex-wrap gap-2\">\n   168→              <QuickFilterChip\n   169→                active={filters.assetType === 'airport'}\n   170→                onClick={() => handleChange('assetType', filters.assetType === 'airport' ? null : 'airport')}\n   171→                icon=\"✈️\"\n   172→                label=\"Airports\"\n   173→              />\n   174→              <QuickFilterChip\n   175→                active={filters.assetType === 'military'}\n   176→                onClick={() => handleChange('assetType', filters.assetType === 'military' ? null : 'military')}\n   177→                icon=\"🛡️\"\n   178→                label=\"Military\"\n   179→              />\n   180→              <QuickFilterChip\n   181→                active={filters.dateRange === 'day'}\n   182→                onClick={() => handleChange('dateRange', filters.dateRange === 'day' ? 'all' : 'day')}\n   183→                icon=\"🕐\"\n   184→                label=\"Today\"\n   185→              />\n   186→              <QuickFilterChip\n   187→                active={filters.minEvidence >= 3}\n   188→                onClick={() => handleChange('minEvidence', filters.minEvidence >= 3 ? 1 : 3)}\n   189→                icon=\"✓\"\n   190→                label=\"Verified\"\n   191→              />\n   192→            </div>\n   193→          </div>\n   194→\n   195→          <hr className=\"border-gray-200 dark:border-gray-700\" />\n   196→\n   197→          {/* Evidence Level Section */}\n   198→          <FilterSection\n   199→            title=\"Evidence Level\"\n   200→            isExpanded={expandedSections.evidence}\n   201→            onToggle={() => toggleSection('evidence')}\n   202→          >\n   203→            <div className=\"space-y-2\">\n   204→              {[1, 2, 3, 4].map((level) => {\n   205→                const config = getEvidenceConfig(level as EvidenceScore)\n   206→                return (\n   207→                  <motion.button\n   208→                    key={level}\n   209→                    onClick={() => handleChange('minEvidence', level)}\n   210→                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${\n   211→                      filters.minEvidence === level\n   212→                        ? 'bg-blue-600 text-white shadow-md'\n   213→                        : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'\n   214→                    }`}\n   215→                    whileHover={{ scale: 1.02 }}\n   216→                    whileTap={{ scale: 0.98 }}\n   217→                  >\n   218→                    <div className=\"flex items-center justify-between\">\n   219→                      <span className=\"text-sm font-medium\">\n   220→                        {level === 1\n\n... [truncated - full output was 18320 chars]",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:27:18.305814+00:00",
+          "type": "text",
+          "content": "I found the QuickFilterChip component at line 368-385. I need to add the `focus-ring` class to the button. The button already has `rounded-full` so the focus ring shape will match the circular chip style.",
+          "phase": "coding",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:21.215715+00:00",
+          "type": "tool_start",
+          "content": "[Edit] ./frontend/components/FilterPanel.tsx",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "tool_input": "./frontend/components/FilterPanel.tsx",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:21.242591+00:00",
+          "type": "tool_end",
+          "content": "[Edit] Done",
+          "phase": "coding",
+          "tool_name": "Edit",
+          "subtask_id": "3.4",
+          "session": 9,
+          "detail": "The file ./frontend/components/FilterPanel.tsx has been updated. Here's the result of running `cat -n` on a snippet of the edited file:\n   364→  icon: string\n   365→  label: string\n   366→}\n   367→\n   368→function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps) {\n   369→  return (\n   370→    <motion.button\n   371→      onClick={onClick}\n   372→      className={`px-3 py-2 text-sm rounded-full font-medium transition-all focus-ring ${\n   373→        active\n   374→          ? 'bg-blue-600 text-white shadow-md'\n   375→          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'\n   376→      }`}\n   377→      whileHover={{ scale: 1.05 }}\n   378→      whileTap={{ scale: 0.95 }}\n   379→    >\n   380→      <span className=\"flex items-center gap-1.5\">",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:27:25.165368+00:00",
+          "type": "text",
+          "content": "The edit was successful. Now let me verify the build works and then commit the changes:",
+          "phase": "coding",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:26.077031+00:00",
+          "type": "tool_start",
+          "content": "[Bash] cd ./frontend && npm run build 2>&1 | head -50",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "cd ./frontend && npm run build 2>&1 | head -50",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:26.120795+00:00",
+          "type": "tool_end",
+          "content": "[Bash] Error: Command 'npm' is not in the allowed commands for this project",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "subtask_id": "3.4",
+          "session": 9,
+          "detail": "Command 'npm' is not in the allowed commands for this project",
+          "collapsed": true
+        },
+        {
+          "timestamp": "2026-01-07T21:27:30.917796+00:00",
+          "type": "text",
+          "content": "Let me commit the changes and update the subtask status:",
+          "phase": "coding",
+          "subtask_id": "3.4",
+          "session": 9
+        },
+        {
+          "timestamp": "2026-01-07T21:27:33.536094+00:00",
+          "type": "tool_start",
+          "content": "[Bash] git add . && git status",
+          "phase": "coding",
+          "tool_name": "Bash",
+          "tool_input": "git add . && git status",
+          "subtask_id": "3.4",
+          "session": 9
         }
       ]
     },
