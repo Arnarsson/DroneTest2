@@ -36,10 +36,10 @@
       "discovered_at": "2026-01-07T21:36:39.009467+00:00"
     },
     "frontend/components/Timeline.tsx": {
-      "description": "Timeline toggle button (line 132-164) now has focus-ring class for keyboard accessibility. The button is a full-width expand/collapse toggle that controls the timeline panel visibility. Added rounded class for proper focus ring shape.",
+      "description": "Incident distribution bar elements (motion.div at lines 258-281) now have full keyboard accessibility: focus-ring class for visible focus styling, tabIndex={0} for keyboard navigation, role=\"button\" for semantics, onKeyDown for Enter/Space activation, and aria-label for screen readers.",
       "category": "accessibility",
-      "discovered_at": "2026-01-07T21:39:15.355281+00:00"
+      "discovered_at": "2026-01-07T21:42:58.079996+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:39:15.355294+00:00"
+  "last_updated": "2026-01-07T21:42:58.080005+00:00"
 }
