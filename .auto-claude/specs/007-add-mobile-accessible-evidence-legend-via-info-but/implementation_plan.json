@@ -4,8 +4,8 @@
   "summary": "Add a mobile-visible info button in the header that opens a modal showing the Evidence Legend, providing mobile users with access to understand the evidence scoring system.",
   "created_at": "2025-01-07T12:00:00Z",
   "updated_at": "2025-01-07T12:00:00Z",
-  "status": "in_progress",
-  "planStatus": "approved",
+  "status": "human_review",
+  "planStatus": "review",
   "phases": [
     {
       "id": "phase-1",
@@ -165,5 +165,32 @@
     "issues": "",
     "tests_passed": ""
   },
-  "last_updated": "2026-01-07T21:31:36.369489+00:00"
+  "last_updated": "2026-01-07T21:37:31.640207+00:00",
+  "qa_signoff": {
+    "status": "approved",
+    "qa_session": 0,
+    "issues_found": [
+      {
+        "description": "None"
+      }
+    ],
+    "tests_passed": {},
+    "timestamp": "2026-01-07T21:37:31.640196+00:00",
+    "ready_for_qa_revalidation": false
+  },
+  "qa_iteration_history": [
+    {
+      "iteration": 1,
+      "status": "approved",
+      "timestamp": "2026-01-07T21:38:06.693245+00:00",
+      "issues": [],
+      "duration_seconds": 336.52
+    }
+  ],
+  "qa_stats": {
+    "total_iterations": 1,
+    "last_iteration": 1,
+    "last_status": "approved",
+    "issues_by_type": {}
+  }
 }

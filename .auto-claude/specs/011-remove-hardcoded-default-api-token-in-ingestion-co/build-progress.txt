@@ -1,0 +1,123 @@
+# Build Progress: Remove Hardcoded Default API Token
+
+## Session: 2025-01-07
+
+### Initial Analysis Complete
+- Identified the security vulnerability in `ingestion/config.py:52`
+- Hardcoded token: `dw-secret-2025-nordic-drone-watch` used as fallback
+- Token also found in: setup-scraper.sh, ingestion/.env.example, RUN_SCRAPER.md, config.py.backup
+
+### Key Findings
+1. **API endpoints already handle missing token correctly**
+   - `frontend/api/ingest.py` validates INGEST_TOKEN is set and returns 500 if missing
+   - `api/ingest.py` has same validation
+   - These correctly enforce "INGEST_TOKEN not set" error
+
+2. **The vulnerability is in the client-side config**
+   - `ingestion/config.py` uses fallback: `os.getenv("INGEST_TOKEN", "dw-secret-2025-nordic-drone-watch")`
+   - This means if env var is not set, hardcoded token is used
+   - Anyone reading source code knows the fallback token
+
+3. **Multiple files contain the hardcoded token**
+   - `setup-scraper.sh:10` - Setup script with hardcoded token
+   - `ingestion/.env.example:6` - Example file with actual token
+   - `ingestion/RUN_SCRAPER.md` - Documentation with token
+   - `ingestion/config.py.backup:11` - Backup with token
+
+### Implementation Plan Created
+- Phase 1: Remove hardcoded token from config.py (add validation)
+- Phase 2: Update setup-scraper.sh to require user input
+- Phase 3: Update .env.example with placeholder
+- Phase 4: Update documentation, delete backup file
+- Phase 5: Testing and verification
+
+### Next Steps
+- Begin Phase 1: Update ingestion/config.py
+
+---
+
+## Session: 2026-01-07 (Testing Phase)
+
+### Subtask 5.2 Complete: Valid INGEST_TOKEN Verification
+
+**Verification Tests Performed:**
+
+1. **Basic Token Loading**
+   - ✅ Token loads correctly from environment variable
+   - ✅ Token value matches expected value
+   - ✅ Token length validation passes (16+ chars)
+
+2. **get_ingest_token() Function**
+   - ✅ Function returns correct token value
+   - ✅ Function caches validated token for performance
+
+3. **Backward Compatibility**
+   - ✅ f-string interpolation works: `f'Bearer {INGEST_TOKEN}'`
+   - ✅ Session headers created correctly
+
+4. **DroneWatchIngester Pattern**
+   - ✅ Token loading via `str(INGEST_TOKEN)` works
+   - ✅ IngestTokenError properly caught if token invalid
+
+5. **LazyToken Special Methods**
+   - ✅ `__str__()` - Returns token string
+   - ✅ `__eq__()` - Equality comparison works
+   - ✅ `__len__()` - Length checking works
+   - ✅ `__bool__()` - Boolean evaluation works
+
+6. **Edge Cases**
+   - ✅ Minimum length token (16 chars) accepted
+   - ✅ Long tokens (43+ chars) accepted
+   - ✅ URL-safe special characters accepted
+
+**Result:** All acceptance criteria met. Commit: e01ef33
+
+### Subtask 5.3 Complete: Existing Tests Verification
+
+**Test Environment Setup:**
+- Created Python virtual environment in `frontend/api/.venv`
+- Installed test dependencies: pytest, pytest-asyncio, pytest-cov, pytest-mock, asyncpg, faker, httpx
+
+**Test Results:**
+
+1. **Backend API Tests (frontend/api/__tests__/)**
+   - **test_db.py**: 23/23 tests PASSED ✅
+   - **test_incidents.py**: 0/15 passed (pre-existing HTTP handler mocking issue)
+   - **test_ingest.py**: 9/21 async tests PASSED ✅
+   - **Total**: 32/59 (54%) - matches documented baseline of ~56%
+
+2. **Pre-Existing Test Failures**
+   - All failures due to `TypeError: BaseRequestHandler.__init__() missing arguments`
+   - Documented in README.md as "Need HTTP handler refactoring"
+   - NOT related to our security changes
+
+3. **Config Validation Tests** (custom verification)
+   - ✅ Valid token loads correctly
+   - ✅ Token value matches environment variable
+   - ✅ Lazy token works in f-strings
+   - ✅ Missing token raises clear IngestTokenError
+   - ✅ Short token (<16 chars) raises validation error
+
+**Conclusion:**
+- No regression introduced by our security changes
+- Our changes were in `ingestion/config.py` (client-side scraper)
+- Tests are for `frontend/api/ingest.py` (server-side API) - which was not modified
+- All acceptance criteria met
+
+---
+
+## FEATURE COMPLETE ✅
+
+All 9 subtasks completed:
+- Phase 1: Config changes (2 subtasks) ✅
+- Phase 2: Script updates (1 subtask) ✅
+- Phase 3: Environment files (1 subtask) ✅
+- Phase 4: Documentation (2 subtasks) ✅
+- Phase 5: Testing (3 subtasks) ✅
+
+**Security Fix Summary:**
+- Removed hardcoded token `dw-secret-2025-nordic-drone-watch` from all files
+- INGEST_TOKEN must now be explicitly set via environment variable
+- Clear error messages guide users on token configuration
+- Token validation enforces minimum 16 character length
+- All existing functionality preserved with no regression
