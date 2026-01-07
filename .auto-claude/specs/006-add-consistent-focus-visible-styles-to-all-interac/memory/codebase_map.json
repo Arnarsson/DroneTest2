@@ -19,7 +19,12 @@
       "description": "ThemeToggle has two buttons: a placeholder button shown during SSR/hydration and the main interactive button. Both need focus-ring class for consistent keyboard accessibility.",
       "category": "component-pattern",
       "discovered_at": "2026-01-07T21:19:40.391829+00:00"
+    },
+    "frontend/components/Filters.tsx": {
+      "description": "Filters.tsx contains view toggle buttons (Map, List, Analytics) that now have focus-ring class for keyboard accessibility. The buttons are contained in a flex container with rounded-lg styling. Select elements for filters already have focus:ring-2 styling.",
+      "category": "component",
+      "discovered_at": "2026-01-07T21:24:11.829687+00:00"
     }
   },
-  "last_updated": "2026-01-07T21:21:21.218853+00:00"
+  "last_updated": "2026-01-07T21:24:11.829696+00:00"
 }

@@ -50,8 +50,9 @@
           "title": "Add focus-visible to About button",
           "description": "Add focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 to the About info button in Header.tsx",
           "file": "frontend/components/Header.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class to the About info button in Header.tsx (line 89). The focus-ring utility class provides consistent focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 styling for keyboard accessibility. The button already had rounded-md so the focus ring shape matches correctly. Committed as 787db84.",
+          "updated_at": "2026-01-07T21:22:25.906729+00:00"
         }
       ]
     },
@@ -65,8 +66,9 @@
           "title": "Add focus-visible to view toggle buttons in Filters.tsx",
           "description": "Add focus-visible styles to the Map, List, and Analytics toggle buttons in the Filters component.",
           "file": "frontend/components/Filters.tsx",
-          "status": "pending",
-          "notes": ""
+          "status": "completed",
+          "notes": "Added focus-ring class to all three view toggle buttons (Map, List, Analytics) in Filters.tsx. The buttons already have rounded-md so the focus ring shape matches correctly. Committed as 5fa8840.",
+          "updated_at": "2026-01-07T21:24:11.816988+00:00"
         },
         {
           "id": "3.2",
@@ -229,5 +231,5 @@
     "tests_passed": ""
   },
   "estimated_subtasks": 18,
-  "last_updated": "2026-01-07T21:21:16.071369+00:00"
+  "last_updated": "2026-01-07T21:24:11.816998+00:00"
 }

@@ -61,7 +61,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
         onClick={onToggle}
         aria-label={`${isOpen ? 'Close' : 'Open'} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ''}`}
         aria-expanded={isOpen}
-        className="lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all"
+        className="lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all focus-ring"
         whileHover={{ scale: 1.08, rotate: 5 }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, scale: 0 }}

@@ -35,11 +35,35 @@
         }
       ],
       "status": "completed"
+    },
+    "2.3": {
+      "attempts": [
+        {
+          "session": 5,
+          "timestamp": "2026-01-07T22:22:37.779222",
+          "approach": "Implemented: Add focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 to the About info b",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "3.1": {
+      "attempts": [
+        {
+          "session": 6,
+          "timestamp": "2026-01-07T22:24:23.595211",
+          "approach": "Implemented: Add focus-visible styles to the Map, List, and Analytics toggle buttons in the Filters component.",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
     }
   },
   "stuck_subtasks": [],
   "metadata": {
     "created_at": "2026-01-07T22:13:54.528514",
-    "last_updated": "2026-01-07T22:21:28.837943"
+    "last_updated": "2026-01-07T22:24:23.595215"
   }
 }
