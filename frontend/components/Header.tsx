@@ -5,6 +5,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { DroneWatchLogo } from './DroneWatchLogo'
 import { AboutModal, useAboutModal } from './AboutModal'
 import { logger } from '@/lib/logger'
+import { SHORTCUT_KEYS } from '@/hooks/useKeyboardShortcuts'
 
 interface HeaderProps {
   incidentCount: number
@@ -52,16 +53,19 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
               active={currentView === 'map'}
               onClick={() => onViewChange('map')}
               label="MAP"
+              shortcutKey={SHORTCUT_KEYS.MAP_VIEW}
             />
             <ViewTab
               active={currentView === 'list'}
               onClick={() => onViewChange('list')}
               label="LIST"
+              shortcutKey={SHORTCUT_KEYS.LIST_VIEW}
             />
             <ViewTab
               active={currentView === 'analytics'}
               onClick={() => onViewChange('analytics')}
               label="ANALYTICS"
+              shortcutKey={SHORTCUT_KEYS.ANALYTICS_VIEW}
             />
           </motion.div>
 
@@ -102,18 +106,21 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             active={currentView === 'map'}
             onClick={() => onViewChange('map')}
             label="MAP"
+            shortcutKey={SHORTCUT_KEYS.MAP_VIEW}
             compact
           />
           <ViewTab
             active={currentView === 'list'}
             onClick={() => onViewChange('list')}
             label="LIST"
+            shortcutKey={SHORTCUT_KEYS.LIST_VIEW}
             compact
           />
           <ViewTab
             active={currentView === 'analytics'}
             onClick={() => onViewChange('analytics')}
             label="ANALYTICS"
+            shortcutKey={SHORTCUT_KEYS.ANALYTICS_VIEW}
             compact
           />
         </div>
@@ -127,14 +134,16 @@ interface ViewTabProps {
   active: boolean
   onClick: () => void
   label: string
+  shortcutKey: string
   compact?: boolean
 }
 
-function ViewTab({ active, onClick, label, compact }: ViewTabProps) {
+function ViewTab({ active, onClick, label, shortcutKey, compact }: ViewTabProps) {
   return (
     <button
       onClick={onClick}
-      aria-label={`Switch to ${label.toLowerCase()} view`}
+      aria-label={`Switch to ${label.toLowerCase()} view (press ${shortcutKey})`}
+      aria-keyshortcuts={shortcutKey}
       aria-current={active ? 'page' : undefined}
       className={`relative px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
         active
@@ -149,7 +158,18 @@ function ViewTab({ active, onClick, label, compact }: ViewTabProps) {
           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}
-      <span className="relative z-10">{label}</span>
+      <span className="relative z-10 flex items-center gap-1.5">
+        {label}
+        <kbd
+          className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[9px] font-medium rounded border ${
+            active
+              ? 'bg-white/20 border-white/30 text-white/90'
+              : 'bg-gray-200/60 dark:bg-gray-700/60 border-gray-300/70 dark:border-gray-600/70 text-gray-500 dark:text-gray-400'
+          }`}
+        >
+          {shortcutKey}
+        </kbd>
+      </span>
     </button>
   )
 }
