@@ -140,10 +140,17 @@
     "Build succeeds"
   ],
   "spec_file": "spec.md",
-  "qa_status": {
-    "status": "pending",
-    "issues": "",
-    "tests_passed": ""
+  "qa_signoff": {
+    "status": "fixes_applied",
+    "timestamp": "2026-01-07T22:30:00.000Z",
+    "fix_session": 0,
+    "issues_fixed": [
+      {
+        "title": "Merged with origin/main to resolve conflicts",
+        "fix_commit": "5cbdda8"
+      }
+    ],
+    "ready_for_qa_revalidation": true
   },
   "metadata": {
     "estimated_effort": "small",
