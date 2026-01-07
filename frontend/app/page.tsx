@@ -146,7 +146,7 @@ export default function Home() {
                 <EvidenceLegend />
               </>
             ) : view === "list" ? (
-              <IncidentList incidents={incidents || []} isLoading={isLoading} />
+              <IncidentList incidents={incidents || []} isLoading={isLoading} onResetFilters={resetFilters} />
             ) : (
               <Analytics incidents={incidents || []} />
             )}
