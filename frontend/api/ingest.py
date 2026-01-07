@@ -536,11 +536,33 @@ class handler(BaseHTTPRequestHandler):
             self.send_error(400, f"Missing required fields: {', '.join(missing)}")
             return
 
+        # Validate and sanitize title field (CRITICAL for XSS prevention)
+        from text_validation import validate_title, validate_narrative
+
+        title_valid, sanitized_title, title_error = validate_title(incident_data.get('title'))
+        if not title_valid:
+            logger.error(f"Title validation failed: {title_error}")
+            self.send_error(400, f"Title validation failed: {title_error}")
+            return
+
+        # Validate and sanitize narrative field if present
+        narrative_valid, sanitized_narrative, narrative_error = validate_narrative(
+            incident_data.get('narrative')
+        )
+        if not narrative_valid:
+            logger.error(f"Narrative validation failed: {narrative_error}")
+            self.send_error(400, f"Narrative validation failed: {narrative_error}")
+            return
+
+        # Apply sanitized values
+        incident_data['title'] = sanitized_title
+        incident_data['narrative'] = sanitized_narrative
+
         # === CRITICAL: Validate this is actually a drone incident ===
-        title = incident_data.get('title', '')
-        narrative = incident_data.get('narrative', '')
+        title = sanitized_title
+        narrative = sanitized_narrative
         full_text = (title + " " + narrative).lower()
-        
+
         # Exclude non-drone incidents (avalanches, deaths, accidents, etc.)
         non_drone_keywords = [
             "avalanche", "lavine", "lawine",  # Avalanche
@@ -555,7 +577,7 @@ class handler(BaseHTTPRequestHandler):
             "bomb", "bombe", "pommi",  # Bombs
             "war", "krig", "sota",  # War
         ]
-        
+
         # Check if it contains non-drone incident keywords
         if any(keyword in full_text for keyword in non_drone_keywords):
             # Only exclude if it doesn't also mention drones
@@ -563,7 +585,7 @@ class handler(BaseHTTPRequestHandler):
                 logger.warning(f"🚫 BLOCKED (Non-drone incident): {title[:60]}")
                 self.send_error(400, "This incident is not drone-related. Only drone incidents are accepted.")
                 return
-        
+
         # Validate it's actually a drone incident using the same logic as ingestion pipeline
         if is_drone_incident:
             if not is_drone_incident(title, narrative):
