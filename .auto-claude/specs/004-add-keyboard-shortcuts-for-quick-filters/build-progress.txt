@@ -1,0 +1,43 @@
+# Build Progress: Add Keyboard Shortcuts for Quick Filters
+Task ID: 004-add-keyboard-shortcuts-for-quick-filters
+
+## Status: Planning Complete
+
+## Implementation Plan Summary
+
+### Phase 1: Create useKeyboardShortcuts Hook
+- [ ] 1.1 Create useKeyboardShortcuts hook (frontend/hooks/useKeyboardShortcuts.ts)
+- [ ] 1.2 Add unit tests for useKeyboardShortcuts
+
+### Phase 2: Integrate Keyboard Shortcuts in Main Page
+- [ ] 2.1 Integrate useKeyboardShortcuts in page.tsx
+
+### Phase 3: Add Visual Keyboard Hints
+- [ ] 3.1 Add shortcut key prop to QuickFilterChip
+- [ ] 3.2 Add shortcut keys to quick filter chip instances
+- [ ] 3.3 Add keyboard hint to reset button and filter toggle
+
+### Phase 4: Testing and Documentation
+- [ ] 4.1 Add keyboard shortcut tests to FilterPanel.test.tsx
+- [ ] 4.2 Run tests and verify functionality
+
+## Keyboard Shortcuts Mapping
+| Key | Action | Filter Property |
+|-----|--------|-----------------|
+| A | Toggle Airports | assetType: 'airport' / null |
+| M | Toggle Military | assetType: 'military' / null |
+| T | Toggle Today | dateRange: 'day' / 'all' |
+| V | Toggle Verified | minEvidence: 3 / 1 |
+| R | Reset All | Reset to defaults |
+| F | Toggle Filter Panel | isFilterPanelOpen |
+
+## Key Files
+- frontend/hooks/useKeyboardShortcuts.ts (new)
+- frontend/app/page.tsx (modify)
+- frontend/components/FilterPanel.tsx (modify)
+- frontend/components/AboutModal.tsx (reference for keyboard pattern)
+
+## Session Log
+- [2026-01-07] Created implementation plan with 4 phases, 8 subtasks
+- [2026-01-07] Analyzed existing QuickFilterChip pattern in FilterPanel.tsx
+- [2026-01-07] Identified keyboard handler pattern in AboutModal.tsx

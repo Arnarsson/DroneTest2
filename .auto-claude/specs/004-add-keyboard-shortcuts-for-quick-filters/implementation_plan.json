@@ -1,0 +1,224 @@
+{
+  "task_id": "004-add-keyboard-shortcuts-for-quick-filters",
+  "title": "Add Keyboard Shortcuts for Quick Filters",
+  "description": "Add keyboard shortcuts for common filter operations following the existing QuickFilterChip pattern: 'A' for airports, 'M' for military, 'T' for today, 'V' for verified (3+), 'R' to reset all filters, 'F' to toggle filter panel.",
+  "created_at": "2026-01-07T21:08:11.576Z",
+  "updated_at": "2026-01-07T21:13:53.019Z",
+  "status": "in_progress",
+  "planStatus": "planned",
+  "workflow_type": "development",
+  "estimated_effort": "small",
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Create useKeyboardShortcuts Hook",
+      "description": "Create a reusable custom hook for handling keyboard shortcuts with proper cleanup and input field detection",
+      "subtasks": [
+        {
+          "id": "1.1",
+          "title": "Create useKeyboardShortcuts hook",
+          "description": "Create frontend/hooks/useKeyboardShortcuts.ts with a hook that registers keydown listeners and handles shortcut callbacks. Must detect when user is typing in input/textarea/select fields to avoid triggering shortcuts.",
+          "status": "completed",
+          "estimated_minutes": 15,
+          "files_to_modify": [
+            "frontend/hooks/useKeyboardShortcuts.ts"
+          ],
+          "acceptance_criteria": [
+            "Hook accepts a map of key -> callback pairs",
+            "Registers keydown event listener on mount",
+            "Cleans up listener on unmount",
+            "Ignores shortcuts when focus is on input, textarea, or select elements",
+            "Supports both lowercase and uppercase key matching",
+            "Uses the existing keyboard event pattern from AboutModal.tsx"
+          ],
+          "notes": "Created frontend/hooks/useKeyboardShortcuts.ts with all acceptance criteria met: accepts key->callback map, registers/cleans up keydown listener, ignores input fields (input/textarea/select/contenteditable), supports case-insensitive key matching. Follows AboutModal.tsx keyboard event pattern.",
+          "updated_at": "2026-01-07T21:17:34.402132+00:00"
+        },
+        {
+          "id": "1.2",
+          "title": "Add unit tests for useKeyboardShortcuts",
+          "description": "Create test file for the hook to verify keyboard event handling, input field detection, and cleanup",
+          "status": "completed",
+          "estimated_minutes": 15,
+          "files_to_modify": [
+            "frontend/hooks/__tests__/useKeyboardShortcuts.test.tsx"
+          ],
+          "acceptance_criteria": [
+            "Tests that callbacks are fired for correct keys",
+            "Tests that shortcuts are ignored when typing in inputs",
+            "Tests cleanup on unmount",
+            "Tests case-insensitive key matching"
+          ],
+          "notes": "Created comprehensive test file at frontend/hooks/__tests__/useKeyboardShortcuts.test.tsx with tests covering all acceptance criteria: callback invocation for correct keys, case-insensitive key matching, input field detection (input/textarea/select/contenteditable), and cleanup on unmount. Tests follow existing patterns from useIncidents.test.tsx.",
+          "updated_at": "2026-01-07T21:19:54.825340+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Integrate Keyboard Shortcuts in Main Page",
+      "description": "Wire up the keyboard shortcuts hook in page.tsx to control filter state",
+      "subtasks": [
+        {
+          "id": "2.1",
+          "title": "Integrate useKeyboardShortcuts in page.tsx",
+          "description": "Import and use the keyboard shortcuts hook in the main page, mapping keys to filter actions. Define shortcut handlers for: A (airports), M (military), T (today), V (verified), R (reset), F (toggle panel).",
+          "status": "completed",
+          "estimated_minutes": 15,
+          "files_to_modify": [
+            "frontend/app/page.tsx"
+          ],
+          "acceptance_criteria": [
+            "'A' toggles assetType between 'airport' and null",
+            "'M' toggles assetType between 'military' and null",
+            "'T' toggles dateRange between 'day' and 'all'",
+            "'V' toggles minEvidence between 3 and 1",
+            "'R' resets all filters to default values",
+            "'F' toggles filter panel open/closed"
+          ],
+          "notes": "Integrated useKeyboardShortcuts hook in page.tsx with all 6 shortcut handlers: A (airports), M (military), T (today), V (verified 3+), R (reset all), F (toggle panel). Uses useMemo for stable shortcut map. Follows existing patterns from FilterPanel.tsx quick filter chips.",
+          "updated_at": "2026-01-07T21:22:18.697388+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Add Visual Keyboard Hints",
+      "description": "Update the UI to show keyboard shortcut hints on the quick filter chips",
+      "subtasks": [
+        {
+          "id": "3.1",
+          "title": "Add shortcut key prop to QuickFilterChip",
+          "description": "Extend QuickFilterChip component to accept an optional shortcutKey prop and display it as a visual hint badge",
+          "status": "completed",
+          "estimated_minutes": 10,
+          "files_to_modify": [
+            "frontend/components/FilterPanel.tsx"
+          ],
+          "acceptance_criteria": [
+            "QuickFilterChip accepts optional shortcutKey prop",
+            "Displays keyboard hint as small badge/tooltip",
+            "Hint is styled subtly (gray, small text)",
+            "Hint is only visible on desktop (hidden on mobile/touch devices)"
+          ],
+          "notes": "Extended QuickFilterChip component with optional shortcutKey prop. The keyboard hint badge is displayed as a small monospace badge within the chip, styled subtly in gray. Uses hidden lg:inline-flex to only show on desktop/non-touch devices. Badge styling adapts to active/inactive state with appropriate color contrast. Added title attribute for tooltip accessibility.",
+          "updated_at": "2026-01-07T21:24:16.622870+00:00"
+        },
+        {
+          "id": "3.2",
+          "title": "Add shortcut keys to quick filter chip instances",
+          "description": "Update the QuickFilterChip instances in FilterPanel to pass the appropriate shortcut keys: A, M, T, V",
+          "status": "completed",
+          "estimated_minutes": 5,
+          "files_to_modify": [
+            "frontend/components/FilterPanel.tsx"
+          ],
+          "acceptance_criteria": [
+            "Airports chip shows 'A' hint",
+            "Military chip shows 'M' hint",
+            "Today chip shows 'T' hint",
+            "Verified chip shows 'V' hint"
+          ],
+          "notes": "Added shortcutKey prop to all four QuickFilterChip instances in FilterPanel.tsx: Airports (A), Military (M), Today (T), Verified (V). The keyboard hint badges will now display on desktop for each chip.",
+          "updated_at": "2026-01-07T21:25:32.555818+00:00"
+        },
+        {
+          "id": "3.3",
+          "title": "Add keyboard hint to reset button and filter toggle",
+          "description": "Add visual keyboard hints showing 'R' on reset button and 'F' on filter panel toggle button",
+          "status": "pending",
+          "estimated_minutes": 10,
+          "files_to_modify": [
+            "frontend/components/FilterPanel.tsx"
+          ],
+          "acceptance_criteria": [
+            "Reset/Clear all button shows 'R' hint",
+            "Filter toggle button shows 'F' hint on desktop",
+            "Hints are styled consistently with quick filter hints"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Testing and Documentation",
+      "description": "Add integration tests and verify the keyboard shortcuts feature",
+      "subtasks": [
+        {
+          "id": "4.1",
+          "title": "Add keyboard shortcut tests to FilterPanel.test.tsx",
+          "description": "Add tests that verify keyboard hints are displayed correctly in the FilterPanel component",
+          "status": "pending",
+          "estimated_minutes": 15,
+          "files_to_modify": [
+            "frontend/components/__tests__/FilterPanel.test.tsx"
+          ],
+          "acceptance_criteria": [
+            "Test keyboard hints are displayed on chips",
+            "Test keyboard hints are hidden on mobile (if applicable)",
+            "Test shortcut key accessibility attributes"
+          ]
+        },
+        {
+          "id": "4.2",
+          "title": "Run tests and verify functionality",
+          "description": "Run all tests to ensure nothing is broken, manually test keyboard shortcuts in browser",
+          "status": "pending",
+          "estimated_minutes": 10,
+          "files_to_modify": [],
+          "acceptance_criteria": [
+            "All existing tests pass",
+            "New keyboard shortcut tests pass",
+            "Manual testing confirms shortcuts work correctly",
+            "Shortcuts don't fire when typing in filter dropdowns"
+          ]
+        }
+      ]
+    }
+  ],
+  "key_files": {
+    "main_implementation": [
+      "frontend/hooks/useKeyboardShortcuts.ts",
+      "frontend/app/page.tsx",
+      "frontend/components/FilterPanel.tsx"
+    ],
+    "tests": [
+      "frontend/hooks/__tests__/useKeyboardShortcuts.test.tsx",
+      "frontend/components/__tests__/FilterPanel.test.tsx"
+    ],
+    "reference": [
+      "frontend/components/AboutModal.tsx"
+    ]
+  },
+  "services_involved": [
+    "frontend"
+  ],
+  "dependencies": [],
+  "risks": [
+    {
+      "risk": "Keyboard shortcuts may conflict with browser or OS shortcuts",
+      "mitigation": "Use single letter keys that don't conflict with common shortcuts (Ctrl+, Cmd+, etc.)"
+    },
+    {
+      "risk": "Shortcuts firing when user types in search/input fields",
+      "mitigation": "Detect active element type and ignore shortcuts when focus is on input/textarea/select"
+    }
+  ],
+  "final_acceptance": [
+    "All keyboard shortcuts work as specified (A, M, T, V, R, F)",
+    "Shortcuts are case-insensitive",
+    "Shortcuts don't fire when typing in form fields",
+    "Visual hints appear on desktop only",
+    "All existing tests pass",
+    "Accessibility: shortcuts are documented in UI",
+    "No console errors or warnings"
+  ],
+  "qa_signoff": {
+    "status": "pending",
+    "tested_by": null,
+    "issues_found": [],
+    "tests_passed": null
+  },
+  "spec_file": "spec.md",
+  "last_updated": "2026-01-07T21:25:32.555827+00:00"
+}
