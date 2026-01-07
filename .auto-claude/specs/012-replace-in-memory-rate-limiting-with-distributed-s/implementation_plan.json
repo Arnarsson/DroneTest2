@@ -1,0 +1,218 @@
+{
+  "feature": "Replace in-memory rate limiting with distributed solution for serverless",
+  "description": "The rate limiter in `frontend/api/rate_limit.py` uses an in-memory dictionary (`_rate_limit_store`) to track request counts per IP. In serverless environments like Vercel, each function instance has its own memory space, meaning rate limits are not shared across instances and can be easily bypassed by hitting different instances.",
+  "created_at": "2026-01-07T21:08:27.873Z",
+  "updated_at": "2026-01-07T22:15:00.000Z",
+  "status": "in_progress",
+  "planStatus": "approved",
+  "workflow_type": "development",
+  "services_involved": ["frontend/api", "Upstash Redis"],
+  "spec_file": "spec.md",
+  "phases": [
+    {
+      "phase_id": "phase-1",
+      "name": "Setup and Dependencies",
+      "description": "Add Upstash Redis dependency and create configuration",
+      "status": "pending",
+      "subtasks": [
+        {
+          "subtask_id": "1.1",
+          "title": "Add upstash-redis dependency",
+          "description": "Add upstash-redis package to frontend/requirements.txt for the Python serverless functions",
+          "status": "completed",
+          "files": ["frontend/requirements.txt"],
+          "acceptance_criteria": [
+            "upstash-redis>=1.0.0 added to frontend/requirements.txt"
+          ]
+        },
+        {
+          "subtask_id": "1.2",
+          "title": "Document environment variables",
+          "description": "Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to .env.local.example files",
+          "status": "pending",
+          "files": ["frontend/.env.local.example", ".env.local.example"],
+          "acceptance_criteria": [
+            "UPSTASH_REDIS_REST_URL documented with description",
+            "UPSTASH_REDIS_REST_TOKEN documented with description",
+            "Instructions for obtaining Upstash credentials added"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-2",
+      "name": "Implement Distributed Rate Limiter",
+      "description": "Create new distributed rate limiter using Upstash Redis with sliding window algorithm",
+      "status": "pending",
+      "subtasks": [
+        {
+          "subtask_id": "2.1",
+          "title": "Create distributed rate limiter module",
+          "description": "Create frontend/api/distributed_rate_limit.py with Upstash Redis implementation using sliding window algorithm",
+          "status": "pending",
+          "files": ["frontend/api/distributed_rate_limit.py"],
+          "acceptance_criteria": [
+            "Uses Upstash Redis REST API (no persistent connections)",
+            "Implements sliding window rate limiting algorithm",
+            "Same interface as existing rate_limit.py (check_rate_limit, get_rate_limit_headers, get_client_ip)",
+            "Handles Redis connection errors gracefully (fail open with logging)",
+            "Supports configurable rate limits via environment variables",
+            "Uses UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN env vars"
+          ]
+        },
+        {
+          "subtask_id": "2.2",
+          "title": "Add fallback for local development",
+          "description": "Implement fallback to in-memory rate limiting when Upstash credentials not configured (local dev)",
+          "status": "pending",
+          "files": ["frontend/api/distributed_rate_limit.py"],
+          "acceptance_criteria": [
+            "Falls back to in-memory rate limiting if Redis unavailable",
+            "Logs warning when using fallback mode",
+            "Works seamlessly for local development without Redis setup"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-3",
+      "name": "Integration",
+      "description": "Update existing endpoints to use new distributed rate limiter",
+      "status": "pending",
+      "subtasks": [
+        {
+          "subtask_id": "3.1",
+          "title": "Update incidents.py to use distributed rate limiter",
+          "description": "Replace import from rate_limit.py to distributed_rate_limit.py in frontend/api/incidents.py",
+          "status": "pending",
+          "files": ["frontend/api/incidents.py"],
+          "acceptance_criteria": [
+            "Imports from distributed_rate_limit instead of rate_limit",
+            "No other code changes required (same interface)",
+            "Rate limit headers still work correctly"
+          ]
+        },
+        {
+          "subtask_id": "3.2",
+          "title": "Deprecate old rate_limit.py",
+          "description": "Add deprecation notice to old rate_limit.py and update comment to reference new module",
+          "status": "pending",
+          "files": ["frontend/api/rate_limit.py"],
+          "acceptance_criteria": [
+            "Deprecation notice added at top of file",
+            "Reference to new distributed_rate_limit.py module",
+            "File kept for backward compatibility but marked deprecated"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-4",
+      "name": "Testing",
+      "description": "Add comprehensive tests for the distributed rate limiter",
+      "status": "pending",
+      "subtasks": [
+        {
+          "subtask_id": "4.1",
+          "title": "Create unit tests for distributed rate limiter",
+          "description": "Create frontend/api/__tests__/test_distributed_rate_limit.py with mocked Redis responses",
+          "status": "pending",
+          "files": ["frontend/api/__tests__/test_distributed_rate_limit.py"],
+          "acceptance_criteria": [
+            "Tests rate limiting allows requests under limit",
+            "Tests rate limiting blocks requests over limit",
+            "Tests sliding window expiry behavior",
+            "Tests fallback to in-memory when Redis unavailable",
+            "Tests correct rate limit headers in response",
+            "Tests IP extraction from various header formats"
+          ]
+        },
+        {
+          "subtask_id": "4.2",
+          "title": "Update incidents tests",
+          "description": "Update test_incidents.py to mock the new distributed rate limiter",
+          "status": "pending",
+          "files": ["frontend/api/__tests__/test_incidents.py"],
+          "acceptance_criteria": [
+            "Tests mock distributed_rate_limit instead of rate_limit",
+            "All existing tests still pass",
+            "Rate limit behavior tests updated if needed"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase-5",
+      "name": "Documentation and Verification",
+      "description": "Final documentation and manual verification",
+      "status": "pending",
+      "subtasks": [
+        {
+          "subtask_id": "5.1",
+          "title": "Update API documentation",
+          "description": "Document rate limiting behavior, headers, and configuration in appropriate docs",
+          "status": "pending",
+          "files": ["docs/API_RATE_LIMITING.md"],
+          "acceptance_criteria": [
+            "Documents rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After)",
+            "Documents default limits (100 requests per minute)",
+            "Documents how to configure custom limits",
+            "Documents Upstash Redis setup for production"
+          ]
+        },
+        {
+          "subtask_id": "5.2",
+          "title": "Run all tests and verify",
+          "description": "Run pytest to verify all tests pass with new implementation",
+          "status": "pending",
+          "files": [],
+          "acceptance_criteria": [
+            "All existing tests pass",
+            "New rate limiter tests pass",
+            "No regressions in incident API behavior"
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "external": [
+      {
+        "name": "Upstash Redis",
+        "description": "Serverless Redis with REST API - requires account setup at upstash.com",
+        "url": "https://upstash.com/",
+        "env_vars": ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"]
+      }
+    ],
+    "internal": []
+  },
+  "risks": [
+    {
+      "risk": "Upstash Redis latency",
+      "mitigation": "Upstash REST API adds ~1-5ms latency per request. This is acceptable for rate limiting.",
+      "severity": "low"
+    },
+    {
+      "risk": "Redis unavailability",
+      "mitigation": "Implement fail-open behavior - if Redis is unavailable, allow requests with logging",
+      "severity": "medium"
+    },
+    {
+      "risk": "Cost at scale",
+      "mitigation": "Upstash free tier is 10k requests/day. Monitor usage and upgrade if needed.",
+      "severity": "low"
+    }
+  ],
+  "final_acceptance": [
+    "Rate limits are shared across all Vercel serverless instances",
+    "Existing rate limit interface (headers, response codes) unchanged",
+    "Falls back gracefully for local development",
+    "All tests pass"
+  ],
+  "qa_signoff": {
+    "status": "pending",
+    "tests_passed": "",
+    "issues": ""
+  },
+  "estimated_effort": "2-3 hours"
+}
