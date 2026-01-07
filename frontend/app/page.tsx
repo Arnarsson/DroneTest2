@@ -11,8 +11,8 @@ import type { FilterState, Incident } from "@/types";
 import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
-import { Toaster } from "sonner";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast, Toaster } from "sonner";
 
 // Dynamic import for map (no SSR)
 const Map = dynamic(() => import("@/components/Map"), {
@@ -88,6 +88,13 @@ export default function Home() {
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
+
+  // Show toast notification when API error occurs
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load incidents. Retrying...");
+    }
+  }, [error]);
 
   return (
     <>
