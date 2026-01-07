@@ -1,0 +1,10 @@
+{
+  "sourceType": "ideation",
+  "ideationType": "security_hardening",
+  "ideaId": "sec-001",
+  "rationale": "Hardcoded secrets are a critical security vulnerability. Anyone who reads the source code can extract this token and gain unauthorized write access to the incidents database. This could allow attackers to inject malicious or false drone incident data.",
+  "category": "security",
+  "securitySeverity": "critical",
+  "impact": "critical",
+  "priority": "urgent"
+}

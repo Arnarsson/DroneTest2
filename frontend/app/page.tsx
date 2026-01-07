@@ -7,13 +7,13 @@ import { FilterPanel } from "@/components/FilterPanel";
 import { Header } from "@/components/Header";
 import { IncidentList } from "@/components/IncidentList";
 import { useIncidents } from "@/hooks/useIncidents";
+import { useKeyboardShortcuts, SHORTCUT_KEYS } from "@/hooks/useKeyboardShortcuts";
 import type { FilterState, Incident } from "@/types";
 import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toaster } from "sonner";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 // Dynamic import for map (no SSR)
 const Map = dynamic(() => import("@/components/Map"), {
@@ -23,9 +23,19 @@ const Map = dynamic(() => import("@/components/Map"), {
   ),
 });
 
+// Human-readable labels for view names
+const VIEW_LABELS: Record<"map" | "list" | "analytics", string> = {
+  map: "Map view",
+  list: "List view",
+  analytics: "Analytics view",
+};
+
 export default function Home() {
   const [view, setView] = useState<"map" | "list" | "analytics">("map");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  // Screen reader announcement message
+  const [announcement, setAnnouncement] = useState("");
+  const announcementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [timelineRange, setTimelineRange] = useState<{
     start: Date | null;
     end: Date | null;
@@ -39,6 +49,7 @@ export default function Home() {
     status: "all",
     assetType: null,
     dateRange: "all",
+    searchQuery: "",
   });
 
   const { data: allIncidents, isLoading, error } = useIncidents(filters);
@@ -95,15 +106,61 @@ export default function Home() {
     setFilters(newFilters);
   }, []);
 
-  // Keyboard shortcut handlers for quick filters
+  // Announce changes to screen readers
+  const announce = useCallback((message: string) => {
+    // Clear any pending announcement timeout
+    if (announcementTimeoutRef.current) {
+      clearTimeout(announcementTimeoutRef.current);
+    }
+    // Set the new announcement
+    setAnnouncement(message);
+    // Clear the announcement after a delay to allow re-announcing the same message
+    announcementTimeoutRef.current = setTimeout(() => {
+      setAnnouncement("");
+    }, 1000);
+  }, []);
+
+  // Cleanup announcement timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (announcementTimeoutRef.current) {
+        clearTimeout(announcementTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Keyboard shortcuts for view switching, filter panel, and quick filters
   const keyboardShortcuts = useMemo(
     () => ({
+      // View switching shortcuts
+      [SHORTCUT_KEYS.MAP_VIEW]: () => {
+        setView("map");
+        announce(VIEW_LABELS.map);
+      },
+      [SHORTCUT_KEYS.LIST_VIEW]: () => {
+        setView("list");
+        announce(VIEW_LABELS.list);
+      },
+      [SHORTCUT_KEYS.ANALYTICS_VIEW]: () => {
+        setView("analytics");
+        announce(VIEW_LABELS.analytics);
+      },
+      // Filter panel toggle
+      [SHORTCUT_KEYS.FILTER_TOGGLE]: () => {
+        setIsFilterPanelOpen((prev) => {
+          const newState = !prev;
+          announce(newState ? "Filter panel opened" : "Filter panel closed");
+          return newState;
+        });
+      },
+      // Quick filter shortcuts
       // A: Toggle airports filter
       a: () => {
         setFilters((prev) => ({
           ...prev,
           assetType: prev.assetType === "airport" ? null : "airport",
         }));
+        announce(filters.assetType === "airport" ? "Airport filter disabled" : "Airport filter enabled");
       },
       // M: Toggle military filter
       m: () => {
@@ -111,6 +168,7 @@ export default function Home() {
           ...prev,
           assetType: prev.assetType === "military" ? null : "military",
         }));
+        announce(filters.assetType === "military" ? "Military filter disabled" : "Military filter enabled");
       },
       // T: Toggle today (last 24 hours) filter
       t: () => {
@@ -118,6 +176,7 @@ export default function Home() {
           ...prev,
           dateRange: prev.dateRange === "day" ? "all" : "day",
         }));
+        announce(filters.dateRange === "day" ? "Today filter disabled" : "Today filter enabled");
       },
       // V: Toggle verified (3+ evidence) filter
       v: () => {
@@ -125,6 +184,7 @@ export default function Home() {
           ...prev,
           minEvidence: prev.minEvidence >= 3 ? 1 : 3,
         }));
+        announce(filters.minEvidence >= 3 ? "Verified filter disabled" : "Verified filter enabled");
       },
       // R: Reset all filters
       r: () => {
@@ -134,14 +194,12 @@ export default function Home() {
           status: "all",
           assetType: null,
           dateRange: "all",
+          searchQuery: "",
         });
-      },
-      // F: Toggle filter panel
-      f: () => {
-        setIsFilterPanelOpen((prev) => !prev);
+        announce("All filters reset");
       },
     }),
-    []
+    [announce, filters.assetType, filters.dateRange, filters.minEvidence]
   );
 
   // Register keyboard shortcuts
@@ -150,6 +208,16 @@ export default function Home() {
   return (
     <>
       <Toaster position="top-right" richColors />
+
+      {/* Screen reader announcements for keyboard shortcuts */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </div>
 
       <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors">
         <Header

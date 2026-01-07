@@ -29,6 +29,10 @@ async function fetchIncidents(filters: FilterState): Promise<Incident[]> {
         params.append('asset_type', filters.assetType)
       }
 
+      if (filters.searchQuery) {
+        params.append('search', filters.searchQuery)
+      }
+
       // Add date range
       // Client-side filtering is handled in page.tsx to prevent API 500 errors with 'since' param
       /* 

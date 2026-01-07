@@ -1,28 +1,56 @@
 import { useEffect, useCallback } from 'react'
 
 /**
- * Map of keyboard keys to their callback functions.
- * Keys should be single characters (e.g., 'a', 'A', 'Escape').
- * Matching is case-insensitive for single letter keys.
+ * Type for a keyboard shortcut handler callback
  */
-export type KeyboardShortcutMap = Record<string, () => void>
+export type ShortcutHandler = () => void
 
 /**
- * Checks if the currently focused element is an input field
- * where keyboard shortcuts should be suppressed.
+ * Configuration for a single keyboard shortcut
  */
-function isInputElement(element: Element | null): boolean {
-  if (!element) return false
+export interface KeyboardShortcut {
+  /** The key to listen for (case-insensitive) */
+  key: string
+  /** The callback to execute when the key is pressed */
+  handler: ShortcutHandler
+  /** Optional description for accessibility/help purposes */
+  description?: string
+}
 
-  const tagName = element.tagName.toLowerCase()
+/**
+ * Map of shortcut keys to their handlers
+ */
+export type ShortcutMap = Record<string, ShortcutHandler>
 
-  // Check for input, textarea, or select elements
-  if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+/**
+ * Shortcut key constants for view switching and filter panel
+ */
+export const SHORTCUT_KEYS = {
+  MAP_VIEW: '1',
+  LIST_VIEW: '2',
+  ANALYTICS_VIEW: '3',
+  FILTER_TOGGLE: 'f',
+} as const
+
+/**
+ * Elements that should not trigger shortcuts when focused
+ */
+const IGNORED_ELEMENTS = ['INPUT', 'TEXTAREA', 'SELECT']
+
+/**
+ * Check if the currently focused element should prevent shortcuts from firing
+ */
+function isInputFocused(): boolean {
+  const activeElement = document.activeElement
+  if (!activeElement) return false
+
+  // Check if it's a form input element
+  if (IGNORED_ELEMENTS.includes(activeElement.tagName)) {
     return true
   }
 
-  // Check for contenteditable elements
-  if (element.getAttribute('contenteditable') === 'true') {
+  // Check if it's a contenteditable element
+  if (activeElement.getAttribute('contenteditable') === 'true') {
     return true
   }
 
@@ -30,54 +58,60 @@ function isInputElement(element: Element | null): boolean {
 }
 
 /**
- * Custom hook for handling keyboard shortcuts.
+ * Custom hook for registering global keyboard shortcuts
  *
- * @param shortcuts - Map of key names to callback functions
- *
- * Features:
- * - Registers keydown event listener on mount
- * - Cleans up listener on unmount
- * - Ignores shortcuts when focus is on input, textarea, select, or contenteditable elements
- * - Supports case-insensitive key matching for single letter keys
+ * @param shortcuts - Map of key strings to handler functions
+ * @param enabled - Whether shortcuts should be active (default: true)
  *
  * @example
  * ```tsx
  * useKeyboardShortcuts({
- *   'a': () => toggleAirports(),
- *   'm': () => toggleMilitary(),
- *   'Escape': () => closePanel(),
+ *   '1': () => setView('map'),
+ *   '2': () => setView('list'),
+ *   '3': () => setView('analytics'),
+ *   'f': () => setIsFilterPanelOpen(prev => !prev),
  * })
  * ```
  */
-export function useKeyboardShortcuts(shortcuts: KeyboardShortcutMap): void {
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    // Ignore shortcuts when user is typing in form fields
-    if (isInputElement(document.activeElement)) {
+export function useKeyboardShortcuts(
+  shortcuts: ShortcutMap,
+  enabled: boolean = true
+): void {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      // Don't fire shortcuts when typing in input fields
+      if (isInputFocused()) {
+        return
+      }
+
+      // Don't fire shortcuts when modifier keys are held (allow browser shortcuts)
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        return
+      }
+
+      // Normalize the key to lowercase for case-insensitive matching
+      const key = event.key.toLowerCase()
+
+      // Check if we have a handler for this key
+      const handler = shortcuts[key] || shortcuts[key.toUpperCase()]
+
+      if (handler) {
+        event.preventDefault()
+        handler()
+      }
+    },
+    [shortcuts]
+  )
+
+  useEffect(() => {
+    if (!enabled) {
       return
     }
 
-    // Get the pressed key
-    const key = event.key
-
-    // Try to find a matching shortcut (case-insensitive for single letters)
-    let callback = shortcuts[key]
-
-    if (!callback) {
-      // Try case-insensitive match for single letter keys
-      const lowerKey = key.toLowerCase()
-      const upperKey = key.toUpperCase()
-
-      callback = shortcuts[lowerKey] || shortcuts[upperKey]
-    }
-
-    // Execute the callback if found
-    if (callback) {
-      callback()
-    }
-  }, [shortcuts])
-
-  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [handleKeyDown])
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleKeyDown, enabled])
 }
