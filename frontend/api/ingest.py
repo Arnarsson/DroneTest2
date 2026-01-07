@@ -554,9 +554,34 @@ class handler(BaseHTTPRequestHandler):
             self.send_error(400, f"Narrative validation failed: {narrative_error}")
             return
 
-        # Apply sanitized values
+        # Apply sanitized values to incident_data before database insertion
+        # This ensures only cleaned data is stored (defense in depth)
+        original_title = incident_data.get('title', '')
+        original_narrative = incident_data.get('narrative', '')
+
+        # Replace with sanitized values
         incident_data['title'] = sanitized_title
         incident_data['narrative'] = sanitized_narrative
+
+        # Log if sanitization made any changes (for monitoring/auditing)
+        if sanitized_title != original_title:
+            logger.info(
+                "Title sanitized before database insertion",
+                extra={
+                    'original_length': len(original_title),
+                    'sanitized_length': len(sanitized_title),
+                    'changes_made': True
+                }
+            )
+        if sanitized_narrative != original_narrative:
+            logger.info(
+                "Narrative sanitized before database insertion",
+                extra={
+                    'original_length': len(original_narrative),
+                    'sanitized_length': len(sanitized_narrative),
+                    'changes_made': True
+                }
+            )
 
         # === CRITICAL: Validate this is actually a drone incident ===
         title = sanitized_title
@@ -566,7 +591,7 @@ class handler(BaseHTTPRequestHandler):
         # Exclude non-drone incidents (avalanches, deaths, accidents, etc.)
         non_drone_keywords = [
             "avalanche", "lavine", "lawine",  # Avalanche
-            "killed", "died", "death", "død", "dödsfall", "kuolema",  # Deaths
+            "killed", "died", "death", "död", "dödsfall", "kuolema",  # Deaths
             "fatal", "fatality", "dødsulykke",  # Fatalities
             "accident", "ulykke", "onnettomuus",  # Accidents (not drone-related)
             "earthquake", "jordskælv", "jordskjelv",  # Natural disasters
