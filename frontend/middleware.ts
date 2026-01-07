@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
-    "font-src 'self' data:",
+    "font-src 'self' data: https://cdn.fontshare.com",
     "connect-src 'self' https://www.dronemap.cc https://dronemap.cc https://www.dronewatch.cc https://dronewatch.cc https://*.vercel.app https://o4508847842131969.ingest.de.sentry.io",
     "frame-src 'none'",
     "object-src 'none'",
@@ -55,4 +55,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
-

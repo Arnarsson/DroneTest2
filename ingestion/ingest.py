@@ -440,18 +440,78 @@ class DroneWatchIngester:
         return success_count, error_count
 
 
+def should_run_ingestion(api_base_url: str) -> bool:
+    """
+    Smart Scheduling Logic:
+    1. If top of the hour (minute < 5), always run.
+    2. If recent incident (< 1 hour ago), run (Active Mode).
+    3. Otherwise, skip to save resources.
+    """
+    try:
+        now = datetime.now(timezone.utc)
+        
+        # Method 1: Top of the hour check (0-5 min)
+        # We allow a 5-minute window because cron might delay slightly
+        if now.minute < 5:
+            print(f"⏰ Hourly schedule check ({now.strftime('%H:%M')}): RUNNING")
+            return True
+
+        # Method 2: Active Mode check
+        print("🔍 Checking for active incidents...")
+        api_url = f"{api_base_url}/incidents?limit=1"
+        response = requests.get(api_url, timeout=10)
+        
+        if response.status_code == 200:
+            incidents = response.json()
+            if incidents and len(incidents) > 0:
+                # Parse occurred_at safely handling Z or offset
+                occurred_str = incidents[0]['occurred_at'].replace('Z', '+00:00')
+                latest_time = datetime.fromisoformat(occurred_str)
+                
+                # Ensure aware comparison (if API returns naive, assume UTC)
+                if latest_time.tzinfo is None:
+                    latest_time = latest_time.replace(tzinfo=timezone.utc)
+                
+                # Calculate time difference
+                diff = now - latest_time
+                hours_diff = diff.total_seconds() / 3600
+                
+                if hours_diff < 1.0:
+                    print(f"🚨 Active Incident detected ({hours_diff:.1f}h ago): RUNNING (High Frequency Mode)")
+                    return True
+                else:
+                    print(f"💤 No recent activity ({hours_diff:.1f}h ago). Skipping off-hour run.")
+                    return False
+            else:
+                print("ℹ️ No incidents found in DB. Skipping off-hour run.")
+                return False
+        else:
+            print(f"⚠️ API Error ({response.status_code}) checking status. Defaulting to RUN.")
+            return True
+            
+    except Exception as e:
+        print(f"⚠️ Error checking active status: {e}. Defaulting to RUN.")
+        return True
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='DroneWatch Ingestion Script')
     parser.add_argument('--test', action='store_true',
                         help='Test mode - show data without sending')
     parser.add_argument('--api-url', help='Override API URL', default=None)
+    parser.add_argument('--smart-schedule', action='store_true',
+                        help='Enable smart scheduling (hourly default, 5min if active)')
     args = parser.parse_args()
 
     # Override API URL if provided
     if args.api_url:
         import config
         config.API_BASE_URL = args.api_url
+
+    # Check schedule if enabled
+    if args.smart_schedule and not args.test:
+        if not should_run_ingestion(API_BASE_URL):
+            return
 
     # Run ingestion
     ingester = DroneWatchIngester()
