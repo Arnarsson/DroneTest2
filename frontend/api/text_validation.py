@@ -31,6 +31,87 @@ HTML_COMMENT_PATTERN = re.compile(r'<!--.*?-->', re.IGNORECASE | re.DOTALL)
 CDATA_PATTERN = re.compile(r'<!\[CDATA\[.*?\]\]>', re.IGNORECASE | re.DOTALL)
 
 
+# ============================================================================
+# XSS Detection Patterns
+# ============================================================================
+
+# All known event handler attributes (comprehensive list)
+EVENT_HANDLERS = [
+    # Mouse events
+    'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover',
+    'onmousemove', 'onmouseout', 'onmouseenter', 'onmouseleave', 'onwheel',
+    'oncontextmenu',
+    # Keyboard events
+    'onkeydown', 'onkeyup', 'onkeypress',
+    # Form events
+    'onfocus', 'onblur', 'onchange', 'oninput', 'onsubmit', 'onreset',
+    'oninvalid', 'onselect', 'onsearch',
+    # Window/Document events
+    'onload', 'onunload', 'onbeforeunload', 'onresize', 'onscroll',
+    'onhashchange', 'onpopstate', 'onpageshow', 'onpagehide', 'onbeforeprint',
+    'onafterprint', 'ononline', 'onoffline', 'onmessage', 'onstorage',
+    # Media events
+    'onplay', 'onpause', 'onplaying', 'onended', 'onvolumechange',
+    'onseeking', 'onseeked', 'ontimeupdate', 'ondurationchange',
+    'onratechange', 'onloadstart', 'onprogress', 'onsuspend', 'onemptied',
+    'onstalled', 'onwaiting', 'oncanplay', 'oncanplaythrough', 'onloadeddata',
+    'onloadedmetadata', 'onabort',
+    # Drag events
+    'ondrag', 'ondragstart', 'ondragend', 'ondragenter', 'ondragleave',
+    'ondragover', 'ondrop',
+    # Clipboard events
+    'oncopy', 'oncut', 'onpaste',
+    # Touch events
+    'ontouchstart', 'ontouchmove', 'ontouchend', 'ontouchcancel',
+    # Animation/Transition events
+    'onanimationstart', 'onanimationend', 'onanimationiteration',
+    'ontransitionend', 'ontransitionstart', 'ontransitioncancel', 'ontransitionrun',
+    # Error events
+    'onerror',
+    # Pointer events
+    'onpointerdown', 'onpointerup', 'onpointermove', 'onpointerenter',
+    'onpointerleave', 'onpointerover', 'onpointerout', 'onpointercancel',
+    'ongotpointercapture', 'onlostpointercapture',
+    # Print events
+    'onbeforeprint', 'onafterprint',
+    # Toggle events
+    'ontoggle',
+    # Security-related
+    'onsecuritypolicyviolation',
+    # Fullscreen
+    'onfullscreenchange', 'onfullscreenerror',
+    # WebSocket
+    'onopen', 'onclose',
+]
+
+# Dangerous HTML tags that can execute JavaScript
+DANGEROUS_TAGS = [
+    'script', 'iframe', 'frame', 'frameset', 'object', 'embed', 'applet',
+    'form', 'input', 'button', 'select', 'textarea', 'isindex', 'keygen',
+    'svg', 'math', 'video', 'audio', 'source', 'img', 'body', 'link',
+    'style', 'base', 'meta', 'marquee', 'bgsound', 'xml', 'xss', 'template',
+]
+
+# Dangerous URI schemes
+DANGEROUS_URI_SCHEMES = [
+    'javascript',
+    'vbscript',
+    'livescript',
+    'mocha',
+    'data',
+    'mhtml',
+]
+
+# CSS dangerous expressions/properties
+CSS_DANGEROUS_PATTERNS = [
+    r'expression\s*\(',  # IE CSS expression
+    r'url\s*\(\s*["\']?\s*javascript:',  # CSS url() with javascript
+    r'behavior\s*:',  # IE behavior
+    r'-moz-binding\s*:',  # Firefox XBL
+    r'@import',  # CSS import
+]
+
+
 def validate_text_length(text: str, max_length: int, field_name: str = "text") -> Tuple[bool, Optional[str]]:
     """
     Validate that text does not exceed maximum length.
@@ -187,12 +268,117 @@ def sanitize_text(text: str) -> str:
     return result
 
 
+def _decode_url_encoded(text: str) -> str:
+    """
+    Decode URL-encoded strings (percent encoding).
+
+    Handles both single and double encoding attempts.
+
+    Args:
+        text: Text potentially containing URL-encoded characters
+
+    Returns:
+        Decoded text
+    """
+    import urllib.parse
+
+    result = text
+    # Attempt up to 3 levels of decoding for nested encoding attacks
+    for _ in range(3):
+        try:
+            decoded = urllib.parse.unquote(result)
+            if decoded == result:
+                break
+            result = decoded
+        except Exception:
+            break
+    return result
+
+
+def _decode_html_entities(text: str) -> str:
+    """
+    Decode HTML entities including numeric and named entities.
+
+    Handles decimal (&#60;), hex (&#x3c;), and named (&lt;) entities.
+
+    Args:
+        text: Text potentially containing HTML entities
+
+    Returns:
+        Decoded text
+    """
+    result = text
+
+    # Decode hex entities: &#x3c; or &#X3C;
+    def decode_hex(match):
+        try:
+            return chr(int(match.group(1), 16))
+        except (ValueError, OverflowError):
+            return match.group(0)
+
+    result = re.sub(r'&#[xX]([0-9a-fA-F]+);?', decode_hex, result)
+
+    # Decode decimal entities: &#60;
+    def decode_decimal(match):
+        try:
+            return chr(int(match.group(1)))
+        except (ValueError, OverflowError):
+            return match.group(0)
+
+    result = re.sub(r'&#(\d+);?', decode_decimal, result)
+
+    # Named entities using html.unescape
+    result = html.unescape(result)
+
+    return result
+
+
+def _normalize_for_detection(text: str) -> Tuple[str, str]:
+    """
+    Normalize text for XSS pattern detection.
+
+    Applies multiple decodings and normalizations to catch obfuscated attacks.
+
+    Args:
+        text: Text to normalize
+
+    Returns:
+        Tuple of (normalized_text, normalized_text_no_space) both lowercase
+    """
+    if not text:
+        return "", ""
+
+    # Remove null bytes and other common obfuscation chars
+    result = re.sub(r'[\x00\x0d]', '', text)
+
+    # Remove backslashes used for obfuscation
+    result = result.replace('\\', '')
+
+    # Decode URL encoding
+    result = _decode_url_encoded(result)
+
+    # Decode HTML entities
+    result = _decode_html_entities(result)
+
+    # Remove whitespace/newlines that might be used to break up keywords
+    # But preserve for pattern matching where whitespace matters
+    result_no_space = re.sub(r'[\s\r\n\t]+', '', result)
+
+    return result.lower(), result_no_space.lower()
+
+
 def detect_xss_patterns(text: str) -> Tuple[bool, Optional[str]]:
     """
-    Detect common XSS attack patterns in text.
+    Detect comprehensive XSS attack patterns in text.
 
-    This is a basic detection for obvious XSS patterns.
-    Full XSS detection is implemented in subtask 1.2.
+    Checks for:
+    - Script tags and variants (obfuscated, encoded)
+    - All event handlers (onclick, onerror, etc.)
+    - Dangerous URI schemes (javascript:, vbscript:, data:, etc.)
+    - URL-encoded and HTML entity-encoded variants
+    - SVG/MathML vector attacks
+    - CSS expression attacks
+    - Other injection vectors
 
     Args:
         text: Text to analyze for XSS patterns
@@ -205,31 +391,144 @@ def detect_xss_patterns(text: str) -> Tuple[bool, Optional[str]]:
     if not text:
         return True, None
 
-    text_lower = text.lower()
+    # Get normalized versions for detection
+    text_normalized, text_no_space = _normalize_for_detection(text)
+    text_original_lower = text.lower()
 
-    # Check for script tags
-    if re.search(r'<\s*script', text_lower):
-        return False, "Detected <script> tag"
+    # =========================================================================
+    # 1. Check for dangerous HTML tags
+    # =========================================================================
+    for tag in DANGEROUS_TAGS:
+        # Pattern matches: <script, < script, <script/, </script, etc.
+        # Allows whitespace between < and tag name
+        pattern = rf'<\s*/?{tag}[\s/>]'
+        if re.search(pattern, text_normalized) or re.search(pattern, text_no_space):
+            return False, f"Detected dangerous HTML tag: <{tag}>"
 
-    # Check for common event handlers
-    event_handlers = [
-        'onclick', 'onerror', 'onload', 'onmouseover', 'onfocus',
-        'onblur', 'onchange', 'onsubmit', 'onkeydown', 'onkeyup'
-    ]
-    for handler in event_handlers:
-        if re.search(rf'{handler}\s*=', text_lower):
+    # =========================================================================
+    # 2. Check for event handlers
+    # =========================================================================
+    for handler in EVENT_HANDLERS:
+        # Pattern matches: onclick=, onclick =, onclick  =
+        # Using normalized text to catch encoded variants
+        pattern = rf'{handler}\s*='
+        if re.search(pattern, text_normalized):
+            return False, f"Detected event handler: {handler}"
+        # Also check without spaces for obfuscated variants
+        if f'{handler}=' in text_no_space:
             return False, f"Detected event handler: {handler}"
 
-    # Check for javascript: URI
-    if re.search(r'javascript\s*:', text_lower):
-        return False, "Detected javascript: URI scheme"
+    # =========================================================================
+    # 3. Check for dangerous URI schemes
+    # =========================================================================
+    for scheme in DANGEROUS_URI_SCHEMES:
+        # Pattern matches: javascript:, java script:, java	script:
+        # Allow any whitespace/null bytes between chars (obfuscation technique)
+        pattern = rf'{scheme}\s*:'
+        if re.search(pattern, text_normalized):
+            # Special handling for data: - only flag if it's a dangerous MIME type
+            if scheme == 'data':
+                # Check for dangerous data: URI content types
+                dangerous_data_types = [
+                    r'data\s*:\s*text/html',
+                    r'data\s*:\s*application/javascript',
+                    r'data\s*:\s*text/javascript',
+                    r'data\s*:\s*application/x-javascript',
+                    r'data\s*:\s*text/vbscript',
+                    r'data\s*:\s*text/x-scriptlet',
+                    r'data\s*:\s*image/svg\+xml',
+                ]
+                for data_pattern in dangerous_data_types:
+                    if re.search(data_pattern, text_normalized):
+                        return False, f"Detected dangerous data: URI with executable content"
+                # Also check for base64 encoded payloads in data URIs
+                if re.search(r'data\s*:[^;,]*;?\s*base64', text_normalized):
+                    return False, "Detected data: URI with base64 encoding"
+            else:
+                return False, f"Detected dangerous URI scheme: {scheme}:"
 
-    # Check for data: URI with executable types
-    if re.search(r'data\s*:\s*(text/html|application/javascript|text/javascript)', text_lower):
-        return False, "Detected potentially dangerous data: URI"
+        # Check obfuscated variants (with chars between letters)
+        obfuscated = r'[\s\x00]*'.join(list(scheme))
+        if re.search(rf'{obfuscated}\s*:', text_original_lower):
+            return False, f"Detected obfuscated URI scheme: {scheme}:"
 
-    # Check for vbscript: (IE legacy)
-    if re.search(r'vbscript\s*:', text_lower):
-        return False, "Detected vbscript: URI scheme"
+    # =========================================================================
+    # 4. Check for CSS-based attacks
+    # =========================================================================
+    for css_pattern in CSS_DANGEROUS_PATTERNS:
+        if re.search(css_pattern, text_normalized, re.IGNORECASE):
+            return False, "Detected dangerous CSS pattern"
+
+    # =========================================================================
+    # 5. Check for SVG-specific attacks
+    # =========================================================================
+    svg_patterns = [
+        r'<\s*svg[^>]*\s+onload\s*=',  # SVG with onload
+        r'<\s*svg[^>]*>.*?<\s*script',  # SVG containing script
+        r'<\s*svg[^>]*>.*?<\s*animate[^>]*\s+on',  # SVG animate with event
+        r'<\s*svg[^>]*>.*?<\s*set[^>]*\s+on',  # SVG set with event
+        r'<\s*svg[^>]*>.*?<\s*foreignobject',  # SVG foreignObject
+    ]
+    for svg_pattern in svg_patterns:
+        if re.search(svg_pattern, text_normalized, re.DOTALL):
+            return False, "Detected SVG-based XSS vector"
+
+    # =========================================================================
+    # 6. Check for MathML attacks
+    # =========================================================================
+    mathml_patterns = [
+        r'<\s*math[^>]*>.*?<\s*annotation-xml[^>]*>.*?<\s*svg',
+        r'<\s*math[^>]*\s+on\w+\s*=',  # MathML with event handler
+    ]
+    for math_pattern in mathml_patterns:
+        if re.search(math_pattern, text_normalized, re.DOTALL):
+            return False, "Detected MathML-based XSS vector"
+
+    # =========================================================================
+    # 7. Check for other injection patterns
+    # =========================================================================
+    other_patterns = [
+        (r'<!--.*?<\s*script', "Detected script tag hidden in HTML comment"),
+        (r'<\s*meta[^>]*http-equiv\s*=\s*["\']?refresh', "Detected meta refresh injection"),
+        (r'<\s*link[^>]*rel\s*=\s*["\']?import', "Detected HTML import injection"),
+        (r'srcdoc\s*=', "Detected srcdoc attribute (potential iframe injection)"),
+        (r'xlink:href\s*=', "Detected xlink:href attribute"),
+        (r'formaction\s*=', "Detected formaction attribute"),
+        (r'action\s*=\s*["\']?\s*javascript:', "Detected javascript in form action"),
+        (r'href\s*=\s*["\']?\s*javascript:', "Detected javascript in href"),
+        (r'src\s*=\s*["\']?\s*javascript:', "Detected javascript in src"),
+        (r'poster\s*=\s*["\']?\s*javascript:', "Detected javascript in poster"),
+        (r'background\s*=\s*["\']?\s*javascript:', "Detected javascript in background"),
+    ]
+    for pattern, message in other_patterns:
+        if re.search(pattern, text_normalized, re.DOTALL | re.IGNORECASE):
+            return False, message
+
+    # =========================================================================
+    # 8. Check for DOM clobbering patterns
+    # =========================================================================
+    dom_patterns = [
+        r'<\s*(?:form|input|img|a)[^>]*\s+(?:id|name)\s*=\s*["\']?(?:location|document|window)',
+    ]
+    for dom_pattern in dom_patterns:
+        if re.search(dom_pattern, text_normalized):
+            return False, "Detected potential DOM clobbering pattern"
+
+    # =========================================================================
+    # 9. Check for encoded patterns that survived normalization
+    # =========================================================================
+    # Look for suspicious URL encoding patterns that might indicate obfuscation
+    encoded_patterns = [
+        (r'%[0-9a-f]{2}', 3),  # If many URL-encoded chars remain, suspicious
+    ]
+    for pattern, threshold in encoded_patterns:
+        matches = re.findall(pattern, text_original_lower)
+        if len(matches) >= threshold:
+            # Check if the encoded content is suspicious after decode
+            decoded = _decode_url_encoded(text)
+            if decoded != text:
+                is_safe, msg = detect_xss_patterns(decoded)
+                if not is_safe:
+                    return False, f"Detected URL-encoded XSS: {msg}"
 
     return True, None
