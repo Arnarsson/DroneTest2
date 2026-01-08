@@ -119,6 +119,7 @@ class handler(BaseHTTPRequestHandler):
         country = query_params.get('country', [None])[0]
         asset_type = query_params.get('asset_type', [None])[0]
         since = query_params.get('since', [None])[0]
+        search = query_params.get('search', [None])[0]
 
         # Handle 'all' values as no filter
         if status == 'all':
@@ -138,7 +139,8 @@ class handler(BaseHTTPRequestHandler):
                 status=status,
                 country=country,
                 asset_type=asset_type,
-                since=since
+                since=since,
+                search=search
             ))
 
             # Check if it's an error response

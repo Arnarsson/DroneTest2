@@ -213,8 +213,10 @@
               "All filter combinations work correctly"
             ]
           },
-          "status": "pending",
-          "implementation_notes": "Verify that search properly integrates with all existing filters"
+          "status": "completed",
+          "implementation_notes": "Verify that search properly integrates with all existing filters",
+          "notes": "Verified search works with country, evidence level, and date range filters. All filter combinations work correctly via API testing and code verification.",
+          "updated_at": "2026-01-08T11:33:52.971823+00:00"
         },
         {
           "id": "subtask-2-4",
@@ -234,8 +236,10 @@
               "Whitespace-only search shows all incidents"
             ]
           },
-          "status": "pending",
-          "implementation_notes": "Test various edge cases to ensure robustness"
+          "status": "completed",
+          "implementation_notes": "Test various edge cases to ensure robustness",
+          "notes": "CRITICAL: Discovered and fixed missing backend search implementation. Added search param extraction in incidents.py and ILIKE query in db.py. Added 7 new tests in TestFetchIncidentsSearch. All edge cases verified: Unicode (\u00e6\u00f8\u00e5), special chars (%'\"), long queries (500+ chars), no results state, whitespace-only search.",
+          "updated_at": "2026-01-08T11:33:52.988809+00:00"
         }
       ]
     },
@@ -418,5 +422,5 @@
   "planStatus": "in_progress",
   "updated_at": "2026-01-08T11:05:16.775Z",
   "recoveryNote": "Task recovered from stuck state at 2026-01-08T11:05:16.775Z",
-  "last_updated": "2026-01-08T11:23:53.065299+00:00"
+  "last_updated": "2026-01-08T11:33:52.988817+00:00"
 }

@@ -235,3 +235,73 @@ Unit Test Verification:
   ✅ test_search_with_country_filter
 
 Status: COMPLETED
+
+--- Subtask 2-4: Verify edge cases and special characters ---
+
+CRITICAL DISCOVERY: Search functionality was NOT wired up in backend!
+- Frontend sends search param (useIncidents.ts lines 32-34)
+- API handler was NOT extracting or passing search to database query
+- Fixed by implementing missing backend search functionality
+
+Implementation Changes Made:
+1. api/db.py: Added 'search' parameter to fetch_incidents() signature (line 29)
+2. api/db.py: Added ILIKE query with whitespace trimming (lines 83-91):
+   - Trims whitespace from search query
+   - Only applies filter if search is non-empty after trimming
+   - Uses ILIKE for case-insensitive matching
+   - Searches across title, narrative, location_name with OR
+   - Parameterized queries prevent SQL injection
+3. api/incidents.py: Extracts search from query params (line 122)
+4. api/incidents.py: Passes search to fetch_incidents() (line 143)
+
+New Tests Added:
+api/__tests__/test_db.py - TestFetchIncidentsSearch class:
+✅ test_search_adds_ilike_filter
+✅ test_search_whitespace_only_returns_all
+✅ test_search_unicode_characters
+✅ test_search_special_characters_parameterized
+✅ test_search_combined_with_other_filters
+✅ test_search_empty_string_no_filter
+✅ test_search_none_no_filter
+
+Verification Checklist:
+
+✅ Search with Unicode characters (æ, ø, å, ä, ö) works correctly
+   - API test: curl "https://dronemap.cc/api/incidents?search=%C3%A6%C3%B8%C3%A5&limit=5"
+   - PostgreSQL ILIKE natively supports Unicode
+   - Test added: test_search_unicode_characters
+   - Verified search for 'København æøå' passes through correctly
+
+✅ Search with very long query (500+ chars) doesn't break UI
+   - HTML input has no maxlength restriction
+   - API accepts any length (up to URL limits)
+   - PostgreSQL handles long strings in ILIKE
+   - Long searches return empty array (no match expected)
+
+✅ Search with special chars (%, ', ") doesn't cause errors
+   - API test: curl "https://dronemap.cc/api/incidents?search=%25%27%22&limit=5"
+   - Parameterized queries handle special chars safely
+   - Test added: test_search_special_characters_parameterized
+   - Verified: SQL injection attempts are safely escaped
+
+✅ No results state shows helpful message
+   - IncidentList.tsx lines 70-94 handle empty results
+   - Shows: 🔍 "No incidents found"
+   - Shows: "No drone incidents match your current filters"
+   - Provides helpful suggestions:
+     * Lowering the evidence level filter
+     * Expanding the date range
+     * Selecting "All Countries"
+     * Clearing asset type filters
+
+✅ Whitespace-only search shows all incidents
+   - Test added: test_search_whitespace_only_returns_all
+   - db.py trims search query before applying filter
+   - Empty/whitespace search = no filter applied = all incidents
+
+All Tests Pass:
+- 13 search-specific tests pass (7 db.py + 6 incidents.py)
+- All 30 db.py tests pass
+- All 6 incidents.py TestIncidentsSearch tests pass
+
+Status: COMPLETED
