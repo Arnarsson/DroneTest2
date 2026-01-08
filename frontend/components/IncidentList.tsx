@@ -7,6 +7,7 @@ import type { Incident } from '@/types'
 import { EvidenceBadge } from './EvidenceBadge'
 import { ExportButtons } from './ExportButtons'
 import { SourceBadge } from './SourceBadge'
+import { IncidentDetailModal, useIncidentDetailModal } from './IncidentDetailModal'
 
 interface IncidentListProps {
   incidents: Incident[]
@@ -16,6 +17,8 @@ interface IncidentListProps {
 export function IncidentList({ incidents, isLoading }: IncidentListProps) {
   const [groupByFacility, setGroupByFacility] = useState(false)
   const [expandedFacilities, setExpandedFacilities] = useState<Set<string>>(new Set())
+  const { isOpen, selectedIncident, openModal, closeModal } = useIncidentDetailModal()
+
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
@@ -134,24 +137,33 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
               incidents={facilityIncidents}
               isExpanded={expandedFacilities.has(facilityKey)}
               onToggle={() => toggleFacility(facilityKey)}
+              onIncidentClick={openModal}
             />
           ))
         ) : (
           // Flat view
           incidents.map((incident, index) => (
-            <IncidentCard key={incident.id} incident={incident} index={index} />
+            <IncidentCard key={incident.id} incident={incident} index={index} onClick={() => openModal(incident)} />
           ))
         )}
       </motion.div>
+
+      {/* Incident Detail Modal */}
+      <IncidentDetailModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        incident={selectedIncident}
+      />
     </div>
   )
 }
 
-function FacilityGroup({ facilityKey, incidents, isExpanded, onToggle }: {
+function FacilityGroup({ facilityKey, incidents, isExpanded, onToggle, onIncidentClick }: {
   facilityKey: string
   incidents: Incident[]
   isExpanded: boolean
   onToggle: () => void
+  onIncidentClick: (incident: Incident) => void
 }) {
   const firstIncident = incidents[0]
   const assetType = firstIncident.asset_type || 'other'
@@ -222,7 +234,7 @@ function FacilityGroup({ facilityKey, incidents, isExpanded, onToggle }: {
           >
             {incidents.map((incident, index) => (
               <div key={incident.id} className="p-6">
-                <IncidentCard incident={incident} index={index} isInGroup />
+                <IncidentCard incident={incident} index={index} isInGroup onClick={() => onIncidentClick(incident)} />
               </div>
             ))}
           </motion.div>
