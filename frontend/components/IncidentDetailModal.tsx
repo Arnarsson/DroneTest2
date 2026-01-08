@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFocusTrap } from '../hooks/useFocusTrap'
-import { Incident } from '../types'
+import { Incident, IncidentSource } from '../types'
 import { EvidenceBadge } from './EvidenceBadge'
+import { SourceBadge } from './SourceBadge'
 import { cleanNarrative, formatIncidentDate } from '@/lib/formatters'
 import type { EvidenceScore } from '@/constants/evidence'
 
@@ -392,6 +393,118 @@ function TimelineSection({ incident }: { incident: Incident }) {
   )
 }
 
+// Helper to get trust weight configuration
+function getTrustWeightConfig(weight: number | undefined): { label: string; color: string; icon: string } {
+  const configs: Record<number, { label: string; color: string; icon: string }> = {
+    4: {
+      label: 'Official',
+      color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+      icon: '✓✓',
+    },
+    3: {
+      label: 'Verified',
+      color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+      icon: '✓',
+    },
+    2: {
+      label: 'Media',
+      color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
+      icon: '○',
+    },
+    1: {
+      label: 'Low Trust',
+      color: 'bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400',
+      icon: '?',
+    },
+  }
+  return configs[weight ?? 1] || configs[1]
+}
+
+// Format published_at date for sources
+function formatSourceDate(dateString: string | undefined): string | null {
+  if (!dateString) return null
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return null
+  }
+}
+
+// Sources section component showing all sources with details
+function SourcesSection({ sources }: { sources: IncidentSource[] }) {
+  if (!sources || sources.length === 0) {
+    return null
+  }
+
+  return (
+    <section aria-labelledby="sources-heading">
+      <h3
+        id="sources-heading"
+        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+      >
+        Sources ({sources.length})
+      </h3>
+      <div className="space-y-3">
+        {sources.map((source, index) => {
+          const trustConfig = getTrustWeightConfig(source.trust_weight)
+          const publishedDate = formatSourceDate(source.published_at)
+
+          return (
+            <div
+              key={`${source.source_url}-${index}`}
+              className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+            >
+              {/* Source header: badge + trust weight */}
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <SourceBadge
+                  url={source.source_url}
+                  type={source.source_type}
+                  title={source.source_title || source.source_name}
+                />
+
+                {/* Trust weight indicator */}
+                {source.trust_weight !== undefined && (
+                  <span
+                    className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${trustConfig.color}`}
+                    title={`Trust Level: ${trustConfig.label}`}
+                  >
+                    <span aria-hidden="true">{trustConfig.icon}</span>
+                    <span>{trustConfig.label}</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Source quote if available */}
+              {source.source_quote && (
+                <blockquote className="mt-3 pl-3 border-l-2 border-gray-300 dark:border-gray-600 italic text-sm text-gray-600 dark:text-gray-400">
+                  &ldquo;{source.source_quote}&rdquo;
+                </blockquote>
+              )}
+
+              {/* Published date */}
+              {publishedDate && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Published: {publishedDate}</span>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 interface IncidentDetailModalProps {
   isOpen: boolean
   onClose: () => void
@@ -566,6 +679,9 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
 
                 {/* Timeline section */}
                 <TimelineSection incident={incident} />
+
+                {/* Sources section - shows ALL sources (no limit unlike IncidentCard) */}
+                <SourcesSection sources={incident.sources} />
               </div>
             </div>
           </motion.div>
