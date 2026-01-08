@@ -561,6 +561,110 @@ class TestIncidentsSearch:
                 narrative_lower = incident['narrative'].lower()
                 assert 'airport' in title_lower or 'airport' in narrative_lower
 
+    @pytest.mark.asyncio
+    async def test_search_case_insensitive(self):
+        """Test that search is case-insensitive - 'Drone', 'drone', 'DRONE' return same results"""
+        # Mock incident with mixed case - should match regardless of search case
+        mock_incident = create_mock_incident_row(
+            title="Drone spotted over Copenhagen Airport",
+            narrative="Security reported a DRONE near the runway",
+            evidence_score=3
+        )
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Mock returns the same incident for any case search
+            # (simulating PostgreSQL ILIKE case-insensitive matching)
+            mock_result = [{
+                "id": str(mock_incident["id"]),
+                "title": mock_incident["title"],
+                "narrative": mock_incident["narrative"],
+                "occurred_at": mock_incident["occurred_at"].isoformat(),
+                "lat": mock_incident["lat"],
+                "lon": mock_incident["lon"],
+                "evidence_score": mock_incident["evidence_score"],
+                "country": mock_incident["country"],
+                "asset_type": mock_incident["asset_type"],
+                "status": mock_incident["status"],
+                "sources": json.loads(mock_incident["sources"])
+            }]
+            mock_run_async.return_value = mock_result
+
+            # Test lowercase search
+            mock_request_lower = MockHTTPRequestHandler(
+                path='/api/incidents?search=drone'
+            )
+            h_lower = object.__new__(handler)
+            h_lower.path = mock_request_lower.path
+            h_lower.command = mock_request_lower.command
+            h_lower.headers = mock_request_lower.headers
+            h_lower.send_response = mock_request_lower.send_response
+            h_lower.send_header = mock_request_lower.send_header
+            h_lower.end_headers = mock_request_lower.end_headers
+            h_lower.wfile = mock_request_lower._wfile
+            h_lower.handle_get()
+
+            assert mock_request_lower.response_code == 200
+            response_lower = json.loads(mock_request_lower.get_response_body())
+            assert len(response_lower) == 1
+            assert response_lower[0]['title'] == "Drone spotted over Copenhagen Airport"
+
+            # Reset mock for uppercase test
+            mock_run_async.return_value = mock_result
+
+            # Test uppercase search
+            mock_request_upper = MockHTTPRequestHandler(
+                path='/api/incidents?search=DRONE'
+            )
+            h_upper = object.__new__(handler)
+            h_upper.path = mock_request_upper.path
+            h_upper.command = mock_request_upper.command
+            h_upper.headers = mock_request_upper.headers
+            h_upper.send_response = mock_request_upper.send_response
+            h_upper.send_header = mock_request_upper.send_header
+            h_upper.end_headers = mock_request_upper.end_headers
+            h_upper.wfile = mock_request_upper._wfile
+            h_upper.handle_get()
+
+            assert mock_request_upper.response_code == 200
+            response_upper = json.loads(mock_request_upper.get_response_body())
+            assert len(response_upper) == 1
+            assert response_upper[0]['title'] == "Drone spotted over Copenhagen Airport"
+
+            # Reset mock for mixed case test
+            mock_run_async.return_value = mock_result
+
+            # Test mixed case search
+            mock_request_mixed = MockHTTPRequestHandler(
+                path='/api/incidents?search=DroNe'
+            )
+            h_mixed = object.__new__(handler)
+            h_mixed.path = mock_request_mixed.path
+            h_mixed.command = mock_request_mixed.command
+            h_mixed.headers = mock_request_mixed.headers
+            h_mixed.send_response = mock_request_mixed.send_response
+            h_mixed.send_header = mock_request_mixed.send_header
+            h_mixed.end_headers = mock_request_mixed.end_headers
+            h_mixed.wfile = mock_request_mixed._wfile
+            h_mixed.handle_get()
+
+            assert mock_request_mixed.response_code == 200
+            response_mixed = json.loads(mock_request_mixed.get_response_body())
+            assert len(response_mixed) == 1
+            assert response_mixed[0]['title'] == "Drone spotted over Copenhagen Airport"
+
+            # All three cases should return the same result
+            assert response_lower == response_upper == response_mixed
+
 
 class TestIncidentsErrorHandling:
     """Test error handling and edge cases"""
