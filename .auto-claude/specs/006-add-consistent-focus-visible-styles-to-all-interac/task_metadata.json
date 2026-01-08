@@ -1,0 +1,16 @@
+{
+  "sourceType": "ideation",
+  "ideationType": "ui_ux_improvements",
+  "ideaId": "uiux-001",
+  "rationale": "Users who navigate with keyboards (including accessibility users) cannot see which element is currently focused, making the application inaccessible for keyboard-only navigation. This is a WCAG 2.1 Level AA requirement.",
+  "category": "ui_ux",
+  "uiuxCategory": "accessibility",
+  "affectedFiles": [
+    "frontend/components/Header.tsx",
+    "frontend/components/FilterPanel.tsx",
+    "frontend/components/ThemeToggle.tsx",
+    "frontend/components/EvidenceLegend.tsx",
+    "frontend/components/IncidentList.tsx"
+  ],
+  "problemSolved": "ViewTab buttons in Header.tsx (line 135-154) and QuickFilterChip buttons in FilterPanel.tsx (line 368-385) have hover states but no focus-visible styling. ThemeToggle only has hover:bg-gray-200 without a focus ring."
+}

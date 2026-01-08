@@ -1,0 +1,45 @@
+{
+  "discovered_files": {
+    "frontend/app/globals.css": {
+      "description": "Added .focus-ring utility class in @layer utilities that provides consistent focus-visible styling: outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2. Use this class on all interactive elements for WCAG 2.1 Level AA keyboard accessibility compliance.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:17:52.946350+00:00"
+    },
+    "frontend/components/FilterPanel.tsx": {
+      "description": "FilterPanel contains multiple interactive elements: mobile filter button, QuickFilterChip component, FilterSection component with toggle, evidence level buttons. Select elements already have focus:ring-2 styling but buttons do not.",
+      "category": "components",
+      "discovered_at": "2026-01-07T21:16:21.820544+00:00"
+    },
+    "frontend/components/Header.tsx": {
+      "description": "ViewTab component now has focus-ring class for keyboard accessibility. Added rounded-md to ensure focus ring matches the button's visual shape (matching the motion.div active indicator).",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:21:21.218843+00:00"
+    },
+    "frontend/components/ThemeToggle.tsx": {
+      "description": "ThemeToggle has two buttons: a placeholder button shown during SSR/hydration and the main interactive button. Both need focus-ring class for consistent keyboard accessibility.",
+      "category": "component-pattern",
+      "discovered_at": "2026-01-07T21:19:40.391829+00:00"
+    },
+    "frontend/components/Filters.tsx": {
+      "description": "Filters.tsx contains view toggle buttons (Map, List, Analytics) that now have focus-ring class for keyboard accessibility. The buttons are contained in a flex container with rounded-lg styling. Select elements for filters already have focus:ring-2 styling.",
+      "category": "component",
+      "discovered_at": "2026-01-07T21:24:11.829687+00:00"
+    },
+    "frontend/components/IncidentList.tsx": {
+      "description": "FacilityGroup component (line 146-228) contains a collapsible header button for grouping incidents by facility. The button now has focus-ring class and rounded-t-xl for keyboard accessibility focus indicators that match the visual rounded corners.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:35:21.544781+00:00"
+    },
+    "frontend/components/AboutModal.tsx": {
+      "description": "AboutModal close button now has focus-ring class for keyboard accessibility. The button has rounded-lg so focus ring shape matches correctly. Modal also has Escape key handling for closing.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:36:39.009467+00:00"
+    },
+    "frontend/components/Timeline.tsx": {
+      "description": "Incident distribution bar elements (motion.div at lines 258-281) now have full keyboard accessibility: focus-ring class for visible focus styling, tabIndex={0} for keyboard navigation, role=\"button\" for semantics, onKeyDown for Enter/Space activation, and aria-label for screen readers.",
+      "category": "accessibility",
+      "discovered_at": "2026-01-07T21:42:58.079996+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:42:58.080005+00:00"
+}

@@ -33,6 +33,7 @@
 #### Backend (Python Serverless)
 - [**Backend API**](development/backend/README.md) - Python serverless functions, PostGIS queries
 - [**API Reference**](development/backend/API.md) - Endpoint documentation (TODO)
+- [**API Rate Limiting**](API_RATE_LIMITING.md) - Rate limits, headers, and Upstash Redis setup
 
 #### Ingestion (Python 3.11)
 - [**Ingestion System**](development/ingestion/README.md) - Scrapers, validation, consolidation

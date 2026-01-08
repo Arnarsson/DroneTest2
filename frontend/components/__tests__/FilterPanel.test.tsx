@@ -47,11 +47,12 @@ jest.mock('framer-motion', () => ({
 }))
 
 // Mock sonner toast
+const mockToast = {
+  success: jest.fn(),
+  error: jest.fn(),
+}
 jest.mock('sonner', () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-  },
+  toast: mockToast,
 }))
 
 // Mock clipboard API
@@ -296,6 +297,31 @@ describe('FilterPanel', () => {
       assetType: null,
       dateRange: 'all',
     })
+  })
+
+  it('shows toast notification when filters are cleared', () => {
+    const activeFilters: FilterState = {
+      minEvidence: 3,
+      country: 'DK',
+      status: 'active',
+      dateRange: 'week',
+      assetType: 'airport',
+    }
+
+    render(
+      <FilterPanel
+        filters={activeFilters}
+        onChange={mockOnChange}
+        incidentCount={10}
+        isOpen={true}
+        onToggle={mockOnToggle}
+      />
+    )
+
+    const clearButton = screen.getByText('Clear all')
+    fireEvent.click(clearButton)
+
+    expect(mockToast.success).toHaveBeenCalledWith('Filters cleared')
   })
 
   it('shows active filter count badge', () => {

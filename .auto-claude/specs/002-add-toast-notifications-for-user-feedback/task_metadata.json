@@ -1,0 +1,13 @@
+{
+  "sourceType": "ideation",
+  "ideationType": "code_improvements",
+  "ideaId": "ci-003",
+  "rationale": "Sonner is already imported and configured in page.tsx (Toaster component rendered at top-right with richColors). The toast function is imported in FilterPanel.tsx (line 4) but never called. The resetFilters() function and error handling in page.tsx are perfect trigger points.",
+  "category": "feature",
+  "estimatedEffort": "trivial",
+  "complexity": "trivial",
+  "affectedFiles": [
+    "frontend/components/FilterPanel.tsx",
+    "frontend/app/page.tsx"
+  ]
+}
