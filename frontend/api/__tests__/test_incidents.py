@@ -777,6 +777,75 @@ class TestIncidentsSearch:
             assert "Drone near power station" in titles  # Match in narrative
             assert "Military facility incident" in titles  # Match in location_name
 
+    @pytest.mark.asyncio
+    async def test_search_special_characters(self):
+        """Test that search with special characters (%, _, ', ") is safely handled"""
+        # Test various special characters that could cause SQL injection or query issues
+        special_char_queries = [
+            "%",           # SQL LIKE wildcard
+            "_",           # SQL LIKE single character wildcard
+            "'",           # SQL string delimiter
+            '"',           # Double quote
+            "'; DROP TABLE incidents; --",  # SQL injection attempt
+            "%' OR '1'='1",  # SQL injection attempt
+            "test%test",   # Embedded wildcard
+            "test_test",   # Embedded single char wildcard
+            "O'Brien",     # Name with apostrophe
+            'Drone "UAV"', # Quoted text
+        ]
+
+        for special_query in special_char_queries:
+            with patch('incidents.run_async') as mock_run_async, \
+                 patch('incidents.os.getenv') as mock_getenv, \
+                 patch('incidents.check_rate_limit') as mock_rate_limit, \
+                 patch('incidents.get_client_ip') as mock_get_ip, \
+                 patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+                # Mock environment and rate limiting
+                mock_getenv.return_value = 'postgresql://mock@localhost/test'
+                mock_rate_limit.return_value = (True, 100, 60)
+                mock_get_ip.return_value = '127.0.0.1'
+                mock_rate_headers.return_value = {}
+
+                # Mock returns empty array (simulating no matches for special char queries)
+                # The key test is that the handler doesn't crash with SQL errors
+                mock_run_async.return_value = []
+
+                # URL-encode the special query for the path
+                from urllib.parse import quote
+                encoded_query = quote(special_query, safe='')
+
+                # Create mock request with special character search
+                mock_request = MockHTTPRequestHandler(
+                    path=f'/api/incidents?search={encoded_query}'
+                )
+
+                # Execute handler
+                h = object.__new__(handler)
+                h.path = mock_request.path
+                h.command = mock_request.command
+                h.headers = mock_request.headers
+                h.send_response = mock_request.send_response
+                h.send_header = mock_request.send_header
+                h.end_headers = mock_request.end_headers
+                h.wfile = mock_request._wfile
+
+                # Handler should not crash with special characters
+                try:
+                    h.handle_get()
+                except Exception as e:
+                    pytest.fail(f"Handler crashed with special character query '{special_query}': {e}")
+
+                # Verify response is valid (200 OK with JSON)
+                assert mock_request.response_code == 200, \
+                    f"Expected 200 for query '{special_query}', got {mock_request.response_code}"
+                assert mock_request.response_headers['Content-Type'] == 'application/json', \
+                    f"Expected JSON content type for query '{special_query}'"
+
+                # Verify response body is valid JSON array
+                response_data = json.loads(mock_request.get_response_body())
+                assert isinstance(response_data, list), \
+                    f"Expected list response for query '{special_query}'"
+
 
 class TestIncidentsErrorHandling:
     """Test error handling and edge cases"""
