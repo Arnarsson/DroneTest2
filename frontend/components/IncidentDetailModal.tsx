@@ -7,7 +7,7 @@ import { Incident, IncidentSource } from '../types'
 import { EvidenceBadge } from './EvidenceBadge'
 import { SourceBadge } from './SourceBadge'
 import { cleanNarrative, formatIncidentDate } from '@/lib/formatters'
-import type { EvidenceScore } from '@/constants/evidence'
+import { EVIDENCE_SYSTEM, type EvidenceScore } from '@/constants/evidence'
 
 // Helper to format asset type with emoji
 function formatAssetType(type: string): string {
@@ -505,6 +505,211 @@ function SourcesSection({ sources }: { sources: IncidentSource[] }) {
   )
 }
 
+// Official source types that result in evidence score 4
+const OFFICIAL_SOURCE_TYPES = ['police', 'military', 'aviation_authority', 'notam']
+
+// Helper to categorize sources by type
+function categorizeSourcesByType(sources: IncidentSource[]): {
+  official: IncidentSource[]
+  media: IncidentSource[]
+  social: IncidentSource[]
+} {
+  const result = {
+    official: [] as IncidentSource[],
+    media: [] as IncidentSource[],
+    social: [] as IncidentSource[],
+  }
+
+  for (const source of sources) {
+    const type = source.source_type?.toLowerCase() || ''
+    if (OFFICIAL_SOURCE_TYPES.includes(type)) {
+      result.official.push(source)
+    } else if (['verified_media', 'media', 'news'].includes(type)) {
+      result.media.push(source)
+    } else {
+      result.social.push(source)
+    }
+  }
+
+  return result
+}
+
+// Helper to explain why a particular evidence score was assigned
+function getScoreExplanation(score: EvidenceScore, sourceCounts: { official: number; media: number; social: number }): string {
+  const totalSources = sourceCounts.official + sourceCounts.media + sourceCounts.social
+
+  if (score === 4) {
+    return `This incident has ${sourceCounts.official} official source${sourceCounts.official !== 1 ? 's' : ''} (police, military, or aviation authority), which automatically assigns the highest evidence level.`
+  }
+  if (score === 3) {
+    return `This incident is verified by ${totalSources} credible source${totalSources !== 1 ? 's' : ''}, providing strong corroboration for the reported activity.`
+  }
+  if (score === 2) {
+    return `This incident has been reported by a single credible source and is awaiting additional confirmation.`
+  }
+  return `This incident is based on social media or unverified reports only. Exercise caution when interpreting this information.`
+}
+
+// Evidence breakdown section showing how the score was calculated
+function EvidenceBreakdownSection({ incident }: { incident: Incident }) {
+  const score = incident.evidence_score as EvidenceScore
+  const config = EVIDENCE_SYSTEM[score]
+  const sources = incident.sources || []
+  const sourceCounts = categorizeSourcesByType(sources)
+  const counts = {
+    official: sourceCounts.official.length,
+    media: sourceCounts.media.length,
+    social: sourceCounts.social.length,
+  }
+  const totalSources = counts.official + counts.media + counts.social
+
+  // Get background styles based on score
+  const getBgStyles = (s: EvidenceScore): string => {
+    const styles: Record<EvidenceScore, string> = {
+      4: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+      3: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+      2: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
+      1: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+    }
+    return styles[s]
+  }
+
+  const getTextStyles = (s: EvidenceScore): { title: string; text: string } => {
+    const styles: Record<EvidenceScore, { title: string; text: string }> = {
+      4: { title: 'text-green-900 dark:text-green-300', text: 'text-green-800 dark:text-green-400' },
+      3: { title: 'text-amber-900 dark:text-amber-300', text: 'text-amber-800 dark:text-amber-400' },
+      2: { title: 'text-orange-900 dark:text-orange-300', text: 'text-orange-800 dark:text-orange-400' },
+      1: { title: 'text-red-900 dark:text-red-300', text: 'text-red-800 dark:text-red-400' },
+    }
+    return styles[s]
+  }
+
+  const textStyles = getTextStyles(score)
+
+  return (
+    <section aria-labelledby="evidence-heading">
+      <h3
+        id="evidence-heading"
+        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+      >
+        Evidence Breakdown
+      </h3>
+
+      {/* Current score display */}
+      <div className={`rounded-lg p-4 border ${getBgStyles(score)} mb-4`}>
+        <div className="flex items-start gap-3">
+          <span
+            className={`flex-shrink-0 w-10 h-10 flex items-center justify-center ${config.bgClass} text-white rounded-full font-bold text-lg`}
+          >
+            {score}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className={`font-semibold text-base ${textStyles.title}`}>
+              {config.label}
+            </div>
+            <div className={`text-sm mt-1 ${textStyles.text}`}>
+              {config.description}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Source breakdown by type */}
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mb-4">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+          Source Breakdown ({totalSources} total)
+        </h4>
+        <div className="grid grid-cols-3 gap-3">
+          {/* Official sources */}
+          <div className={`text-center p-3 rounded-lg ${counts.official > 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
+            <div className={`text-2xl font-bold ${counts.official > 0 ? 'text-green-700 dark:text-green-300' : 'text-gray-400 dark:text-gray-500'}`}>
+              {counts.official}
+            </div>
+            <div className={`text-xs font-medium mt-1 ${counts.official > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+              Official
+            </div>
+            {counts.official > 0 && (
+              <div className="mt-1">
+                <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400">
+                  <svg className="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Verified
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Media sources */}
+          <div className={`text-center p-3 rounded-lg ${counts.media > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
+            <div className={`text-2xl font-bold ${counts.media > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-gray-400 dark:text-gray-500'}`}>
+              {counts.media}
+            </div>
+            <div className={`text-xs font-medium mt-1 ${counts.media > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
+              Media
+            </div>
+          </div>
+
+          {/* Social/Other sources */}
+          <div className={`text-center p-3 rounded-lg ${counts.social > 0 ? 'bg-gray-200 dark:bg-gray-600/50' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
+            <div className={`text-2xl font-bold ${counts.social > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}>
+              {counts.social}
+            </div>
+            <div className={`text-xs font-medium mt-1 ${counts.social > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-500 dark:text-gray-400'}`}>
+              Social/Other
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Score explanation */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+        <div className="flex items-start gap-2">
+          <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
+              Why this score?
+            </h4>
+            <p className="text-sm text-blue-800 dark:text-blue-400">
+              {getScoreExplanation(score, counts)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Highlight official sources if any */}
+      {counts.official > 0 && (
+        <div className="mt-4 bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <div>
+              <h4 className="text-sm font-semibold text-green-900 dark:text-green-300 mb-1">
+                Official Sources Confirmed
+              </h4>
+              <ul className="text-sm text-green-800 dark:text-green-400 space-y-1">
+                {sourceCounts.official.map((source, idx) => (
+                  <li key={idx} className="flex items-center gap-1">
+                    <span className="capitalize">{source.source_type.replace(/_/g, ' ')}</span>
+                    {source.source_name && (
+                      <span className="text-green-700 dark:text-green-500">
+                        ({source.source_name})
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 interface IncidentDetailModalProps {
   isOpen: boolean
   onClose: () => void
@@ -682,6 +887,9 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
 
                 {/* Sources section - shows ALL sources (no limit unlike IncidentCard) */}
                 <SourcesSection sources={incident.sources} />
+
+                {/* Evidence breakdown section - shows how the score was calculated */}
+                <EvidenceBreakdownSection incident={incident} />
               </div>
             </div>
           </motion.div>
