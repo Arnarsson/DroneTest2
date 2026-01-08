@@ -66,11 +66,6 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
     setExpandedFacilities(newSet)
   }
 
-  const handleResetFilters = () => {
-    // This would need to be passed from parent, but for now just inform user
-    window.location.reload()
-  }
-
   if (incidents.length === 0) {
     return (
       <motion.div
