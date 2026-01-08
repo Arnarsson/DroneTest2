@@ -56,6 +56,11 @@
 }
 
 @layer utilities {
+  /* Focus Ring - Consistent focus-visible styling for accessibility */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2;
+  }
+
   /* Glass Morphism */
   .glass {
     background: rgba(255, 255, 255, 0.7);

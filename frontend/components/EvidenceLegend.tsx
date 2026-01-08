@@ -36,7 +36,7 @@ export function EvidenceLegend() {
           <motion.button
             key="collapsed"
             onClick={() => setIsOpen(true)}
-            className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl rounded-xl shadow-elevated px-4 py-2.5 hover:shadow-lifted transition-all border border-gray-200/70 dark:border-gray-800/70"
+            className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl rounded-xl shadow-elevated px-4 py-2.5 hover:shadow-lifted transition-all border border-gray-200/70 dark:border-gray-800/70 focus-ring"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
@@ -64,7 +64,7 @@ export function EvidenceLegend() {
               <h3 className="text-base font-bold text-gray-900 dark:text-white">Evidence Levels</h3>
               <motion.button
                 onClick={handleClose}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded focus-ring"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
               >
