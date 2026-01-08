@@ -103,7 +103,7 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
 
             {/* About button */}
             <button
-              onClick={openModal}
+              onClick={openAboutModal}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all focus-ring"
               title="About DroneWatch"
             >
