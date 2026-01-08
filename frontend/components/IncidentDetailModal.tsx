@@ -4,6 +4,138 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { Incident } from '../types'
+import { EvidenceBadge } from './EvidenceBadge'
+import type { EvidenceScore } from '@/constants/evidence'
+
+// Helper to format asset type with emoji
+function formatAssetType(type: string): string {
+  const icons: Record<string, string> = {
+    airport: '✈️ Airport',
+    harbor: '⚓ Harbor',
+    military: '🛡️ Military',
+    powerplant: '⚡ Power Plant',
+    bridge: '🌉 Bridge',
+    other: '📍 Other',
+    unknown: '❓ Unknown',
+  }
+  return icons[type] || type
+}
+
+// Helper to get status badge styling and label
+function getStatusConfig(status: Incident['status']): { label: string; className: string } {
+  const configs: Record<Incident['status'], { label: string; className: string }> = {
+    active: {
+      label: 'Active',
+      className: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    },
+    resolved: {
+      label: 'Resolved',
+      className: 'bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700',
+    },
+    unconfirmed: {
+      label: 'Unconfirmed',
+      className: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    },
+    false_positive: {
+      label: 'False Positive',
+      className: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
+    },
+  }
+  return configs[status] || configs.unconfirmed
+}
+
+// Helper to get country flag emoji from country name/code
+function getCountryFlag(country: string): string {
+  // Common country code mappings
+  const countryFlags: Record<string, string> = {
+    'USA': '🇺🇸',
+    'US': '🇺🇸',
+    'United States': '🇺🇸',
+    'UK': '🇬🇧',
+    'GB': '🇬🇧',
+    'United Kingdom': '🇬🇧',
+    'Germany': '🇩🇪',
+    'DE': '🇩🇪',
+    'France': '🇫🇷',
+    'FR': '🇫🇷',
+    'Netherlands': '🇳🇱',
+    'NL': '🇳🇱',
+    'Sweden': '🇸🇪',
+    'SE': '🇸🇪',
+    'Norway': '🇳🇴',
+    'NO': '🇳🇴',
+    'Denmark': '🇩🇰',
+    'DK': '🇩🇰',
+    'Poland': '🇵🇱',
+    'PL': '🇵🇱',
+    'Finland': '🇫🇮',
+    'FI': '🇫🇮',
+    'Belgium': '🇧🇪',
+    'BE': '🇧🇪',
+    'Austria': '🇦🇹',
+    'AT': '🇦🇹',
+    'Switzerland': '🇨🇭',
+    'CH': '🇨🇭',
+    'Italy': '🇮🇹',
+    'IT': '🇮🇹',
+    'Spain': '🇪🇸',
+    'ES': '🇪🇸',
+    'Canada': '🇨🇦',
+    'CA': '🇨🇦',
+    'Australia': '🇦🇺',
+    'AU': '🇦🇺',
+    'Japan': '🇯🇵',
+    'JP': '🇯🇵',
+    'South Korea': '🇰🇷',
+    'KR': '🇰🇷',
+    'China': '🇨🇳',
+    'CN': '🇨🇳',
+    'India': '🇮🇳',
+    'IN': '🇮🇳',
+    'Russia': '🇷🇺',
+    'RU': '🇷🇺',
+    'Ukraine': '🇺🇦',
+    'UA': '🇺🇦',
+    'Ireland': '🇮🇪',
+    'IE': '🇮🇪',
+    'Portugal': '🇵🇹',
+    'PT': '🇵🇹',
+    'Czech Republic': '🇨🇿',
+    'CZ': '🇨🇿',
+    'Czechia': '🇨🇿',
+    'Hungary': '🇭🇺',
+    'HU': '🇭🇺',
+    'Romania': '🇷🇴',
+    'RO': '🇷🇴',
+    'Greece': '🇬🇷',
+    'GR': '🇬🇷',
+    'Turkey': '🇹🇷',
+    'TR': '🇹🇷',
+    'Israel': '🇮🇱',
+    'IL': '🇮🇱',
+    'Brazil': '🇧🇷',
+    'BR': '🇧🇷',
+    'Mexico': '🇲🇽',
+    'MX': '🇲🇽',
+    'Argentina': '🇦🇷',
+    'AR': '🇦🇷',
+    'New Zealand': '🇳🇿',
+    'NZ': '🇳🇿',
+    'Singapore': '🇸🇬',
+    'SG': '🇸🇬',
+    'Taiwan': '🇹🇼',
+    'TW': '🇹🇼',
+    'Thailand': '🇹🇭',
+    'TH': '🇹🇭',
+    'Estonia': '🇪🇪',
+    'EE': '🇪🇪',
+    'Latvia': '🇱🇻',
+    'LV': '🇱🇻',
+    'Lithuania': '🇱🇹',
+    'LT': '🇱🇹',
+  }
+  return countryFlags[country] || '🌍'
+}
 
 interface IncidentDetailModalProps {
   isOpen: boolean
@@ -97,15 +229,60 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
 
             {/* Content */}
             <div className="p-6 sm:p-8">
-              {/* Header - Placeholder for subtask 2.1 */}
-              <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-800">
-                <h2 id="incident-modal-title" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white pr-12">
+              {/* Header Section */}
+              <header className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-800">
+                {/* Title Row */}
+                <h2
+                  id="incident-modal-title"
+                  className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white pr-12 mb-4 leading-tight"
+                >
                   {incident.title}
                 </h2>
-                <p id="incident-modal-description" className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Incident details and source information
+
+                {/* Badges Row */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+                  {/* Evidence Badge */}
+                  <EvidenceBadge score={incident.evidence_score as EvidenceScore} size="lg" />
+
+                  {/* Status Badge */}
+                  {(() => {
+                    const statusConfig = getStatusConfig(incident.status)
+                    return (
+                      <span
+                        className={`text-sm px-3 py-1.5 rounded-full font-semibold border ${statusConfig.className}`}
+                      >
+                        {statusConfig.label}
+                      </span>
+                    )
+                  })()}
+
+                  {/* Asset Type Badge */}
+                  {incident.asset_type && (
+                    <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm px-3 py-1.5 rounded-full font-semibold border border-blue-200 dark:border-blue-800">
+                      {formatAssetType(incident.asset_type)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Country & Meta Info Row */}
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <span className="text-lg" role="img" aria-label={`Flag of ${incident.country}`}>
+                    {getCountryFlag(incident.country)}
+                  </span>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{incident.country}</span>
+                  {incident.region && (
+                    <>
+                      <span className="text-gray-400 dark:text-gray-600">•</span>
+                      <span>{incident.region}</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Screen reader description */}
+                <p id="incident-modal-description" className="sr-only">
+                  Incident details and source information for {incident.title}
                 </p>
-              </div>
+              </header>
 
               {/* Content sections will be added in Phase 2 */}
               <div className="space-y-6">
