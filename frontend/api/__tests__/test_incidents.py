@@ -477,6 +477,91 @@ class TestIncidentsCORS:
         assert 'GET, OPTIONS' in mock_request.response_headers.get('Access-Control-Allow-Methods', '')
 
 
+class TestIncidentsSearch:
+    """Test search query parameter functionality"""
+
+    @pytest.mark.asyncio
+    async def test_get_incidents_with_search_parameter(self):
+        """Test search parameter filters incidents by title, narrative, and location_name"""
+        # Mock incidents - some matching search term "airport", some not
+        mock_matching_incidents = [
+            create_mock_incident_row(
+                title="Drone spotted over Copenhagen Airport",
+                narrative="Multiple witnesses reported activity",
+                evidence_score=4
+            ),
+            create_mock_incident_row(
+                title="Incident near facility",
+                narrative="Security reported a drone near the airport perimeter",
+                evidence_score=3
+            ),
+        ]
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return only matching incidents (simulating database ILIKE filtering)
+            mock_run_async.return_value = [
+                {
+                    "id": str(inc["id"]),
+                    "title": inc["title"],
+                    "narrative": inc["narrative"],
+                    "occurred_at": inc["occurred_at"].isoformat(),
+                    "lat": inc["lat"],
+                    "lon": inc["lon"],
+                    "evidence_score": inc["evidence_score"],
+                    "country": inc["country"],
+                    "asset_type": inc["asset_type"],
+                    "status": inc["status"],
+                    "sources": json.loads(inc["sources"])
+                }
+                for inc in mock_matching_incidents
+            ]
+
+            # Create mock request with search parameter
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search=airport'
+            )
+
+            # Execute handler (use object.__new__ to bypass __init__ requirements)
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h._wfile = mock_request._wfile
+            h.wfile = property(lambda self: self._wfile)
+
+            # Bind mock methods to handler instance
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+            assert len(response_data) == 2
+
+            # Verify incidents contain search term in title or narrative
+            for incident in response_data:
+                title_lower = incident['title'].lower()
+                narrative_lower = incident['narrative'].lower()
+                assert 'airport' in title_lower or 'airport' in narrative_lower
+
+
 class TestIncidentsErrorHandling:
     """Test error handling and edge cases"""
 
