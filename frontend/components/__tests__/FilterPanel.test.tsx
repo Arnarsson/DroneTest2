@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { FilterPanel } from '../FilterPanel'
 import type { FilterState } from '@/types'
 import { logger } from '@/lib/logger'
+import { toast } from 'sonner'
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
@@ -54,6 +55,15 @@ jest.mock('sonner', () => ({
   toast: mockToast,
 }))
 
+// Mock clipboard API
+const mockWriteText = jest.fn()
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
+    writeText: mockWriteText,
+  },
+  writable: true,
+})
+
 describe('FilterPanel', () => {
   const mockFilters: FilterState = {
     searchQuery: '',
@@ -69,6 +79,7 @@ describe('FilterPanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockWriteText.mockResolvedValue(undefined)
   })
 
   it('renders all filter controls', () => {
@@ -616,5 +627,124 @@ describe('FilterPanel', () => {
 
     // Whitespace-only searchQuery should not count as active filter
     expect(screen.queryByText(/active filter/)).not.toBeInTheDocument()
+  })
+
+  describe('Copy Link functionality', () => {
+    const activeFilters: FilterState = {
+      searchQuery: '',
+      minEvidence: 3,
+      country: 'DK',
+      status: 'active',
+      dateRange: 'week',
+      assetType: 'airport',
+    }
+
+    it('shows Copy Link button when filters are active', () => {
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      expect(screen.getByText('Copy Link')).toBeInTheDocument()
+    })
+
+    it('does not show Copy Link button when no filters are active', () => {
+      render(
+        <FilterPanel
+          filters={mockFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      expect(screen.queryByText('Copy Link')).not.toBeInTheDocument()
+    })
+
+    it('copies URL to clipboard when Copy Link button is clicked', async () => {
+      // Set up window.location.href
+      Object.defineProperty(window, 'location', {
+        value: { href: 'http://localhost:3000/?country=DK&min_evidence=3' },
+        writable: true,
+      })
+
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      const copyButton = screen.getByText('Copy Link')
+      fireEvent.click(copyButton)
+
+      await waitFor(() => {
+        expect(mockWriteText).toHaveBeenCalledWith('http://localhost:3000/?country=DK&min_evidence=3')
+      })
+    })
+
+    it('shows success toast when URL is copied successfully', async () => {
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      const copyButton = screen.getByText('Copy Link')
+      fireEvent.click(copyButton)
+
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith('Link copied to clipboard!')
+      })
+    })
+
+    it('shows error toast when copy fails', async () => {
+      mockWriteText.mockRejectedValue(new Error('Clipboard access denied'))
+
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      const copyButton = screen.getByText('Copy Link')
+      fireEvent.click(copyButton)
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Failed to copy link')
+      })
+    })
+
+    it('has correct aria-label for accessibility', () => {
+      render(
+        <FilterPanel
+          filters={activeFilters}
+          onChange={mockOnChange}
+          incidentCount={10}
+          isOpen={true}
+          onToggle={mockOnToggle}
+        />
+      )
+
+      const copyButton = screen.getByLabelText('Copy link with current filters')
+      expect(copyButton).toBeInTheDocument()
+    })
   })
 })

@@ -7,12 +7,13 @@ import { FilterPanel } from "@/components/FilterPanel";
 import { Header } from "@/components/Header";
 import { IncidentList } from "@/components/IncidentList";
 import { useIncidents } from "@/hooks/useIncidents";
+import { useURLFilterState } from "@/hooks/useURLFilterState";
 import { useKeyboardShortcuts, SHORTCUT_KEYS } from "@/hooks/useKeyboardShortcuts";
 import type { FilterState, Incident } from "@/types";
 import { isWithinInterval } from "date-fns/isWithinInterval";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 
 // Dynamic import for map (no SSR)
@@ -30,7 +31,7 @@ const VIEW_LABELS: Record<"map" | "list" | "analytics", string> = {
   analytics: "Analytics view",
 };
 
-export default function Home() {
+function HomeContent() {
   const [view, setView] = useState<"map" | "list" | "analytics">("map");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   // Screen reader announcement message
@@ -43,14 +44,8 @@ export default function Home() {
     start: null,
     end: null,
   });
-  const [filters, setFilters] = useState<FilterState>({
-    minEvidence: 1,
-    country: "all",
-    status: "all",
-    assetType: null,
-    dateRange: "all",
-    searchQuery: "",
-  });
+  // URL-synced filter state - allows sharing/bookmarking filtered views
+  const { filters, setFilters } = useURLFilterState();
 
   const { data: allIncidents, isLoading, error } = useIncidents(filters);
 
@@ -102,9 +97,12 @@ export default function Home() {
     return filtered;
   }, [allIncidents, timelineRange, filters.dateRange]);
 
-  const handleFilterChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters);
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: FilterState) => {
+      setFilters(newFilters);
+    },
+    [setFilters]
+  );
 
   // Show toast notification when API error occurs
   useEffect(() => {
@@ -277,5 +275,22 @@ export default function Home() {
         <AtlasBadge />
       </div>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+          <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700" />
+          <div className="flex-1 bg-gray-100 dark:bg-gray-900 animate-pulse flex items-center justify-center">
+            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+          </div>
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }
