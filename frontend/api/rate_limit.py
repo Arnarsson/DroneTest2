@@ -1,8 +1,30 @@
 """
-Simple in-memory rate limiter for API endpoints.
-For production, consider using Vercel Edge Config or Redis for distributed rate limiting.
+DEPRECATED: This module is deprecated and will be removed in a future version.
+
+Use `distributed_rate_limit` instead, which provides distributed rate limiting
+using Upstash Redis for serverless environments. The new module falls back to
+in-memory rate limiting when Redis is not configured, so it works seamlessly
+for local development.
+
+Example migration:
+    # Old (deprecated):
+    from rate_limit import check_rate_limit, get_rate_limit_headers, get_client_ip
+
+    # New (recommended):
+    from distributed_rate_limit import check_rate_limit, get_rate_limit_headers, get_client_ip
+
+This module is kept for backward compatibility only. All new code should use
+distributed_rate_limit instead.
 """
 import time
+import warnings
+
+# Emit deprecation warning when this module is imported
+warnings.warn(
+    "The 'rate_limit' module is deprecated. Use 'distributed_rate_limit' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 from collections import defaultdict
 from typing import Dict, Tuple
 
