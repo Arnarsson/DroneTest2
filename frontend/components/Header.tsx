@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ThemeToggle } from './ThemeToggle'
 import { DroneWatchLogo } from './DroneWatchLogo'
 import { AboutModal, useAboutModal } from './AboutModal'
+import { EvidenceLegendModal, useEvidenceLegendModal } from './EvidenceLegendModal'
 import { logger } from '@/lib/logger'
 import { SHORTCUT_KEYS } from '@/hooks/useKeyboardShortcuts'
 
@@ -29,11 +30,13 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
   logger.debug('[Header] Rendered with incidentCount:', incidentCount)
   logger.debug('[Header] isLoading:', isLoading)
 
-  const { isOpen, openModal, closeModal } = useAboutModal()
+  const { isOpen: isAboutOpen, openModal: openAboutModal, closeModal: closeAboutModal } = useAboutModal()
+  const { isOpen: isLegendOpen, openModal: openLegendModal, closeModal: closeLegendModal } = useEvidenceLegendModal()
 
   return (
     <div>
-      <AboutModal isOpen={isOpen} onClose={closeModal} />
+      <AboutModal isOpen={isAboutOpen} onClose={closeAboutModal} />
+      <EvidenceLegendModal isOpen={isLegendOpen} onClose={closeLegendModal} />
       <header className="sticky top-0 z-50 bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-2xl border-b border-gray-200/70 dark:border-gray-800/70 shadow-soft transition-all">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
@@ -98,12 +101,24 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             {/* Theme toggle */}
             <ThemeToggle />
 
+            {/* Mobile Evidence Legend button - visible only on mobile */}
+            <button
+              onClick={openLegendModal}
+              className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all"
+              aria-label="View evidence legend"
+              title="Evidence Legend"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+
             {/* Keyboard shortcuts help */}
             <KeyboardShortcutsHelp />
 
             {/* About button */}
             <button
-              onClick={openModal}
+              onClick={openAboutModal}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all focus-ring"
               title="About DroneWatch"
             >
