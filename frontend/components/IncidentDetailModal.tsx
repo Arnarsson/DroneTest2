@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { Incident } from '../types'
 import { EvidenceBadge } from './EvidenceBadge'
+import { cleanNarrative } from '@/lib/formatters'
 import type { EvidenceScore } from '@/constants/evidence'
 
 // Helper to format asset type with emoji
@@ -284,19 +285,29 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
                 </p>
               </header>
 
-              {/* Content sections will be added in Phase 2 */}
+              {/* Content sections */}
               <div className="space-y-6">
-                {/* Narrative section placeholder */}
-                {incident.narrative && (
-                  <section>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Narrative</h3>
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {incident.narrative}
-                    </p>
-                  </section>
-                )}
+                {/* Narrative section - full, untruncated narrative with proper formatting */}
+                {(() => {
+                  const cleanedNarrative = incident.narrative ? cleanNarrative(incident.narrative) : ''
+                  return cleanedNarrative ? (
+                    <section aria-labelledby="narrative-heading">
+                      <h3
+                        id="narrative-heading"
+                        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+                      >
+                        Narrative
+                      </h3>
+                      <div className="prose prose-gray dark:prose-invert max-w-none">
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base whitespace-pre-wrap">
+                          {cleanedNarrative}
+                        </p>
+                      </div>
+                    </section>
+                  ) : null
+                })()}
 
-                {/* Additional sections will be implemented in subtasks 2.2-2.6 */}
+                {/* Additional sections will be implemented in subtasks 2.3-2.6 */}
               </div>
             </div>
           </motion.div>
