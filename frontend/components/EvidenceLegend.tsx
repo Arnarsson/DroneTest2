@@ -93,7 +93,7 @@ export function EvidenceLegend() {
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <a
                 href="/about"
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1 focus-ring rounded"
                 target="_blank"
               >
                 <span>Learn more about evidence scoring</span>

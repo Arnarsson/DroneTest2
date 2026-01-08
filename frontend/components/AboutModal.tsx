@@ -230,7 +230,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     href="https://github.com/Arnarsson/DroneWatch2.0"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium focus-ring rounded"
                   >
                     GitHub
                   </a>

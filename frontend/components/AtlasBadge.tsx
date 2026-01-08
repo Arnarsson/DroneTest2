@@ -14,7 +14,7 @@ export function AtlasBadge() {
         href="https://atlasconsulting.dk/"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center bg-black/95 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-lg border border-gray-700/30 px-2 py-1.5 md:px-3 md:py-2 hover:border-gray-600/50 transition-all duration-300"
+        className="group flex items-center bg-black/95 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-lg border border-gray-700/30 px-2 py-1.5 md:px-3 md:py-2 hover:border-gray-600/50 transition-all duration-300 focus-ring"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
