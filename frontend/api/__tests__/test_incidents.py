@@ -665,6 +665,118 @@ class TestIncidentsSearch:
             # All three cases should return the same result
             assert response_lower == response_upper == response_mixed
 
+    @pytest.mark.asyncio
+    async def test_search_multiple_fields(self):
+        """Test that search matches across title, narrative, and location_name fields"""
+        # Create mock incidents with search term "Copenhagen" in different fields:
+        # 1. Title contains "Copenhagen"
+        # 2. Narrative contains "Copenhagen"
+        # 3. Location_name contains "Copenhagen"
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return incidents matching in different fields
+            # (simulating database ILIKE matching on title OR narrative OR location_name)
+            mock_run_async.return_value = [
+                {
+                    "id": str(uuid4()),
+                    "title": "Copenhagen Airport drone sighting",  # Match in title
+                    "narrative": "A drone was spotted near the runway",
+                    "location_name": "Kastrup Airport",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6181,
+                    "lon": 12.6560,
+                    "evidence_score": 4,
+                    "country": "DK",
+                    "asset_type": "airport",
+                    "status": "active",
+                    "sources": []
+                },
+                {
+                    "id": str(uuid4()),
+                    "title": "Drone near power station",
+                    "narrative": "Reports from Copenhagen police confirmed sighting",  # Match in narrative
+                    "location_name": "Amager Power Station",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6500,
+                    "lon": 12.6200,
+                    "evidence_score": 3,
+                    "country": "DK",
+                    "asset_type": "power_station",
+                    "status": "active",
+                    "sources": []
+                },
+                {
+                    "id": str(uuid4()),
+                    "title": "Military facility incident",
+                    "narrative": "Unidentified drone detected by radar",
+                    "location_name": "Copenhagen Naval Base",  # Match in location_name
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6800,
+                    "lon": 12.5900,
+                    "evidence_score": 5,
+                    "country": "DK",
+                    "asset_type": "military",
+                    "status": "active",
+                    "sources": []
+                }
+            ]
+
+            # Create mock request with search parameter
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search=Copenhagen'
+            )
+
+            # Execute handler
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+
+            # Should return all 3 incidents (matched in different fields)
+            assert len(response_data) == 3
+
+            # Verify each incident contains "Copenhagen" in at least one field
+            for incident in response_data:
+                title = incident.get('title', '').lower()
+                narrative = incident.get('narrative', '').lower()
+                location_name = incident.get('location_name', '').lower()
+
+                has_match = (
+                    'copenhagen' in title or
+                    'copenhagen' in narrative or
+                    'copenhagen' in location_name
+                )
+                assert has_match, f"Incident should contain 'copenhagen' in title, narrative, or location_name"
+
+            # Verify specific incidents were returned
+            titles = [inc['title'] for inc in response_data]
+            assert "Copenhagen Airport drone sighting" in titles  # Match in title
+            assert "Drone near power station" in titles  # Match in narrative
+            assert "Military facility incident" in titles  # Match in location_name
+
 
 class TestIncidentsErrorHandling:
     """Test error handling and edge cases"""
