@@ -525,6 +525,547 @@ class TestIncidentsCORS:
         assert 'GET, OPTIONS' in mock_request.response_headers.get('Access-Control-Allow-Methods', '')
 
 
+class TestIncidentsSearch:
+    """Test search query parameter functionality"""
+
+    @pytest.mark.asyncio
+    async def test_empty_search_returns_all(self):
+        """Test that empty search parameter returns all incidents (same as no filter)"""
+        # Mock incidents - should return all since search is empty
+        mock_incidents = [
+            create_mock_incident_row(
+                title="Copenhagen Airport drone sighting",
+                narrative="Multiple witnesses reported activity",
+                evidence_score=4
+            ),
+            create_mock_incident_row(
+                title="Stockholm harbor incident",
+                narrative="Security reported unknown drone",
+                evidence_score=3
+            ),
+            create_mock_incident_row(
+                title="Oslo military base alert",
+                narrative="Radar detected unidentified object",
+                evidence_score=5
+            ),
+        ]
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return all incidents (simulating no search filter applied for empty search)
+            mock_run_async.return_value = [
+                {
+                    "id": str(inc["id"]),
+                    "title": inc["title"],
+                    "narrative": inc["narrative"],
+                    "occurred_at": inc["occurred_at"].isoformat(),
+                    "lat": inc["lat"],
+                    "lon": inc["lon"],
+                    "evidence_score": inc["evidence_score"],
+                    "country": inc["country"],
+                    "asset_type": inc["asset_type"],
+                    "status": inc["status"],
+                    "sources": json.loads(inc["sources"])
+                }
+                for inc in mock_incidents
+            ]
+
+            # Create mock request with empty search parameter
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search='
+            )
+
+            # Execute handler
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+
+            # Should return all 3 incidents since search is empty (no filter applied)
+            assert len(response_data) == 3
+
+            # Verify all mock incidents are returned
+            titles = [inc['title'] for inc in response_data]
+            assert "Copenhagen Airport drone sighting" in titles
+            assert "Stockholm harbor incident" in titles
+            assert "Oslo military base alert" in titles
+
+    @pytest.mark.asyncio
+    async def test_get_incidents_with_search_parameter(self):
+        """Test search parameter filters incidents by title, narrative, and location_name"""
+        # Mock incidents - some matching search term "airport", some not
+        mock_matching_incidents = [
+            create_mock_incident_row(
+                title="Drone spotted over Copenhagen Airport",
+                narrative="Multiple witnesses reported activity",
+                evidence_score=4
+            ),
+            create_mock_incident_row(
+                title="Incident near facility",
+                narrative="Security reported a drone near the airport perimeter",
+                evidence_score=3
+            ),
+        ]
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return only matching incidents (simulating database ILIKE filtering)
+            mock_run_async.return_value = [
+                {
+                    "id": str(inc["id"]),
+                    "title": inc["title"],
+                    "narrative": inc["narrative"],
+                    "occurred_at": inc["occurred_at"].isoformat(),
+                    "lat": inc["lat"],
+                    "lon": inc["lon"],
+                    "evidence_score": inc["evidence_score"],
+                    "country": inc["country"],
+                    "asset_type": inc["asset_type"],
+                    "status": inc["status"],
+                    "sources": json.loads(inc["sources"])
+                }
+                for inc in mock_matching_incidents
+            ]
+
+            # Create mock request with search parameter
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search=airport'
+            )
+
+            # Execute handler (use object.__new__ to bypass __init__ requirements)
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h._wfile = mock_request._wfile
+            h.wfile = property(lambda self: self._wfile)
+
+            # Bind mock methods to handler instance
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+            assert len(response_data) == 2
+
+            # Verify incidents contain search term in title or narrative
+            for incident in response_data:
+                title_lower = incident['title'].lower()
+                narrative_lower = incident['narrative'].lower()
+                assert 'airport' in title_lower or 'airport' in narrative_lower
+
+    @pytest.mark.asyncio
+    async def test_search_case_insensitive(self):
+        """Test that search is case-insensitive - 'Drone', 'drone', 'DRONE' return same results"""
+        # Mock incident with mixed case - should match regardless of search case
+        mock_incident = create_mock_incident_row(
+            title="Drone spotted over Copenhagen Airport",
+            narrative="Security reported a DRONE near the runway",
+            evidence_score=3
+        )
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Mock returns the same incident for any case search
+            # (simulating PostgreSQL ILIKE case-insensitive matching)
+            mock_result = [{
+                "id": str(mock_incident["id"]),
+                "title": mock_incident["title"],
+                "narrative": mock_incident["narrative"],
+                "occurred_at": mock_incident["occurred_at"].isoformat(),
+                "lat": mock_incident["lat"],
+                "lon": mock_incident["lon"],
+                "evidence_score": mock_incident["evidence_score"],
+                "country": mock_incident["country"],
+                "asset_type": mock_incident["asset_type"],
+                "status": mock_incident["status"],
+                "sources": json.loads(mock_incident["sources"])
+            }]
+            mock_run_async.return_value = mock_result
+
+            # Test lowercase search
+            mock_request_lower = MockHTTPRequestHandler(
+                path='/api/incidents?search=drone'
+            )
+            h_lower = object.__new__(handler)
+            h_lower.path = mock_request_lower.path
+            h_lower.command = mock_request_lower.command
+            h_lower.headers = mock_request_lower.headers
+            h_lower.send_response = mock_request_lower.send_response
+            h_lower.send_header = mock_request_lower.send_header
+            h_lower.end_headers = mock_request_lower.end_headers
+            h_lower.wfile = mock_request_lower._wfile
+            h_lower.handle_get()
+
+            assert mock_request_lower.response_code == 200
+            response_lower = json.loads(mock_request_lower.get_response_body())
+            assert len(response_lower) == 1
+            assert response_lower[0]['title'] == "Drone spotted over Copenhagen Airport"
+
+            # Reset mock for uppercase test
+            mock_run_async.return_value = mock_result
+
+            # Test uppercase search
+            mock_request_upper = MockHTTPRequestHandler(
+                path='/api/incidents?search=DRONE'
+            )
+            h_upper = object.__new__(handler)
+            h_upper.path = mock_request_upper.path
+            h_upper.command = mock_request_upper.command
+            h_upper.headers = mock_request_upper.headers
+            h_upper.send_response = mock_request_upper.send_response
+            h_upper.send_header = mock_request_upper.send_header
+            h_upper.end_headers = mock_request_upper.end_headers
+            h_upper.wfile = mock_request_upper._wfile
+            h_upper.handle_get()
+
+            assert mock_request_upper.response_code == 200
+            response_upper = json.loads(mock_request_upper.get_response_body())
+            assert len(response_upper) == 1
+            assert response_upper[0]['title'] == "Drone spotted over Copenhagen Airport"
+
+            # Reset mock for mixed case test
+            mock_run_async.return_value = mock_result
+
+            # Test mixed case search
+            mock_request_mixed = MockHTTPRequestHandler(
+                path='/api/incidents?search=DroNe'
+            )
+            h_mixed = object.__new__(handler)
+            h_mixed.path = mock_request_mixed.path
+            h_mixed.command = mock_request_mixed.command
+            h_mixed.headers = mock_request_mixed.headers
+            h_mixed.send_response = mock_request_mixed.send_response
+            h_mixed.send_header = mock_request_mixed.send_header
+            h_mixed.end_headers = mock_request_mixed.end_headers
+            h_mixed.wfile = mock_request_mixed._wfile
+            h_mixed.handle_get()
+
+            assert mock_request_mixed.response_code == 200
+            response_mixed = json.loads(mock_request_mixed.get_response_body())
+            assert len(response_mixed) == 1
+            assert response_mixed[0]['title'] == "Drone spotted over Copenhagen Airport"
+
+            # All three cases should return the same result
+            assert response_lower == response_upper == response_mixed
+
+    @pytest.mark.asyncio
+    async def test_search_multiple_fields(self):
+        """Test that search matches across title, narrative, and location_name fields"""
+        # Create mock incidents with search term "Copenhagen" in different fields:
+        # 1. Title contains "Copenhagen"
+        # 2. Narrative contains "Copenhagen"
+        # 3. Location_name contains "Copenhagen"
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return incidents matching in different fields
+            # (simulating database ILIKE matching on title OR narrative OR location_name)
+            mock_run_async.return_value = [
+                {
+                    "id": str(uuid4()),
+                    "title": "Copenhagen Airport drone sighting",  # Match in title
+                    "narrative": "A drone was spotted near the runway",
+                    "location_name": "Kastrup Airport",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6181,
+                    "lon": 12.6560,
+                    "evidence_score": 4,
+                    "country": "DK",
+                    "asset_type": "airport",
+                    "status": "active",
+                    "sources": []
+                },
+                {
+                    "id": str(uuid4()),
+                    "title": "Drone near power station",
+                    "narrative": "Reports from Copenhagen police confirmed sighting",  # Match in narrative
+                    "location_name": "Amager Power Station",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6500,
+                    "lon": 12.6200,
+                    "evidence_score": 3,
+                    "country": "DK",
+                    "asset_type": "power_station",
+                    "status": "active",
+                    "sources": []
+                },
+                {
+                    "id": str(uuid4()),
+                    "title": "Military facility incident",
+                    "narrative": "Unidentified drone detected by radar",
+                    "location_name": "Copenhagen Naval Base",  # Match in location_name
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6800,
+                    "lon": 12.5900,
+                    "evidence_score": 5,
+                    "country": "DK",
+                    "asset_type": "military",
+                    "status": "active",
+                    "sources": []
+                }
+            ]
+
+            # Create mock request with search parameter
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search=Copenhagen'
+            )
+
+            # Execute handler
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+
+            # Should return all 3 incidents (matched in different fields)
+            assert len(response_data) == 3
+
+            # Verify each incident contains "Copenhagen" in at least one field
+            for incident in response_data:
+                title = incident.get('title', '').lower()
+                narrative = incident.get('narrative', '').lower()
+                location_name = incident.get('location_name', '').lower()
+
+                has_match = (
+                    'copenhagen' in title or
+                    'copenhagen' in narrative or
+                    'copenhagen' in location_name
+                )
+                assert has_match, f"Incident should contain 'copenhagen' in title, narrative, or location_name"
+
+            # Verify specific incidents were returned
+            titles = [inc['title'] for inc in response_data]
+            assert "Copenhagen Airport drone sighting" in titles  # Match in title
+            assert "Drone near power station" in titles  # Match in narrative
+            assert "Military facility incident" in titles  # Match in location_name
+
+    @pytest.mark.asyncio
+    async def test_search_special_characters(self):
+        """Test that search with special characters (%, _, ', ") is safely handled"""
+        # Test various special characters that could cause SQL injection or query issues
+        special_char_queries = [
+            "%",           # SQL LIKE wildcard
+            "_",           # SQL LIKE single character wildcard
+            "'",           # SQL string delimiter
+            '"',           # Double quote
+            "'; DROP TABLE incidents; --",  # SQL injection attempt
+            "%' OR '1'='1",  # SQL injection attempt
+            "test%test",   # Embedded wildcard
+            "test_test",   # Embedded single char wildcard
+            "O'Brien",     # Name with apostrophe
+            'Drone "UAV"', # Quoted text
+        ]
+
+        for special_query in special_char_queries:
+            with patch('incidents.run_async') as mock_run_async, \
+                 patch('incidents.os.getenv') as mock_getenv, \
+                 patch('incidents.check_rate_limit') as mock_rate_limit, \
+                 patch('incidents.get_client_ip') as mock_get_ip, \
+                 patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+                # Mock environment and rate limiting
+                mock_getenv.return_value = 'postgresql://mock@localhost/test'
+                mock_rate_limit.return_value = (True, 100, 60)
+                mock_get_ip.return_value = '127.0.0.1'
+                mock_rate_headers.return_value = {}
+
+                # Mock returns empty array (simulating no matches for special char queries)
+                # The key test is that the handler doesn't crash with SQL errors
+                mock_run_async.return_value = []
+
+                # URL-encode the special query for the path
+                from urllib.parse import quote
+                encoded_query = quote(special_query, safe='')
+
+                # Create mock request with special character search
+                mock_request = MockHTTPRequestHandler(
+                    path=f'/api/incidents?search={encoded_query}'
+                )
+
+                # Execute handler
+                h = object.__new__(handler)
+                h.path = mock_request.path
+                h.command = mock_request.command
+                h.headers = mock_request.headers
+                h.send_response = mock_request.send_response
+                h.send_header = mock_request.send_header
+                h.end_headers = mock_request.end_headers
+                h.wfile = mock_request._wfile
+
+                # Handler should not crash with special characters
+                try:
+                    h.handle_get()
+                except Exception as e:
+                    pytest.fail(f"Handler crashed with special character query '{special_query}': {e}")
+
+                # Verify response is valid (200 OK with JSON)
+                assert mock_request.response_code == 200, \
+                    f"Expected 200 for query '{special_query}', got {mock_request.response_code}"
+                assert mock_request.response_headers['Content-Type'] == 'application/json', \
+                    f"Expected JSON content type for query '{special_query}'"
+
+                # Verify response body is valid JSON array
+                response_data = json.loads(mock_request.get_response_body())
+                assert isinstance(response_data, list), \
+                    f"Expected list response for query '{special_query}'"
+
+    @pytest.mark.asyncio
+    async def test_search_with_country_filter(self):
+        """Test that search works correctly when combined with country filter"""
+        # Create mock incidents that match both search="drone" and country="DK"
+        # These simulate what the database would return when both filters are applied
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return only incidents matching both search="drone" AND country="DK"
+            # (simulating database applying both filters)
+            mock_run_async.return_value = [
+                {
+                    "id": str(uuid4()),
+                    "title": "Drone spotted over Copenhagen Airport",
+                    "narrative": "Multiple witnesses reported drone activity",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6181,
+                    "lon": 12.6560,
+                    "evidence_score": 4,
+                    "country": "DK",  # Matches country filter
+                    "asset_type": "airport",
+                    "status": "active",
+                    "sources": []
+                },
+                {
+                    "id": str(uuid4()),
+                    "title": "Unknown drone near Aarhus harbor",
+                    "narrative": "Security reported a drone sighting",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 56.1629,
+                    "lon": 10.2039,
+                    "evidence_score": 3,
+                    "country": "DK",  # Matches country filter
+                    "asset_type": "harbor",
+                    "status": "active",
+                    "sources": []
+                }
+            ]
+
+            # Create mock request with both search and country parameters
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search=drone&country=DK'
+            )
+
+            # Execute handler
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+
+            # Should return 2 incidents (matching both search="drone" and country="DK")
+            assert len(response_data) == 2
+
+            # Verify all incidents contain "drone" in title or narrative
+            for incident in response_data:
+                title_lower = incident['title'].lower()
+                narrative_lower = incident['narrative'].lower()
+                assert 'drone' in title_lower or 'drone' in narrative_lower, \
+                    f"Incident should contain 'drone' in title or narrative"
+
+            # Verify all incidents have country="DK"
+            for incident in response_data:
+                assert incident['country'] == 'DK', \
+                    f"Incident should have country='DK', got '{incident['country']}'"
+
+
 class TestIncidentsErrorHandling:
     """Test error handling and edge cases"""
 

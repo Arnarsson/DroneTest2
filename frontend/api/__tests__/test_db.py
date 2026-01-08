@@ -425,3 +425,124 @@ class TestFetchIncidentsVerificationStatus:
             assert 'verified' in query
             assert 'auto_verified' in query
             assert 'pending' in query
+
+
+class TestFetchIncidentsSearch:
+    """Test search parameter handling in fetch_incidents"""
+
+    @pytest.mark.asyncio
+    async def test_search_adds_ilike_filter(self):
+        """Test search parameter adds ILIKE filter to query"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            result = await fetch_incidents(search="drone")
+
+            query = mock_conn.fetch_calls[0][0]
+            params = mock_conn.fetch_calls[0][1]
+
+            # Should have ILIKE conditions for title, narrative, location_name
+            assert 'ILIKE' in query
+            assert 'title ILIKE' in query
+            assert 'narrative ILIKE' in query
+            assert 'location_name ILIKE' in query
+            # Search pattern should have % wildcards
+            assert '%drone%' in params
+
+    @pytest.mark.asyncio
+    async def test_search_whitespace_only_returns_all(self):
+        """Test whitespace-only search returns all incidents (no filter applied)"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            # Whitespace-only search should be treated as no search
+            result = await fetch_incidents(search="   ")
+
+            query = mock_conn.fetch_calls[0][0]
+
+            # Should NOT have ILIKE in query since whitespace-only search is ignored
+            assert 'ILIKE' not in query
+
+    @pytest.mark.asyncio
+    async def test_search_unicode_characters(self):
+        """Test search handles Unicode characters (æ, ø, å, ä, ö)"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            result = await fetch_incidents(search="København æøå")
+
+            query = mock_conn.fetch_calls[0][0]
+            params = mock_conn.fetch_calls[0][1]
+
+            # Unicode should be passed through correctly
+            assert 'ILIKE' in query
+            assert '%København æøå%' in params
+
+    @pytest.mark.asyncio
+    async def test_search_special_characters_parameterized(self):
+        """Test special characters are handled safely via parameterized queries"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            # Test various special characters that could cause SQL injection
+            result = await fetch_incidents(search="test%'\"OR 1=1")
+
+            query = mock_conn.fetch_calls[0][0]
+            params = mock_conn.fetch_calls[0][1]
+
+            # Special characters should be in params, not in query string (safe)
+            assert 'ILIKE' in query
+            # The pattern should be passed as a parameter, not interpolated
+            assert '%test%\'"OR 1=1%' in params
+            # Query should use parameterized placeholder
+            assert '$' in query
+
+    @pytest.mark.asyncio
+    async def test_search_combined_with_other_filters(self):
+        """Test search works with other filters like country and status"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            result = await fetch_incidents(
+                search="drone",
+                country="DK",
+                status="active",
+                min_evidence=2
+            )
+
+            query = mock_conn.fetch_calls[0][0]
+            params = mock_conn.fetch_calls[0][1]
+
+            # Should have all filters
+            assert 'ILIKE' in query  # search
+            assert 'country' in query  # country filter
+            assert 'status' in query  # status filter
+            assert 'evidence_score' in query  # min_evidence
+            # Verify parameters include search pattern
+            assert '%drone%' in params
+
+    @pytest.mark.asyncio
+    async def test_search_empty_string_no_filter(self):
+        """Test empty string search returns all incidents"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            result = await fetch_incidents(search="")
+
+            query = mock_conn.fetch_calls[0][0]
+
+            # Empty search should not add ILIKE filter
+            assert 'ILIKE' not in query
+
+    @pytest.mark.asyncio
+    async def test_search_none_no_filter(self):
+        """Test None search returns all incidents"""
+        mock_conn = MockAsyncPGConnection(mock_data=[])
+
+        with patch('db.get_connection', return_value=mock_conn):
+            result = await fetch_incidents(search=None)
+
+            query = mock_conn.fetch_calls[0][0]
+
+            # None search should not add ILIKE filter
+            assert 'ILIKE' not in query
