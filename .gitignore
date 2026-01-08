@@ -61,3 +61,12 @@ frontend/.env.production
 *.env.production
 .coverage
 htmlcov/
+
+# Auto-Claude specs (should not be tracked)
+.auto-claude/specs/
+.auto-claude/ideation/
+.auto-claude/.gitignore_checked
+.auto-claude/file_evolution.json
+.auto-claude/project_index.json
+.claude_settings.json
+.worktrees/
