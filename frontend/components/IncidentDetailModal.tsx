@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { Incident } from '../types'
@@ -136,6 +136,117 @@ function getCountryFlag(country: string): string {
     'LT': '🇱🇹',
   }
   return countryFlags[country] || '🌍'
+}
+
+// Location section component with coordinates and copy-to-clipboard
+function LocationSection({ incident }: { incident: Incident }) {
+  const [copied, setCopied] = useState(false)
+
+  // Format coordinates to 4 decimal places
+  const formatCoordinate = (value: number): string => {
+    return value.toFixed(4)
+  }
+
+  const coordinateString = `${formatCoordinate(incident.lat)}, ${formatCoordinate(incident.lon)}`
+
+  // Generate Google Maps URL
+  const googleMapsUrl = `https://www.google.com/maps?q=${incident.lat},${incident.lon}`
+
+  // Copy coordinates to clipboard
+  const handleCopyCoordinates = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(coordinateString)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea')
+      textArea.value = coordinateString
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }, [coordinateString])
+
+  return (
+    <section aria-labelledby="location-heading">
+      <h3
+        id="location-heading"
+        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+      >
+        Location
+      </h3>
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
+        {/* Location name */}
+        {incident.location_name && (
+          <div className="flex items-start gap-2">
+            <span className="text-lg" role="img" aria-hidden="true">📍</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {incident.location_name}
+            </span>
+          </div>
+        )}
+
+        {/* Region if available and different from header display */}
+        {incident.region && (
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-base" role="img" aria-hidden="true">🗺️</span>
+            <span>{incident.region}</span>
+          </div>
+        )}
+
+        {/* Coordinates with copy button */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">Coordinates:</span>
+            <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-sm font-mono text-gray-800 dark:text-gray-200">
+              {coordinateString}
+            </code>
+          </div>
+
+          {/* Copy button */}
+          <button
+            onClick={handleCopyCoordinates}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors focus-ring"
+            aria-label={copied ? 'Coordinates copied' : 'Copy coordinates to clipboard'}
+          >
+            {copied ? (
+              <>
+                <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Google Maps link */}
+        <a
+          href={googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          Open in Google Maps
+        </a>
+      </div>
+    </section>
+  )
 }
 
 interface IncidentDetailModalProps {
@@ -307,7 +418,8 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
                   ) : null
                 })()}
 
-                {/* Additional sections will be implemented in subtasks 2.3-2.6 */}
+                {/* Location section */}
+                <LocationSection incident={incident} />
               </div>
             </div>
           </motion.div>
