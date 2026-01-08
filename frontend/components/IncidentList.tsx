@@ -279,7 +279,7 @@ function IncidentCard({ incident, index, isInGroup = false, onClick }: { inciden
         isInGroup
           ? 'bg-transparent'
           : 'bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-8 border border-gray-200 dark:border-gray-800'
-      } ${onClick ? 'cursor-pointer focus-ring' : ''}`}
+      } ${onClick ? 'cursor-pointer focus-ring group' : ''}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
@@ -373,6 +373,18 @@ function IncidentCard({ incident, index, isInGroup = false, onClick }: { inciden
               </span>
             )}
           </div>
+        </div>
+      )}
+
+      {/* View Details Indicator */}
+      {onClick && (
+        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+          <span className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 font-medium group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+            View details
+            <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
         </div>
       )}
     </motion.article>
