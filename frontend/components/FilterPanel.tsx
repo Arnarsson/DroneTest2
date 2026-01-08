@@ -51,6 +51,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
       assetType: null,
       dateRange: 'all'
     })
+    toast.success('Filters cleared')
   }
 
   const toggleSection = (section: keyof typeof expandedSections) => {
