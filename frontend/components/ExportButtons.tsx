@@ -58,7 +58,7 @@ export function ExportButtons({ incidents, isDisabled = false }: ExportButtonsPr
     downloadFile(jsonContent, filename, 'application/json')
   }
 
-  const buttonBaseClasses = 'flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all'
+  const buttonBaseClasses = 'flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all focus-ring'
   const buttonEnabledClasses = 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
   const buttonDisabledClasses = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
 
