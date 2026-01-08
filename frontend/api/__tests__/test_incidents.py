@@ -481,6 +481,90 @@ class TestIncidentsSearch:
     """Test search query parameter functionality"""
 
     @pytest.mark.asyncio
+    async def test_empty_search_returns_all(self):
+        """Test that empty search parameter returns all incidents (same as no filter)"""
+        # Mock incidents - should return all since search is empty
+        mock_incidents = [
+            create_mock_incident_row(
+                title="Copenhagen Airport drone sighting",
+                narrative="Multiple witnesses reported activity",
+                evidence_score=4
+            ),
+            create_mock_incident_row(
+                title="Stockholm harbor incident",
+                narrative="Security reported unknown drone",
+                evidence_score=3
+            ),
+            create_mock_incident_row(
+                title="Oslo military base alert",
+                narrative="Radar detected unidentified object",
+                evidence_score=5
+            ),
+        ]
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return all incidents (simulating no search filter applied for empty search)
+            mock_run_async.return_value = [
+                {
+                    "id": str(inc["id"]),
+                    "title": inc["title"],
+                    "narrative": inc["narrative"],
+                    "occurred_at": inc["occurred_at"].isoformat(),
+                    "lat": inc["lat"],
+                    "lon": inc["lon"],
+                    "evidence_score": inc["evidence_score"],
+                    "country": inc["country"],
+                    "asset_type": inc["asset_type"],
+                    "status": inc["status"],
+                    "sources": json.loads(inc["sources"])
+                }
+                for inc in mock_incidents
+            ]
+
+            # Create mock request with empty search parameter
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search='
+            )
+
+            # Execute handler
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+
+            # Should return all 3 incidents since search is empty (no filter applied)
+            assert len(response_data) == 3
+
+            # Verify all mock incidents are returned
+            titles = [inc['title'] for inc in response_data]
+            assert "Copenhagen Airport drone sighting" in titles
+            assert "Stockholm harbor incident" in titles
+            assert "Oslo military base alert" in titles
+
+    @pytest.mark.asyncio
     async def test_get_incidents_with_search_parameter(self):
         """Test search parameter filters incidents by title, narrative, and location_name"""
         # Mock incidents - some matching search term "airport", some not
