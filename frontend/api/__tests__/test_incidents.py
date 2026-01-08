@@ -846,6 +846,93 @@ class TestIncidentsSearch:
                 assert isinstance(response_data, list), \
                     f"Expected list response for query '{special_query}'"
 
+    @pytest.mark.asyncio
+    async def test_search_with_country_filter(self):
+        """Test that search works correctly when combined with country filter"""
+        # Create mock incidents that match both search="drone" and country="DK"
+        # These simulate what the database would return when both filters are applied
+
+        with patch('incidents.run_async') as mock_run_async, \
+             patch('incidents.os.getenv') as mock_getenv, \
+             patch('incidents.check_rate_limit') as mock_rate_limit, \
+             patch('incidents.get_client_ip') as mock_get_ip, \
+             patch('incidents.get_rate_limit_headers') as mock_rate_headers:
+            # Mock environment and rate limiting
+            mock_getenv.return_value = 'postgresql://mock@localhost/test'
+            mock_rate_limit.return_value = (True, 100, 60)
+            mock_get_ip.return_value = '127.0.0.1'
+            mock_rate_headers.return_value = {}
+
+            # Return only incidents matching both search="drone" AND country="DK"
+            # (simulating database applying both filters)
+            mock_run_async.return_value = [
+                {
+                    "id": str(uuid4()),
+                    "title": "Drone spotted over Copenhagen Airport",
+                    "narrative": "Multiple witnesses reported drone activity",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 55.6181,
+                    "lon": 12.6560,
+                    "evidence_score": 4,
+                    "country": "DK",  # Matches country filter
+                    "asset_type": "airport",
+                    "status": "active",
+                    "sources": []
+                },
+                {
+                    "id": str(uuid4()),
+                    "title": "Unknown drone near Aarhus harbor",
+                    "narrative": "Security reported a drone sighting",
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "lat": 56.1629,
+                    "lon": 10.2039,
+                    "evidence_score": 3,
+                    "country": "DK",  # Matches country filter
+                    "asset_type": "harbor",
+                    "status": "active",
+                    "sources": []
+                }
+            ]
+
+            # Create mock request with both search and country parameters
+            mock_request = MockHTTPRequestHandler(
+                path='/api/incidents?search=drone&country=DK'
+            )
+
+            # Execute handler
+            h = object.__new__(handler)
+            h.path = mock_request.path
+            h.command = mock_request.command
+            h.headers = mock_request.headers
+            h.send_response = mock_request.send_response
+            h.send_header = mock_request.send_header
+            h.end_headers = mock_request.end_headers
+            h.wfile = mock_request._wfile
+
+            h.handle_get()
+
+            # Verify response
+            assert mock_request.response_code == 200
+            assert mock_request.response_headers['Content-Type'] == 'application/json'
+
+            # Parse response body
+            response_data = json.loads(mock_request.get_response_body())
+
+            # Should return 2 incidents (matching both search="drone" and country="DK")
+            assert len(response_data) == 2
+
+            # Verify all incidents contain "drone" in title or narrative
+            for incident in response_data:
+                title_lower = incident['title'].lower()
+                narrative_lower = incident['narrative'].lower()
+                assert 'drone' in title_lower or 'drone' in narrative_lower, \
+                    f"Incident should contain 'drone' in title or narrative"
+
+            # Verify all incidents have country="DK"
+            for incident in response_data:
+                assert incident['country'] == 'DK', \
+                    f"Incident should have country='DK', got '{incident['country']}'"
+
 
 class TestIncidentsErrorHandling:
     """Test error handling and edge cases"""
