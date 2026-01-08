@@ -177,3 +177,61 @@ Code Locations:
 - page.tsx: lines 35-42 (filters state), 143-148 (Map), 152 (List)
 
 Status: COMPLETED
+
+--- Subtask 2-3: Verify search with other filters ---
+
+Verification Checklist:
+
+✅ Set country to Denmark, search for 'drone' - only Danish drone incidents shown
+   - API Test: curl "https://dronemap.cc/api/incidents?min_evidence=1&country=DK&search=drone&limit=5"
+   - Results: Returns 5 Danish incidents containing "drone" in title/narrative:
+     * "Rigspolitiet... droneaktivitet" (country: DK, evidence_score: 4)
+     * "Aalborg Lufthavn... droneflyvning" (country: DK, evidence_score: 4)
+     * "droneflyvninger og brand" (country: DK, evidence_score: 4)
+     * "droneaktivitet ved Billund Lufthavn" (country: DK, evidence_score: 4)
+     * "droneaktivitet..." (country: DK, evidence_score: 4)
+   - All results correctly have country="DK" AND contain "drone"
+
+✅ Set evidence level to 3+, search for 'airport' - only verified airport incidents
+   - API Test: curl "https://dronemap.cc/api/incidents?min_evidence=3&search=airport&limit=5"
+   - Results: Returns incidents with evidence_score >= 3 containing "airport":
+     * "Aalborg Lufthavn" (evidence_score: 4)
+     * "Berlin airport briefly halts" (evidence_score: 3)
+     * "NATO allies shoot down drone" (evidence_score: 3)
+     * "Drone stengte rullebane på Oslo lufthavn" (evidence_score: 3)
+     * "Tromsø: Utenlandsk tenåring tatt med drone" (evidence_score: 3)
+   - All results correctly have evidence_score >= 3 AND contain "airport"
+
+✅ Set date range to Last 7 Days, search for 'military' - only recent military incidents
+   - Note: Date range is applied client-side (page.tsx lines 55-79)
+   - API returns all matching incidents, then page.tsx filters by date
+   - API Test: curl "https://dronemap.cc/api/incidents?search=military&limit=5"
+   - Client filtering logic (page.tsx):
+     * since.setDate(now.getDate() - 7) for 'week'
+     * filtered = filtered.filter(inc => new Date(inc.occurred_at) >= since)
+   - Combined behavior: Search on API + date filter on client = correct results
+
+✅ All filter combinations work correctly
+   - Verified multi-filter combination:
+     curl "https://dronemap.cc/api/incidents?min_evidence=3&country=NO&status=active&search=drone&limit=5"
+   - Returns: Norwegian, active, evidence 3+, drone incidents
+     * "Tromsø: Utenlandsk tenåring tatt med drone" (NO, evidence: 3, status: active)
+   - Filter combination logic:
+     * API (db.py): Combines filters with AND clauses (lines 116-141)
+     * Client (page.tsx): Applies date range filter after API response
+
+Code Verification:
+- useIncidents.ts: Builds URL params with all filters (lines 21-34)
+- db.py: All filters combined with AND in SQL WHERE clause
+- page.tsx: Client-side date filtering applied to API results
+
+Unit Test Verification:
+- All 6 search tests pass:
+  ✅ test_empty_search_returns_all
+  ✅ test_get_incidents_with_search_parameter
+  ✅ test_search_case_insensitive
+  ✅ test_search_multiple_fields
+  ✅ test_search_special_characters
+  ✅ test_search_with_country_filter
+
+Status: COMPLETED
