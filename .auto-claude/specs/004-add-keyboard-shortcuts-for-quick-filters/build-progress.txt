@@ -1,0 +1,77 @@
+# Build Progress: Add Keyboard Shortcuts for Quick Filters
+Task ID: 004-add-keyboard-shortcuts-for-quick-filters
+
+## Status: Complete ✓
+
+## Implementation Plan Summary
+
+### Phase 1: Create useKeyboardShortcuts Hook
+- [x] 1.1 Create useKeyboardShortcuts hook (frontend/hooks/useKeyboardShortcuts.ts)
+- [x] 1.2 Add unit tests for useKeyboardShortcuts
+
+### Phase 2: Integrate Keyboard Shortcuts in Main Page
+- [x] 2.1 Integrate useKeyboardShortcuts in page.tsx
+
+### Phase 3: Add Visual Keyboard Hints
+- [x] 3.1 Add shortcut key prop to QuickFilterChip
+- [x] 3.2 Add shortcut keys to quick filter chip instances
+- [x] 3.3 Add keyboard hint to reset button and filter toggle
+
+### Phase 4: Testing and Documentation
+- [x] 4.1 Add keyboard shortcut tests to FilterPanel.test.tsx
+- [x] 4.2 Run tests and verify functionality
+
+## Keyboard Shortcuts Mapping
+| Key | Action | Filter Property |
+|-----|--------|-----------------|
+| A | Toggle Airports | assetType: 'airport' / null |
+| M | Toggle Military | assetType: 'military' / null |
+| T | Toggle Today | dateRange: 'day' / 'all' |
+| V | Toggle Verified | minEvidence: 3 / 1 |
+| R | Reset All | Reset to defaults |
+| F | Toggle Filter Panel | isFilterPanelOpen |
+
+## Key Files
+- frontend/hooks/useKeyboardShortcuts.ts (new)
+- frontend/app/page.tsx (modify)
+- frontend/components/FilterPanel.tsx (modify)
+- frontend/components/AboutModal.tsx (reference for keyboard pattern)
+
+## Test Coverage Summary
+- useKeyboardShortcuts.test.tsx: 14 test cases covering:
+  - Callback invocation for correct keys
+  - Case-insensitive key matching (lowercase/uppercase)
+  - Input field detection (input, textarea, select, contenteditable)
+  - Cleanup on unmount
+  - Shortcut updates when props change
+  - Special keys (Escape, Enter)
+  - Empty shortcuts map handling
+
+- FilterPanel.test.tsx: 8 new keyboard hint tests covering:
+  - Keyboard hints displayed on quick filter chips (A, M, T, V)
+  - F hint displayed in filter header
+  - R hint displayed on reset button
+  - aria-hidden attributes for accessibility
+  - title attributes for tooltip hints
+  - Mobile aria-label includes keyboard hint
+
+## Manual Testing Checklist (for browser verification)
+- [ ] Press 'A' to toggle airport filter
+- [ ] Press 'M' to toggle military filter
+- [ ] Press 'T' to toggle today filter
+- [ ] Press 'V' to toggle verified filter
+- [ ] Press 'R' to reset all filters
+- [ ] Press 'F' to toggle filter panel
+- [ ] Verify shortcuts are case-insensitive (a/A, m/M, etc.)
+- [ ] Verify shortcuts DO NOT fire when typing in dropdowns/select elements
+- [ ] Verify keyboard hints are visible on desktop
+- [ ] Verify keyboard hints are hidden on mobile
+
+## Session Log
+- [2026-01-07] Created implementation plan with 4 phases, 8 subtasks
+- [2026-01-07] Analyzed existing QuickFilterChip pattern in FilterPanel.tsx
+- [2026-01-07] Identified keyboard handler pattern in AboutModal.tsx
+- [2026-01-07] Phase 1 complete: useKeyboardShortcuts hook created with tests
+- [2026-01-07] Phase 2 complete: Hook integrated in page.tsx
+- [2026-01-07] Phase 3 complete: Visual keyboard hints added to UI
+- [2026-01-07] Phase 4 complete: FilterPanel tests added, code review verified

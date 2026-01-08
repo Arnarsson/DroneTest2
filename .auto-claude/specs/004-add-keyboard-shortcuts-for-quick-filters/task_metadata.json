@@ -1,0 +1,13 @@
+{
+  "sourceType": "ideation",
+  "ideationType": "code_improvements",
+  "ideaId": "ci-005",
+  "rationale": "QuickFilterChip in FilterPanel.tsx already defines the common quick filter toggles (airports, military, today, verified). All action handlers exist - just need keyboard event bindings. The onToggle for filter panel and resetFilters function are already exposed.",
+  "category": "feature",
+  "estimatedEffort": "small",
+  "complexity": "small",
+  "affectedFiles": [
+    "frontend/app/page.tsx",
+    "frontend/components/FilterPanel.tsx"
+  ]
+}

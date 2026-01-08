@@ -1,0 +1,15 @@
+{
+  "discovered_files": {
+    "frontend/hooks/useKeyboardShortcuts.ts": {
+      "description": "Custom hook for keyboard shortcuts with input field detection (input/textarea/select/contenteditable), case-insensitive key matching, and proper cleanup on unmount. Uses the same pattern as AboutModal.tsx for keydown events.",
+      "category": "hooks",
+      "discovered_at": "2026-01-07T21:17:41.060456+00:00"
+    },
+    "frontend/app/page.tsx": {
+      "description": "Main page integrates useKeyboardShortcuts hook for quick filter keyboard shortcuts: A (airports), M (military), T (today), V (verified 3+), R (reset), F (toggle panel). Shortcut map is memoized with useMemo for stable reference.",
+      "category": "keyboard-shortcuts",
+      "discovered_at": "2026-01-07T21:22:25.079576+00:00"
+    }
+  },
+  "last_updated": "2026-01-07T21:22:25.079589+00:00"
+}

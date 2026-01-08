@@ -125,7 +125,16 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h2>
+                <span
+                  className="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-mono rounded border bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  title="Press F to toggle filters"
+                >
+                  F
+                </span>
+              </div>
               <motion.p
                 className="text-sm text-gray-500 dark:text-gray-400 mt-1"
                 key={incidentCount}
@@ -175,9 +184,15 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                 </span>
                 <button
                   onClick={resetFilters}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold rounded focus-ring"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1 rounded focus-ring"
                 >
                   Clear all
+                  <span
+                    className="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-mono rounded border bg-blue-100 dark:bg-blue-800/50 border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-300"
+                    aria-hidden="true"
+                  >
+                    R
+                  </span>
                 </button>
               </motion.div>
             )}
@@ -194,24 +209,28 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                 onClick={() => handleChange('assetType', filters.assetType === 'airport' ? null : 'airport')}
                 icon="✈️"
                 label="Airports"
+                shortcutKey="A"
               />
               <QuickFilterChip
                 active={filters.assetType === 'military'}
                 onClick={() => handleChange('assetType', filters.assetType === 'military' ? null : 'military')}
                 icon="🛡️"
                 label="Military"
+                shortcutKey="M"
               />
               <QuickFilterChip
                 active={filters.dateRange === 'day'}
                 onClick={() => handleChange('dateRange', filters.dateRange === 'day' ? 'all' : 'day')}
                 icon="🕐"
                 label="Today"
+                shortcutKey="T"
               />
               <QuickFilterChip
                 active={filters.minEvidence >= 3}
                 onClick={() => handleChange('minEvidence', filters.minEvidence >= 3 ? 1 : 3)}
                 icon="✓"
                 label="Verified"
+                shortcutKey="V"
               />
             </div>
           </div>
@@ -388,9 +407,10 @@ interface QuickFilterChipProps {
   onClick: () => void
   icon: string
   label: string
+  shortcutKey?: string
 }
 
-function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps) {
+function QuickFilterChip({ active, onClick, icon, label, shortcutKey }: QuickFilterChipProps) {
   return (
     <motion.button
       onClick={onClick}
@@ -401,10 +421,23 @@ function QuickFilterChip({ active, onClick, icon, label }: QuickFilterChipProps)
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
+      title={shortcutKey ? `Press ${shortcutKey} to toggle` : undefined}
     >
       <span className="flex items-center gap-1.5">
         <span>{icon}</span>
         <span>{label}</span>
+        {shortcutKey && (
+          <span
+            className={`hidden lg:inline-flex items-center justify-center ml-1 px-1.5 py-0.5 text-[10px] font-mono rounded border ${
+              active
+                ? 'bg-blue-500/50 border-blue-400/50 text-blue-100'
+                : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400'
+            }`}
+            aria-hidden="true"
+          >
+            {shortcutKey}
+          </span>
+        )}
       </span>
     </motion.button>
   )

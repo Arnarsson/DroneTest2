@@ -154,9 +154,10 @@ export default function Home() {
     };
   }, []);
 
-  // Keyboard shortcuts for view switching and filter panel toggle
+  // Keyboard shortcuts for view switching, filter panel, and quick filters
   const keyboardShortcuts = useMemo(
     () => ({
+      // View switching shortcuts
       [SHORTCUT_KEYS.MAP_VIEW]: () => {
         setView("map");
         announce(VIEW_LABELS.map);
@@ -169,6 +170,7 @@ export default function Home() {
         setView("analytics");
         announce(VIEW_LABELS.analytics);
       },
+      // Filter panel toggle
       [SHORTCUT_KEYS.FILTER_TOGGLE]: () => {
         setIsFilterPanelOpen((prev) => {
           const newState = !prev;
@@ -176,9 +178,56 @@ export default function Home() {
           return newState;
         });
       },
+      // Quick filter shortcuts
+      // A: Toggle airports filter
+      a: () => {
+        setFilters((prev) => ({
+          ...prev,
+          assetType: prev.assetType === "airport" ? null : "airport",
+        }));
+        announce(filters.assetType === "airport" ? "Airport filter disabled" : "Airport filter enabled");
+      },
+      // M: Toggle military filter
+      m: () => {
+        setFilters((prev) => ({
+          ...prev,
+          assetType: prev.assetType === "military" ? null : "military",
+        }));
+        announce(filters.assetType === "military" ? "Military filter disabled" : "Military filter enabled");
+      },
+      // T: Toggle today (last 24 hours) filter
+      t: () => {
+        setFilters((prev) => ({
+          ...prev,
+          dateRange: prev.dateRange === "day" ? "all" : "day",
+        }));
+        announce(filters.dateRange === "day" ? "Today filter disabled" : "Today filter enabled");
+      },
+      // V: Toggle verified (3+ evidence) filter
+      v: () => {
+        setFilters((prev) => ({
+          ...prev,
+          minEvidence: prev.minEvidence >= 3 ? 1 : 3,
+        }));
+        announce(filters.minEvidence >= 3 ? "Verified filter disabled" : "Verified filter enabled");
+      },
+      // R: Reset all filters
+      r: () => {
+        setFilters({
+          minEvidence: 1,
+          country: "all",
+          status: "all",
+          assetType: null,
+          dateRange: "all",
+          searchQuery: "",
+        });
+        announce("All filters reset");
+      },
     }),
-    [announce]
+    [announce, filters.assetType, filters.dateRange, filters.minEvidence]
   );
+
+  // Register keyboard shortcuts
   useKeyboardShortcuts(keyboardShortcuts);
 
   return (
