@@ -83,6 +83,7 @@ export function IncidentList({ incidents, isLoading }: IncidentListProps) {
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-left border border-blue-200 dark:border-blue-800">
             <p className="text-sm text-blue-900 dark:text-blue-200 font-medium mb-2">💡 Try:</p>
             <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+              <li>• Clearing the search query</li>
               <li>• Lowering the evidence level filter</li>
               <li>• Expanding the date range</li>
               <li>• Selecting "All Countries"</li>
