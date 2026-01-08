@@ -157,14 +157,18 @@ Configure Sentry to notify on:
 ## Rate Limiting Monitoring
 
 API rate limiting is implemented with:
-- **Limit**: 100 requests per minute per IP
-- **Window**: 60 seconds
+- **Limit**: 100 requests per minute per IP (configurable)
+- **Window**: 60 seconds (configurable)
 - **Response**: 429 status with `Retry-After` header
+- **Backend**: Distributed via Upstash Redis (serverless-compatible)
 
 Monitor rate limiting via:
 - Sentry: Look for 429 errors
 - Vercel logs: Check rate limit violations
 - API response headers: `X-RateLimit-Remaining`
+- Upstash dashboard: Monitor Redis usage
+
+For detailed configuration and setup, see [API Rate Limiting](API_RATE_LIMITING.md).
 
 ## Security Monitoring
 

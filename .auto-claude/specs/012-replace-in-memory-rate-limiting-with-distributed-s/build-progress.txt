@@ -1,0 +1,59 @@
+# Build Progress: Replace in-memory rate limiting with distributed solution
+
+## Status: Complete (10/10 subtasks completed)
+
+## Summary
+Replace the in-memory rate limiter (`frontend/api/rate_limit.py`) with a distributed
+solution using Upstash Redis. The current implementation doesn't work in Vercel
+serverless because each instance has isolated memory.
+
+## Solution: Upstash Redis
+- Serverless-optimized Redis with REST API (no persistent connections)
+- Free tier: 10,000 requests/day
+- Adds ~1-5ms latency (acceptable for rate limiting)
+- Falls back to in-memory for local development
+
+## Implementation Plan (5 Phases)
+
+### Phase 1: Setup and Dependencies
+- [x] 1.1: Add upstash-redis to frontend/requirements.txt
+- [x] 1.2: Document UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN env vars
+
+### Phase 2: Implement Distributed Rate Limiter
+- [x] 2.1: Create frontend/api/distributed_rate_limit.py with Redis sliding window
+- [x] 2.2: Add fallback to in-memory when Redis unavailable
+
+### Phase 3: Integration
+- [x] 3.1: Update incidents.py to use distributed_rate_limit
+- [x] 3.2: Deprecate old rate_limit.py
+
+### Phase 4: Testing
+- [x] 4.1: Create tests for distributed rate limiter
+- [x] 4.2: Update incidents tests to mock new module
+
+### Phase 5: Documentation and Verification
+- [x] 5.1: Create docs/API_RATE_LIMITING.md
+- [x] 5.2: Run all tests and verify
+
+## Key Files
+- Current: frontend/api/rate_limit.py (in-memory, DEPRECATED)
+- New: frontend/api/distributed_rate_limit.py (Redis-backed)
+- Consumer: frontend/api/incidents.py
+
+## Interface (unchanged)
+- check_rate_limit(ip) -> (allowed, remaining, reset_after)
+- get_rate_limit_headers(remaining, reset_after) -> dict
+- get_client_ip(headers) -> str
+
+## Progress Log
+- 2025-01-07: Created implementation plan with 5 phases, 10 subtasks
+- 2026-01-07: Completed 1.1 - Added upstash-redis>=1.0.0 to frontend/requirements.txt
+- 2026-01-07: Completed 1.2 - Documented env vars in .env.local.example
+- 2026-01-07: Completed 2.1 - Created distributed_rate_limit.py with Redis sliding window
+- 2026-01-07: Completed 2.2 - Added in-memory fallback when Redis unavailable
+- 2026-01-07: Completed 3.1 - Updated incidents.py to use distributed_rate_limit
+- 2026-01-07: Completed 3.2 - Added deprecation notice to old rate_limit.py
+- 2026-01-07: Completed 4.1 - Created 34 comprehensive tests for distributed rate limiter
+- 2026-01-07: Completed 4.2 - Updated incidents tests with rate limiting mocks
+- 2026-01-07: Completed 5.1 - Created API_RATE_LIMITING.md documentation
+- 2026-01-07: Completed 5.2 - All 34 distributed rate limiter tests pass

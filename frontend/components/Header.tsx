@@ -104,7 +104,7 @@ export function Header({ incidentCount, isLoading, currentView, onViewChange }: 
             {/* About button */}
             <button
               onClick={openModal}
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all focus-ring"
               title="About DroneWatch"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -159,7 +159,7 @@ function ViewTab({ active, onClick, label, shortcutKey, compact }: ViewTabProps)
       aria-label={`Switch to ${label.toLowerCase()} view (press ${shortcutKey})`}
       aria-keyshortcuts={shortcutKey}
       aria-current={active ? 'page' : undefined}
-      className={`relative px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
+      className={`relative px-3 py-1.5 text-[10px] font-bold tracking-wider transition-all rounded-md focus-ring ${
         active
           ? 'text-white'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'

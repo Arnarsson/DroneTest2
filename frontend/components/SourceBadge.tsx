@@ -78,7 +78,7 @@ export function SourceBadge({ url, type = 'other', title, className = '' }: Sour
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border transition-all ${config.color} ${config.hoverColor} ${className}`}
+        className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border transition-all focus-ring ${config.color} ${config.hoverColor} ${className}`}
         whileHover={{ scale: 1.03, y: -2 }}
         whileTap={{ scale: 0.98 }}
         aria-label={`View source: ${title || domain}`}

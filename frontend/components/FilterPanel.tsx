@@ -51,6 +51,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
       assetType: null,
       dateRange: 'all'
     })
+    toast.success('Filters cleared')
   }
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -65,7 +66,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
         aria-label={`${isOpen ? 'Close' : 'Open'} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ''} (press ${SHORTCUT_KEYS.FILTER_TOGGLE.toUpperCase()})`}
         aria-expanded={isOpen}
         aria-keyshortcuts={SHORTCUT_KEYS.FILTER_TOGGLE}
-        className="lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all"
+        className="lg:hidden fixed bottom-20 right-4 z-[999] bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-elevated p-4 transition-all focus-ring"
         whileHover={{ scale: 1.08, rotate: 5 }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, scale: 0 }}
@@ -145,7 +146,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
             </div>
             <button
               onClick={onToggle}
-              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus-ring"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -183,7 +184,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                 </span>
                 <button
                   onClick={resetFilters}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1 rounded focus-ring"
                 >
                   Clear all
                   <span
@@ -249,7 +250,7 @@ export function FilterPanel({ filters, onChange, incidentCount, isOpen, onToggle
                   <motion.button
                     key={level}
                     onClick={() => handleChange('minEvidence', level)}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all focus-ring ${
                       filters.minEvidence === level
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -369,7 +370,7 @@ function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionP
     <div>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between mb-3 group"
+        className="w-full flex items-center justify-between mb-3 group rounded focus-ring"
       >
         <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
           {title}
@@ -413,7 +414,7 @@ function QuickFilterChip({ active, onClick, icon, label, shortcutKey }: QuickFil
   return (
     <motion.button
       onClick={onClick}
-      className={`px-3 py-2 text-sm rounded-full font-medium transition-all ${
+      className={`px-3 py-2 text-sm rounded-full font-medium transition-all focus-ring ${
         active
           ? 'bg-blue-600 text-white shadow-md'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'

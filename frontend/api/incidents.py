@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # Import with error handling to catch initialization failures
 try:
     from db import fetch_incidents, run_async
-    from rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
+    from distributed_rate_limit import get_client_ip, check_rate_limit, get_rate_limit_headers
 except Exception as e:
     # Log import errors for debugging
     print(f"CRITICAL: Failed to import modules: {str(e)}", file=sys.stderr)
