@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { IncidentList } from '../IncidentList'
 import type { Incident } from '@/types'
 
@@ -10,10 +11,24 @@ jest.mock('framer-motion', () => ({
         {children}
       </button>
     ),
-    div: ({ children, onClick, className, ...props }: any) => (
-      <div onClick={onClick} className={className} {...props}>
-        {children}
-      </div>
+    div: React.forwardRef(
+      (
+        { children, onClick, className, role, 'aria-modal': ariaModal, 'aria-labelledby': ariaLabelledby, 'aria-describedby': ariaDescribedby, ...props }: any,
+        ref: React.Ref<HTMLDivElement>
+      ) => (
+        <div
+          ref={ref}
+          onClick={onClick}
+          className={className}
+          role={role}
+          aria-modal={ariaModal}
+          aria-labelledby={ariaLabelledby}
+          aria-describedby={ariaDescribedby}
+          {...props}
+        >
+          {children}
+        </div>
+      )
     ),
     p: ({ children, className, ...props }: any) => (
       <p className={className} {...props}>
@@ -29,6 +44,19 @@ jest.mock('framer-motion', () => ({
       <span className={className} {...props}>
         {children}
       </span>
+    ),
+    article: ({ children, onClick, onKeyDown, className, tabIndex, role, 'aria-label': ariaLabel, ...props }: any) => (
+      <article
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+        className={className}
+        tabIndex={tabIndex}
+        role={role}
+        aria-label={ariaLabel}
+        {...props}
+      >
+        {children}
+      </article>
     ),
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
@@ -295,6 +323,317 @@ describe('IncidentList', () => {
           incidents: manyIncidents,
         })
       )
+    })
+  })
+
+  describe('IncidentDetailModal Integration', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+      // Reset body overflow that modal sets
+      document.body.style.overflow = 'unset'
+    })
+
+    it('opens modal when clicking an incident card', () => {
+      const incidents = [
+        createMockIncident({ id: '1', title: 'Test Incident for Modal' }),
+      ]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Modal should not be visible initially
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+      // Click on the incident card
+      const card = screen.getByRole('button', { name: /View details for incident: Test Incident for Modal/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should now be visible
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    it('displays correct incident data in the modal', () => {
+      const testIncident = createMockIncident({
+        id: 'test-123',
+        title: 'Unique Modal Test Incident',
+        narrative: 'This is a unique narrative for testing the modal content.',
+        location_name: 'Test Location for Modal',
+        country: 'DK',
+        evidence_score: 3,
+        sources: [
+          {
+            source_url: 'https://example.com/test',
+            source_type: 'news',
+            source_title: 'Test News Source',
+          },
+        ],
+      })
+      render(<IncidentList incidents={[testIncident]} isLoading={false} />)
+
+      // Click on the incident card
+      const card = screen.getByRole('button', { name: /View details for incident: Unique Modal Test Incident/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Verify modal displays the correct incident data
+      const modal = screen.getByRole('dialog')
+      expect(modal).toBeInTheDocument()
+
+      // Check title is in modal (use getByRole to get the modal title)
+      const modalTitle = document.getElementById('incident-modal-title')
+      expect(modalTitle).toHaveTextContent('Unique Modal Test Incident')
+
+      // Check narrative is in modal
+      expect(within(modal).getByText('This is a unique narrative for testing the modal content.')).toBeInTheDocument()
+
+      // Check location section exists
+      expect(within(modal).getByText('Location')).toBeInTheDocument()
+      expect(within(modal).getByText('Test Location for Modal')).toBeInTheDocument()
+    })
+
+    it('opens modal with different incident data when clicking different cards', () => {
+      const incidents = [
+        createMockIncident({ id: '1', title: 'First Card Incident', narrative: 'First narrative text' }),
+        createMockIncident({ id: '2', title: 'Second Card Incident', narrative: 'Second narrative text' }),
+      ]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Click on first incident card
+      const firstCard = screen.getByRole('button', { name: /View details for incident: First Card Incident/i })
+      fireEvent.click(firstCard)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Verify first incident is shown in modal
+      const modal = screen.getByRole('dialog')
+      expect(within(modal).getByText('First narrative text')).toBeInTheDocument()
+
+      // Close the modal
+      const closeButton = screen.getByLabelText('Close modal')
+      fireEvent.click(closeButton)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be closed
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+      // Click on second incident card
+      const secondCard = screen.getByRole('button', { name: /View details for incident: Second Card Incident/i })
+      fireEvent.click(secondCard)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Verify second incident is shown in modal
+      const modal2 = screen.getByRole('dialog')
+      expect(within(modal2).getByText('Second narrative text')).toBeInTheDocument()
+    })
+
+    it('closes modal when clicking the close button', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Close Button' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Open the modal
+      const card = screen.getByRole('button', { name: /View details for incident: Test Close Button/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be open
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      // Click close button
+      const closeButton = screen.getByLabelText('Close modal')
+      fireEvent.click(closeButton)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be closed
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('closes modal when pressing Escape key', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Escape Key' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Open the modal
+      const card = screen.getByRole('button', { name: /View details for incident: Test Escape Key/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be open
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      // Press Escape key
+      fireEvent.keyDown(document, { key: 'Escape' })
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be closed
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('closes modal when clicking outside the modal content', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Click Outside' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Open the modal
+      const card = screen.getByRole('button', { name: /View details for incident: Test Click Outside/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be open
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toBeInTheDocument()
+
+      // Click on the backdrop (parent of dialog)
+      const backdrop = dialog.parentElement
+      fireEvent.mouseDown(backdrop!)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be closed
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('does not close modal when clicking inside the modal content', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Click Inside' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Open the modal
+      const card = screen.getByRole('button', { name: /View details for incident: Test Click Inside/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be open
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toBeInTheDocument()
+
+      // Click inside the modal
+      fireEvent.mouseDown(dialog)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should still be open
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    it('opens modal via keyboard Enter key on incident card', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Keyboard Open' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Find the incident card
+      const card = screen.getByRole('button', { name: /View details for incident: Test Keyboard Open/i })
+
+      // Focus and press Enter
+      card.focus()
+      fireEvent.keyDown(card, { key: 'Enter' })
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be open
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    it('opens modal via keyboard Space key on incident card', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Space Key Open' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Find the incident card
+      const card = screen.getByRole('button', { name: /View details for incident: Test Space Key Open/i })
+
+      // Focus and press Space
+      card.focus()
+      fireEvent.keyDown(card, { key: ' ' })
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Modal should be open
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    it('modal has correct ARIA attributes', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test ARIA Attributes' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Open the modal
+      const card = screen.getByRole('button', { name: /View details for incident: Test ARIA Attributes/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toHaveAttribute('aria-modal', 'true')
+      expect(dialog).toHaveAttribute('aria-labelledby', 'incident-modal-title')
+      expect(dialog).toHaveAttribute('aria-describedby', 'incident-modal-description')
+    })
+
+    it('prevents body scroll when modal is open', () => {
+      const incidents = [createMockIncident({ id: '1', title: 'Test Body Scroll' })]
+      render(<IncidentList incidents={incidents} isLoading={false} />)
+
+      // Body should scroll normally before modal opens
+      expect(document.body.style.overflow).not.toBe('hidden')
+
+      // Open the modal
+      const card = screen.getByRole('button', { name: /View details for incident: Test Body Scroll/i })
+      fireEvent.click(card)
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Body scroll should be prevented
+      expect(document.body.style.overflow).toBe('hidden')
+
+      // Close the modal
+      fireEvent.keyDown(document, { key: 'Escape' })
+
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      // Body scroll should be restored
+      expect(document.body.style.overflow).toBe('unset')
     })
   })
 })
