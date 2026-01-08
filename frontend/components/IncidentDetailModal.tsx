@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { Incident } from '../types'
 import { EvidenceBadge } from './EvidenceBadge'
-import { cleanNarrative } from '@/lib/formatters'
+import { cleanNarrative, formatIncidentDate } from '@/lib/formatters'
 import type { EvidenceScore } from '@/constants/evidence'
 
 // Helper to format asset type with emoji
@@ -249,6 +249,149 @@ function LocationSection({ incident }: { incident: Incident }) {
   )
 }
 
+// Calculate duration between two dates in human-readable format
+function calculateDuration(firstDate: string, lastDate: string): string | null {
+  try {
+    const first = new Date(firstDate)
+    const last = new Date(lastDate)
+    const diffMs = last.getTime() - first.getTime()
+
+    // If same time or negative, return null
+    if (diffMs <= 0) return null
+
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays > 0) {
+      return diffDays === 1 ? '1 day' : `${diffDays} days`
+    } else if (diffHours > 0) {
+      return diffHours === 1 ? '1 hour' : `${diffHours} hours`
+    } else if (diffMinutes > 0) {
+      return diffMinutes === 1 ? '1 minute' : `${diffMinutes} minutes`
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
+// Timeline section component showing incident dates
+function TimelineSection({ incident }: { incident: Incident }) {
+  const occurredAt = formatIncidentDate(incident.occurred_at)
+  const firstSeenAt = formatIncidentDate(incident.first_seen_at)
+  const lastSeenAt = formatIncidentDate(incident.last_seen_at)
+
+  // Check if first and last seen are different
+  const hasDifferentFirstLast = incident.first_seen_at !== incident.last_seen_at
+  const duration = hasDifferentFirstLast
+    ? calculateDuration(incident.first_seen_at, incident.last_seen_at)
+    : null
+
+  return (
+    <section aria-labelledby="timeline-heading">
+      <h3
+        id="timeline-heading"
+        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+      >
+        Timeline
+      </h3>
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+        <div className="space-y-4">
+          {/* Primary date: occurred_at */}
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+              <span className="text-base" role="img" aria-hidden="true">📅</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Incident Date
+              </p>
+              <p className="text-base font-semibold text-gray-900 dark:text-white">
+                {occurredAt}
+              </p>
+            </div>
+          </div>
+
+          {/* First and Last Seen section with visual timeline */}
+          {hasDifferentFirstLast ? (
+            <div className="relative">
+              {/* Vertical timeline line */}
+              <div className="absolute left-4 top-8 bottom-8 w-0.5 bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
+
+              <div className="space-y-4">
+                {/* First Seen */}
+                <div className="flex items-start gap-3 relative">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center z-10">
+                    <span className="text-base" role="img" aria-hidden="true">🟢</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      First Reported
+                    </p>
+                    <p className="text-base text-gray-900 dark:text-white">
+                      {firstSeenAt}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Duration badge */}
+                {duration && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 flex justify-center" aria-hidden="true">
+                      <div className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500" />
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Duration: {duration}
+                    </span>
+                  </div>
+                )}
+
+                {/* Last Seen */}
+                <div className="flex items-start gap-3 relative">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center z-10">
+                    <span className="text-base" role="img" aria-hidden="true">🔴</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Last Reported
+                    </p>
+                    <p className="text-base text-gray-900 dark:text-white">
+                      {lastSeenAt}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Single sighting - first and last are the same */
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                <span className="text-base" role="img" aria-hidden="true">⏱️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  First & Last Reported
+                </p>
+                <p className="text-base text-gray-900 dark:text-white">
+                  {firstSeenAt}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Single sighting
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 interface IncidentDetailModalProps {
   isOpen: boolean
   onClose: () => void
@@ -420,6 +563,9 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
 
                 {/* Location section */}
                 <LocationSection incident={incident} />
+
+                {/* Timeline section */}
+                <TimelineSection incident={incident} />
               </div>
             </div>
           </motion.div>
