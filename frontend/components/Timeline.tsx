@@ -131,7 +131,7 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group focus-ring rounded"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">⏱️</span>
@@ -200,7 +200,7 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                 {/* Play/Pause */}
                 <motion.button
                   onClick={togglePlay}
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md flex items-center gap-2"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md flex items-center gap-2 focus-ring"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -220,7 +220,7 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                 {/* Show All / Reset */}
                 <motion.button
                   onClick={handleShowAll}
-                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
+                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium focus-ring"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -230,7 +230,7 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                 {/* Speed */}
                 <motion.button
                   onClick={cycleSpeed}
-                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
+                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium focus-ring"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -257,7 +257,9 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                   return (
                     <motion.div
                       key={idx}
-                      className={`flex-1 rounded-t cursor-pointer transition-all ${
+                      role="button"
+                      tabIndex={0}
+                      className={`flex-1 rounded-t cursor-pointer transition-all focus-ring ${
                         isActive ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
                       }`}
                       style={{ height: `${height}%` }}
@@ -265,7 +267,15 @@ export function Timeline({ incidents, onTimeRangeChange, isOpen, onToggle }: Tim
                         setIsPlaying(false)
                         setCurrentDate(day.date)
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          setIsPlaying(false)
+                          setCurrentDate(day.date)
+                        }
+                      }}
                       title={`${format(day.date, 'MMM d')}: ${day.count} incident${day.count !== 1 ? 's' : ''}`}
+                      aria-label={`${format(day.date, 'MMM d')}: ${day.count} incident${day.count !== 1 ? 's' : ''}`}
                       whileHover={{ scale: 1.02, zIndex: 10 }}
                       whileTap={{ scale: 0.98 }}
                     />

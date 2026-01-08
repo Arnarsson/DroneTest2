@@ -106,7 +106,7 @@ export function Filters({ filters, onChange, view, onViewChange }: FiltersProps)
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 transition-colors">
             <button
               onClick={() => onViewChange('map')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`focus-ring px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 view === 'map'
                   ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -116,7 +116,7 @@ export function Filters({ filters, onChange, view, onViewChange }: FiltersProps)
             </button>
             <button
               onClick={() => onViewChange('list')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`focus-ring px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 view === 'list'
                   ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -126,7 +126,7 @@ export function Filters({ filters, onChange, view, onViewChange }: FiltersProps)
             </button>
             <button
               onClick={() => onViewChange('analytics')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`focus-ring px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 view === 'analytics'
                   ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
