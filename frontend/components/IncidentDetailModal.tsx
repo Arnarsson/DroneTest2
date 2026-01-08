@@ -176,11 +176,11 @@ function LocationSection({ incident }: { incident: Incident }) {
     <section aria-labelledby="location-heading">
       <h3
         id="location-heading"
-        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+        className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3"
       >
         Location
       </h3>
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
         {/* Location name */}
         {incident.location_name && (
           <div className="flex items-start gap-2">
@@ -200,18 +200,18 @@ function LocationSection({ incident }: { incident: Incident }) {
         )}
 
         {/* Coordinates with copy button */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Coordinates:</span>
-            <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-sm font-mono text-gray-800 dark:text-gray-200">
+            <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs sm:text-sm font-mono text-gray-800 dark:text-gray-200 break-all">
               {coordinateString}
             </code>
           </div>
 
-          {/* Copy button */}
+          {/* Copy button - increased touch target for mobile */}
           <button
             onClick={handleCopyCoordinates}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors focus-ring"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 sm:py-1 text-sm rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors focus-ring active:scale-95"
             aria-label={copied ? 'Coordinates copied' : 'Copy coordinates to clipboard'}
           >
             {copied ? (
@@ -232,12 +232,12 @@ function LocationSection({ incident }: { incident: Incident }) {
           </button>
         </div>
 
-        {/* Google Maps link */}
+        {/* Google Maps link - increased touch target for mobile */}
         <a
           href={googleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+          className="inline-flex items-center gap-2 min-h-[44px] py-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors focus-ring rounded active:opacity-80"
           onClick={(e) => e.stopPropagation()}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -294,11 +294,11 @@ function TimelineSection({ incident }: { incident: Incident }) {
     <section aria-labelledby="timeline-heading">
       <h3
         id="timeline-heading"
-        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+        className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3"
       >
         Timeline
       </h3>
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 sm:p-4">
         <div className="space-y-4">
           {/* Primary date: occurred_at */}
           <div className="flex items-start gap-3">
@@ -447,11 +447,11 @@ function SourcesSection({ sources }: { sources: IncidentSource[] }) {
     <section aria-labelledby="sources-heading">
       <h3
         id="sources-heading"
-        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+        className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3"
       >
         Sources ({sources.length})
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {sources.map((source, index) => {
           const trustConfig = getTrustWeightConfig(source.trust_weight)
           const publishedDate = formatSourceDate(source.published_at)
@@ -459,7 +459,7 @@ function SourcesSection({ sources }: { sources: IncidentSource[] }) {
           return (
             <div
               key={`${source.source_url}-${index}`}
-              className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+              className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-700"
             >
               {/* Source header: badge + trust weight */}
               <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -590,24 +590,24 @@ function EvidenceBreakdownSection({ incident }: { incident: Incident }) {
     <section aria-labelledby="evidence-heading">
       <h3
         id="evidence-heading"
-        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+        className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3"
       >
         Evidence Breakdown
       </h3>
 
       {/* Current score display */}
-      <div className={`rounded-lg p-4 border ${getBgStyles(score)} mb-4`}>
-        <div className="flex items-start gap-3">
+      <div className={`rounded-lg p-3 sm:p-4 border ${getBgStyles(score)} mb-3 sm:mb-4`}>
+        <div className="flex items-start gap-2 sm:gap-3">
           <span
-            className={`flex-shrink-0 w-10 h-10 flex items-center justify-center ${config.bgClass} text-white rounded-full font-bold text-lg`}
+            className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center ${config.bgClass} text-white rounded-full font-bold text-base sm:text-lg`}
           >
             {score}
           </span>
           <div className="flex-1 min-w-0">
-            <div className={`font-semibold text-base ${textStyles.title}`}>
+            <div className={`font-semibold text-sm sm:text-base ${textStyles.title}`}>
               {config.label}
             </div>
-            <div className={`text-sm mt-1 ${textStyles.text}`}>
+            <div className={`text-xs sm:text-sm mt-0.5 sm:mt-1 ${textStyles.text}`}>
               {config.description}
             </div>
           </div>
@@ -615,17 +615,17 @@ function EvidenceBreakdownSection({ incident }: { incident: Incident }) {
       </div>
 
       {/* Source breakdown by type */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mb-4">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           Source Breakdown ({totalSources} total)
         </h4>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {/* Official sources */}
-          <div className={`text-center p-3 rounded-lg ${counts.official > 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
-            <div className={`text-2xl font-bold ${counts.official > 0 ? 'text-green-700 dark:text-green-300' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`text-center p-2 sm:p-3 rounded-lg ${counts.official > 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${counts.official > 0 ? 'text-green-700 dark:text-green-300' : 'text-gray-400 dark:text-gray-500'}`}>
               {counts.official}
             </div>
-            <div className={`text-xs font-medium mt-1 ${counts.official > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+            <div className={`text-xs font-medium mt-0.5 sm:mt-1 ${counts.official > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
               Official
             </div>
             {counts.official > 0 && (
@@ -641,21 +641,21 @@ function EvidenceBreakdownSection({ incident }: { incident: Incident }) {
           </div>
 
           {/* Media sources */}
-          <div className={`text-center p-3 rounded-lg ${counts.media > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
-            <div className={`text-2xl font-bold ${counts.media > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`text-center p-2 sm:p-3 rounded-lg ${counts.media > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${counts.media > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-gray-400 dark:text-gray-500'}`}>
               {counts.media}
             </div>
-            <div className={`text-xs font-medium mt-1 ${counts.media > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
+            <div className={`text-xs font-medium mt-0.5 sm:mt-1 ${counts.media > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
               Media
             </div>
           </div>
 
           {/* Social/Other sources */}
-          <div className={`text-center p-3 rounded-lg ${counts.social > 0 ? 'bg-gray-200 dark:bg-gray-600/50' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
-            <div className={`text-2xl font-bold ${counts.social > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`text-center p-2 sm:p-3 rounded-lg ${counts.social > 0 ? 'bg-gray-200 dark:bg-gray-600/50' : 'bg-gray-100 dark:bg-gray-700/50'}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${counts.social > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}>
               {counts.social}
             </div>
-            <div className={`text-xs font-medium mt-1 ${counts.social > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-500 dark:text-gray-400'}`}>
+            <div className={`text-xs font-medium mt-0.5 sm:mt-1 ${counts.social > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-500 dark:text-gray-400'}`}>
               Social/Other
             </div>
           </div>
@@ -663,16 +663,16 @@ function EvidenceBreakdownSection({ incident }: { incident: Incident }) {
       </div>
 
       {/* Score explanation */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4 border border-blue-200 dark:border-blue-800">
         <div className="flex items-start gap-2">
-          <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
-            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
+            <h4 className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-300 mb-0.5 sm:mb-1">
               Why this score?
             </h4>
-            <p className="text-sm text-blue-800 dark:text-blue-400">
+            <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-400">
               {getScoreExplanation(score, counts)}
             </p>
           </div>
@@ -681,16 +681,16 @@ function EvidenceBreakdownSection({ incident }: { incident: Incident }) {
 
       {/* Highlight official sources if any */}
       {counts.official > 0 && (
-        <div className="mt-4 bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+        <div className="mt-3 sm:mt-4 bg-green-50 dark:bg-green-900/20 rounded-lg p-3 sm:p-4 border border-green-200 dark:border-green-800">
           <div className="flex items-start gap-2">
-            <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
             <div>
-              <h4 className="text-sm font-semibold text-green-900 dark:text-green-300 mb-1">
+              <h4 className="text-xs sm:text-sm font-semibold text-green-900 dark:text-green-300 mb-0.5 sm:mb-1">
                 Official Sources Confirmed
               </h4>
-              <ul className="text-sm text-green-800 dark:text-green-400 space-y-1">
+              <ul className="text-xs sm:text-sm text-green-800 dark:text-green-400 space-y-1">
                 {sourceCounts.official.map((source, idx) => (
                   <li key={idx} className="flex items-center gap-1">
                     <span className="capitalize">{source.source_type.replace(/_/g, ' ')}</span>
@@ -774,7 +774,7 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-3 sm:px-4 py-4 sm:py-6"
         >
           <motion.div
             ref={modalRef}
@@ -786,13 +786,13 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800"
+            className="relative w-full max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overscroll-contain"
           >
-            {/* Close button */}
+            {/* Close button - increased touch target for mobile (min 44x44px) */}
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg focus-ring z-10"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors min-w-[44px] min-h-[44px] p-3 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg focus-ring z-10 flex items-center justify-center"
               aria-label="Close modal"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -801,19 +801,19 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
             </button>
 
             {/* Content */}
-            <div className="p-6 sm:p-8">
+            <div className="p-4 sm:p-6 md:p-8">
               {/* Header Section */}
-              <header className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-800">
+              <header className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-200 dark:border-gray-800">
                 {/* Title Row */}
                 <h2
                   id="incident-modal-title"
-                  className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white pr-12 mb-4 leading-tight"
+                  className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white pr-10 sm:pr-12 mb-3 sm:mb-4 leading-tight"
                 >
                   {incident.title}
                 </h2>
 
                 {/* Badges Row */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 mb-3 sm:mb-4">
                   {/* Evidence Badge */}
                   <EvidenceBadge score={incident.evidence_score as EvidenceScore} size="lg" />
 
@@ -822,7 +822,7 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
                     const statusConfig = getStatusConfig(incident.status)
                     return (
                       <span
-                        className={`text-sm px-3 py-1.5 rounded-full font-semibold border ${statusConfig.className}`}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-semibold border ${statusConfig.className}`}
                       >
                         {statusConfig.label}
                       </span>
@@ -831,7 +831,7 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
 
                   {/* Asset Type Badge */}
                   {incident.asset_type && (
-                    <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm px-3 py-1.5 rounded-full font-semibold border border-blue-200 dark:border-blue-800">
+                    <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-semibold border border-blue-200 dark:border-blue-800">
                       {formatAssetType(incident.asset_type)}
                     </span>
                   )}
@@ -858,7 +858,7 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
               </header>
 
               {/* Content sections */}
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Narrative section - full, untruncated narrative with proper formatting */}
                 {(() => {
                   const cleanedNarrative = incident.narrative ? cleanNarrative(incident.narrative) : ''
@@ -866,7 +866,7 @@ export function IncidentDetailModal({ isOpen, onClose, incident }: IncidentDetai
                     <section aria-labelledby="narrative-heading">
                       <h3
                         id="narrative-heading"
-                        className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+                        className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3"
                       >
                         Narrative
                       </h3>
