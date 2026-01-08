@@ -17,6 +17,7 @@ export const DEFAULT_FILTER_STATE: FilterState = {
   status: 'all',
   assetType: null,
   dateRange: 'all',
+  searchQuery: '',
 }
 
 /**
@@ -38,6 +39,7 @@ export const URL_PARAM_KEYS = {
   status: 'status',
   assetType: 'asset_type',
   dateRange: 'date_range',
+  searchQuery: 'search',
 } as const
 
 /**
@@ -159,7 +161,7 @@ export function parseStatus(value: string | null): string {
  * ```ts
  * const params = new URLSearchParams('?country=DK&min_evidence=3')
  * const filters = parseFilterParams(params)
- * // { country: 'DK', minEvidence: 3, status: 'all', assetType: null, dateRange: 'all' }
+ * // { country: 'DK', minEvidence: 3, status: 'all', assetType: null, dateRange: 'all', searchQuery: '' }
  * ```
  */
 export function parseFilterParams(searchParams: URLSearchParams): FilterState {
@@ -169,6 +171,7 @@ export function parseFilterParams(searchParams: URLSearchParams): FilterState {
     status: parseStatus(searchParams.get(URL_PARAM_KEYS.status)),
     assetType: parseAssetType(searchParams.get(URL_PARAM_KEYS.assetType)),
     dateRange: parseDateRange(searchParams.get(URL_PARAM_KEYS.dateRange)),
+    searchQuery: searchParams.get(URL_PARAM_KEYS.searchQuery) || '',
   }
 }
 
@@ -213,6 +216,10 @@ export function serializeFilterParams(filters: FilterState): URLSearchParams {
 
   if (filters.dateRange !== DEFAULT_FILTER_STATE.dateRange) {
     params.set(URL_PARAM_KEYS.dateRange, filters.dateRange)
+  }
+
+  if (filters.searchQuery && filters.searchQuery.trim() !== '') {
+    params.set(URL_PARAM_KEYS.searchQuery, filters.searchQuery)
   }
 
   return params
